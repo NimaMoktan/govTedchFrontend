@@ -1,29 +1,28 @@
 "use client"
-import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { QRCodeCanvas } from "qrcode.react";
-import { BiQrScan, BiPlayCircle } from "react-icons/bi";
-import Input from "@/components/Inputs/Input";
-import { Formik, Form, FormikState } from "formik";
-import * as Yup from "yup";
-import { CiUnlock, CiLock } from "react-icons/ci";
-import { IoReloadSharp } from "react-icons/io5";
+import React, { useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
+import { connect, jwtAuthenticator, StringCodec } from 'nats.ws';
+import { QRCodeCanvas } from 'qrcode.react';
+import Image from 'next/image';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Formik, Form, FormikState } from "formik";
+import * as Yup from "yup";
+import { BiQrScan, BiPlayCircle } from "react-icons/bi";
+import Input from "@/components/Inputs/Input";
+import Link from "next/link";
+import { CiUnlock, CiLock } from "react-icons/ci";
+import { IoReloadSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { connect, jwtAuthenticator, StringCodec } from 'nats.ws';
-import axios from "axios";
 
-const SignIn: React.FC = () => {
-
-  const [os, setOS] = useState("Android");
-  const [isLoading, setIsLoading] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false)
-  const router = useRouter();
+export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [deepLinkUrl, setDeepLinkUrl] = useState('');
+  const [authenticated, setAuthenticated] = useState(false)
+  const [os, setOs] = useState('');
+
+  const router = useRouter();
 
   const handleLogin = async (
     values: { username: string; password: string },
@@ -54,6 +53,7 @@ const SignIn: React.FC = () => {
 
         document.cookie = `token=${data.jwt}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.jwt);
 
         setTimeout(() => {
           router.push("/dashboard");
@@ -83,80 +83,84 @@ const SignIn: React.FC = () => {
     }
   };
 
-  const natsListener = useCallback(async (threadId : string, token : string) => {
-  
-    const sendToServer = async (params : any) => {
+  const detectDeviceType = () => {
+    const userAgent = navigator.userAgent || navigator.vendor;
+    if (/android/i.test(userAgent)) return "Android";
+    if (/iPhone|iPad|iPod/i.test(userAgent)) return "iPhone/iOS";
+    return "Other";
+  };
 
+  const natsListener = useCallback(async (threadId : any) => {
+
+    const sendToServer = async (params : {
+      username: any; params : any
+}) => {
+      try {
+
+        toast.success("Login successful!", {
+          position: "top-right",
+          autoClose: 2500,
+        });
+
+        document.cookie = `token=${params.username}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
+        console.log("I HERE")
+        setTimeout(() => {
+          router.push("/user-dashboard");
+        }, 2000);
+        
+      } catch (error) {
+        setErrorMessage("Error submitting data");
+      }
     };
 
     try {
-
       const conn = await connect({
         servers: ["https://natsdemoclient.bhutanndi.com"],
-        authenticator: jwtAuthenticator(token, new TextEncoder().encode('SUAPXY7TJFUFE3IX3OEMSLE3JFZJ3FZZRSRSOGSG2ANDIFN77O2MIBHWUM'))
+        authenticator: jwtAuthenticator('', new TextEncoder().encode('SUAPXY7TJFUFE3IX3OEMSLE3JFZJ3FZZRSRSOGSG2ANDIFN77O2MIBHWUM')),
       });
-      const sc = StringCodec();
-      const s1 = conn.subscribe(threadId);
-      console.log(s1.getSubject(), "Subscription subject");
 
-      for await (const m of s1) {
+      const sc = StringCodec();
+      const sub = conn.subscribe(threadId);
+
+      for await (const m of sub) {
         const data = JSON.parse(sc.decode(m.data));
-        console.log("INSIDE FOR")
         if (data?.data?.verification_result === 'ProofValidated') {
           const { "EID": empID, "ID Number": cid } = data.data.requested_presentation.revealed_attrs;
-          await sendToServer({ username: cid[0].value });
-          // conn.close();
-          setTimeout(() => {
-            console.error("Timeout: No messages received");
-            conn.close();
-          }, 10000);
-
+          await sendToServer({
+            username: cid[0].value,
+            params: undefined
+          });
+          conn.close();
         } else {
-          setErrorMessage('Your authorization request has been denied.')
+          setErrorMessage('Your authorization request has been denied.');
         }
       }
-
     } catch (error) {
-      console.error(error);
+      console.error("NATS connection error:", error);
     }
   }, []);
-
 
   const handleLoginWithNdi = useCallback(() => {
     setIsLoading(true);
     setErrorMessage('');
-    const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "*/*"
-    };
 
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/ndi/authentication`, { headers })
-      .then((response : any) => {
-        const { proofRequestURL, proofRequestThreadId, deepLinkURL } = response.data.data;
-        const { access_token } = response.data;
+    axios.post(`http://localhost:8089/api/ndi/authentication`, { headers: { Accept: "*/*" } })
+      .then(response => {
+        const { proofRequestURL, proofRequestThreadId } = response.data.data;
         setProofRequestURL(proofRequestURL);
-        setDeepLinkUrl(deepLinkURL);
-        // console.log(deepLinkURL, "DEEPLINK")
-        natsListener(proofRequestThreadId, access_token);
+        console.log(proofRequestURL)
+        natsListener(proofRequestThreadId);
       })
-      .catch((error : any) => {
-        setErrorMessage('Communication failed with server.')
-      })
+      .catch(() => setErrorMessage('Communication failed with server.'))
       .finally(() => setIsLoading(false));
   }, [natsListener]);
 
-
-  useEffect(()=>{
-
-    handleLoginWithNdi()
-
-    const token = Cookies.get("token");
-
-    if (token) {
-      router.push("/dashboard");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOs(detectDeviceType());
+      handleLoginWithNdi();
     }
-    
-  },[handleLoginWithNdi, os])
+  }, [handleLoginWithNdi]);
 
   return (
     <div className="flex flex-col items-center justify-center px-8 py-8 mx-auto md:h-screen lg:py-0">
@@ -164,7 +168,7 @@ const SignIn: React.FC = () => {
         <div className="flex flex-wrap items-center">
           <ToastContainer />
           <div className="hidden w-full xl:block xl:w-1/2">
-            <div className="px-26 py-17.5">
+            <div className="px-13 py-10">
               
               <Formik
                 initialValues={{
@@ -210,27 +214,26 @@ const SignIn: React.FC = () => {
           </div>
 
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
-            <div className="w-full p-4 sm:p-7 xl:p-10">
+            <div className="w-full p-4 sm:p-7 xl:p-5">
               <div className="flex flex-col justify-center items-center bg-[#f8f8f8] rounded-lg p-6 space-y-4">
-
                 <div className="form-group text-center">
                   <span className="font-bold text-gray-400">
                     Scan with <span className="text-green-500">Bhutan NDI</span> Wallet
                   </span>
                 </div>
 
-                <div className="flex border-2 border-green-500 p-2.5 rounded-2xl">
+                {/* <div className="flex border-2 border-green-500 p-2.5 rounded-2xl"> */}
                   <QRCodeCanvas
                     value={proofRequestURL}
                     size={200}
-                    imageSettings={{
-                      src: "/images/logo/NDIlogobg.png",
-                      excavate: true,
-                      height: 50,
-                      width: 50,
-                    }}
+                    // imageSettings={{
+                    //   src: "/images/logo/NDIlogobg.png",
+                    //   excavate: true,
+                    //   height: 50,
+                    //   width: 50,
+                    // }}
                   />
-                </div>
+                {/* </div> */}
 
                 <div className="form-group mt-8">
                   <div className="flex justify-center">
@@ -297,10 +300,12 @@ const SignIn: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <img
+                    <Image
                       src="/images/logo/googleplay.png"
                       className="w-[99px] h-[30px]"
                       alt="Google Play Store"
+                      width={100}
+                      height={100}
                     />
                   </a>
                   <a
@@ -309,10 +314,12 @@ const SignIn: React.FC = () => {
                     rel="noopener noreferrer"
                     className="ml-3"
                   >
-                    <img
+                    <Image
                       src="/images/logo/appstore.png"
                       className="w-[99px] h-[30px]"
                       alt="Apple App Store"
+                      width={100}
+                      height={100}
                     />
                   </a>
                 </div>
@@ -324,6 +331,4 @@ const SignIn: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default SignIn;
+}

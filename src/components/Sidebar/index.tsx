@@ -7,7 +7,7 @@ import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { GrDashboard, GrTable } from "react-icons/gr";
-import { BiSolidBox, BiLogIn, BiUserPlus } from "react-icons/bi";
+import { BiSolidBox, BiSolidBadgeCheck , BiUserPlus, BiLogoProductHunt, BiLogoCreativeCommons, BiSolidGasPump  } from "react-icons/bi";
 import { CiCalculator1, CiChat2 } from "react-icons/ci";
 import { BsCupHot } from "react-icons/bs";
 
@@ -28,25 +28,6 @@ const menuGroups = [
       },
       {
         icon: (
-          <GrTable className="fill-current" size={18} /> 
-        ),
-        label: "Master",
-        route: "#",
-        children: [
-          { label: "Calibration Type", route: "/master-management/calibration" },
-          // { label: "Equipment/Instrument Type", route: "/master-management/equipment-type" },
-          // { label: "Dzongkhag", route: "/master-management/dzongkhag" },
-          // { label: "Requester Office", route: "/master-management/requester-office" },
-          // Master Links I have added
-          { label: "Code Maintenance", route: "/masters-table/code_maintenance" },
-          { label: "Product Test Services", route: "/masters-table/product_test_services" },
-          { label: "Sample Test Services", route: "/masters-table/sample_test_services" },
-          { label: "Service Types", route: "/masters-table/service_type" },
-          { label: "Status", route: "/masters-table/status" },
-        ],
-      },
-      {
-        icon: (
           <BiUserPlus className="fill-current" size={22} /> 
         ),
         label: "User Management",
@@ -54,9 +35,60 @@ const menuGroups = [
         children: [
           { label: "Users", route: "/user-management/users" },
           { label: "Roles", route: "/user-management/roles" },
-          { label: "Permissions", route: "/user-management/permissions" },
+        ],
+      }
+      
+    ],
+  },
+  {
+    name: "Master Management",
+    menuItems: [
+      {
+        icon: (
+          <CiCalculator1 className="fill-current" size={22} />
+        ),
+        label: "Calibration Master",
+        route: "#",
+        children: [
+          { label: "Calibration Parameters", route: "/master-management/parameters" },
+          { label: "Calibration Item Group", route: "/master-management/calibration" },
+          { label: "Calibration Item", route: "/master-management/calibration-item" },
         ],
       },
+      {
+        icon: (
+          <BiSolidGasPump className="fill-current" size={22} />
+        ),
+        label: "Product/Material Master",
+        route: "#",
+        children: [
+          { label: "Test Type", route: "/ui/alerts" },
+          { label: "Sample Test Type", route: "/ui/buttons" },
+        ],
+      },
+      {
+        icon: (
+          <BiSolidBadgeCheck className="fill-current" size={22} />
+        ),
+        label: "Verification Master",
+        route: "#",
+        children: [
+          { label: "Fuel Retail Outlet", route: "/material_feedback" },
+        ],
+      },
+      {
+        icon: (
+          <BiLogoCreativeCommons  className="fill-current" size={22} />
+        ),
+        label: "Common Master",
+        route: "#",
+        children: [
+          { label: "Laboratory Testing Site", route: "/material_feedback" },
+          { label: "Dzongkhag", route: "/material_feedback" },
+          { label: "Organization List", route: "/material_feedback" },
+        ],
+      },
+      
     ],
   },
   {

@@ -13,16 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
-export type CalibrationGroup = {
+export type CalibrationType = {
   id: number;
   code: string;
   description: string;
-  calibration_service_id: object;
-  active: string;
-  calibrationServiceDto?: any;
+  active: string
 };
 
-export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void) : ColumnDef<CalibrationGroup>[] => [
+export const columns = (handleEdit: (calibrationType: CalibrationType) => void, handleDelete: (id: CalibrationType) => void) : ColumnDef<CalibrationType>[] => [
   {
     accessorKey: "id",
     header: "Id"
@@ -56,29 +54,11 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
     },
   },
   {
-    accessorKey: "calibrationServiceDto",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Parameter
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const {calibrationServiceDto} = row.original;
-     
-      return (<p>{calibrationServiceDto.description}</p>)
-    }
-  },
-  {
     accessorKey: "active",
     header: () => "Status",
     cell: ({ row }) => {
       const status = row.original.active;
+      console.log(status)
       return (<p
         className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
           ? "bg-success text-success"
@@ -87,7 +67,7 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
       >
         {status === "Y" ? "Active" : "Inactive"}
       </p>)
-    }
+    },
   },
   {
     id: "actions",
