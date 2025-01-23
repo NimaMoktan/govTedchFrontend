@@ -90,7 +90,7 @@ const UserManagement = () => {
         const result = await response.json();
   
         // Map the roles data to the format expected by the Select component
-        const roleOptions = result.map((role: { id: number; role_name: string }) => ({
+        const roleOptions = result?.map((role: { id: number; role_name: string }) => ({
           value: String(role.id),  // Use string values for consistency
           text: role.role_name, 
         }));
