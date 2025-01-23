@@ -28,11 +28,11 @@ const PermissionsPage: React.FC = () => {
     useEffect(() => {
         const fetchPermissions = async () => {
             try {
-                const rolesResponse = await axios.get('http://172.31.1.80:8081/roles/', {
+                const rolesResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                const privilegesResponse = await axios.get('http://172.31.1.80:8081/privileges/', {
+                const privilegesResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/privileges/`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
@@ -74,7 +74,7 @@ const PermissionsPage: React.FC = () => {
         };
 
         try {
-            await axios.post('http://172.31.1.80:8081/roles/createRoleWithPrivileges', formattedData, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/roles/createRoleWithPrivileges`, formattedData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             Swal.fire({
@@ -101,7 +101,7 @@ const PermissionsPage: React.FC = () => {
         };
     
         try {
-            const response = await axios.post('http://172.31.1.80:8081/roles/addPrivilegesToRole', requestData, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/roles/addPrivilegesToRole`, requestData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
     

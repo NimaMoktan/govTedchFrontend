@@ -45,7 +45,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://172.31.1.80:8081/userDtls/', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

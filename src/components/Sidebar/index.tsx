@@ -54,7 +54,6 @@ const menuGroups = [
         children: [
           { label: "Users", route: "/user-management/users" },
           { label: "Roles", route: "/user-management/roles" },
-          { label: "Permissions", route: "/user-management/permissions" },
         ],
       },
     ],
