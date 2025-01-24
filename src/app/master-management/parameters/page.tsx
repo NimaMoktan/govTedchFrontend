@@ -9,63 +9,57 @@ import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import Select from "@/components/Inputs/Select";
-import { DataTable } from "./data-table";
+import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationGroupItem {
+interface CalibrationService {
     id: number;
     code: string;
     description: string;
-    active: string,
-    calibration_service_id: object
-}
-interface Parameters {
-    value: number;
-    text: string;
+    active: string
 }
 
-const CalibrationItemGroup: React.FC = () => {
-    const [itemGroup, setItemGroup] = useState<CalibrationGroupItem[]>([]);
+const CalibrationParameters: React.FC = () => {
+    const [services, setServices] = useState<CalibrationService[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
+    const [editingService, setEditingService] = useState<CalibrationService | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [parameter, setParameter] = useState<Parameters[]>([])
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
         setIsEditing(false);
-        setEditingGroup(null);
+        setEditingService(null);
     };
 
-    const loadItemGroup = () => {
+    const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data.data != null) {
-                    setItemGroup(data.data);
-                } else {
-                    setItemGroup([])
+                if(data.data != null){
+                    setServices(data.data);
+                }else{
+                    setServices([])
                 }
                 setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
+    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
 
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${editingGroup?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -80,9 +74,15 @@ const CalibrationItemGroup: React.FC = () => {
             body: JSON.stringify(values),
         })
             .then((res) => {
-
                 if (res.ok) {
-                    return res.json()
+
+                    toast.success(
+                        isEditing ? "Service updated successfully" : "Service created successfully",
+                        { position: "top-right", autoClose: 1000 }
+                    );
+                    loadServices();
+                    toggleModal();
+                    resetForm();
                 } else {
                     toast.error(
                         isEditing ? "Service updated successfully" : "Service created successfully",
@@ -90,18 +90,11 @@ const CalibrationItemGroup: React.FC = () => {
                     );
                     throw new Error("Failed to save service");
                 }
-            }).then((response) =>{
-                toast.success(response.messsage,
-                    { position: "top-right", autoClose: 1000 }
-                );
-                loadItemGroup();
-                toggleModal();
-                resetForm();
             })
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (itemGroup: CalibrationGroupItem) => {
+    const handleDelete = (service: CalibrationService) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -112,7 +105,7 @@ const CalibrationItemGroup: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${itemGroup.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${service.id}/delete`,
                     {},
                     {
                         headers: {
@@ -123,9 +116,9 @@ const CalibrationItemGroup: React.FC = () => {
                 const { data } = response;
                 if (data.statusCode == 200) {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
-
-                    setTimeout(() => {
-                        loadItemGroup();
+                    
+                    setTimeout(()=>{
+                        loadServices();
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -136,53 +129,29 @@ const CalibrationItemGroup: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationGroupItem) => {
-        setEditingGroup(service);
+    const handleEdit = (service: CalibrationService) => {
+        setEditingService(service);
         setIsEditing(true);
         setShowModal("block");
     };
 
     useEffect(() => {
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.data != null) {
-                        const list = data.data;
-
-                        const paramOptions = list?.map((param: { id: number; description: string }) => ({
-                            value: param.id,  // Use string values for consistency
-                            text: param.description,
-                        }));
-
-                        setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);
-                        console.log(paramOptions)
-
-                    } else {
-                        setParameter([])
-                    }
-                    setIsLoading(false)
-                })
-                .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItemGroup();
+            loadServices();
         }
     }, [token]);
 
-    if (isLoading) {
-        return <Loader />
+    if(isLoading){
+        return <Loader/>
     }
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Item Group" />
+            <Breadcrumb pageName="Calibration Parameters" />
             <div className="flex flex-col gap-10">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
-
+                    
                     <div
                         className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
@@ -190,15 +159,13 @@ const CalibrationItemGroup: React.FC = () => {
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
                                 initialValues={{
-                                    code: editingGroup?.code || "",
-                                    description: editingGroup?.description || "",
-                                    active: editingGroup?.active || "Y",
-                                    calibration_service_id: editingGroup?.calibration_service_id || "",
+                                    code: editingService?.code || "",
+                                    description: editingService?.description || "",
+                                    active: editingService?.active || "Y"
                                 }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
-                                    calibration_service_id: Yup.number().required("Description is required"),
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
@@ -217,20 +184,12 @@ const CalibrationItemGroup: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
-                                            label="Calibration Parameters"
-                                            name="calibration_service_id"
-                                            options={parameter}
-                                        />
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <Select
                                             label="Status"
                                             name="active"
                                             options={[{
                                                 value: "Y",
                                                 text: "YES"
-                                            },
+                                            }, 
                                             {
                                                 value: "N",
                                                 text: "NO"
@@ -257,11 +216,11 @@ const CalibrationItemGroup: React.FC = () => {
                             </Formik>
                         </div>
                     </div>
-                    <DataTable columns={columns(handleEdit, handleDelete)} data={itemGroup} handleAdd={toggleModal} />
+                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal}/>
                 </div>
             </div>
         </DefaultLayout>
     );
 };
 
-export default CalibrationItemGroup;
+export default CalibrationParameters;

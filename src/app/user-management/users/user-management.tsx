@@ -48,7 +48,7 @@ const UserManagement = () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTYwMTYsImV4cCI6MTczNzczMjAxNn0.up3xWE2raPe1tmAw_h1OYGvBSF9pkEInRxACag6rUVE",
           },
         });
   
@@ -76,25 +76,33 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await fetch('http://172.31.1.80:8081/roles/', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTY0MDQsImV4cCI6MTczNzczMjQwNH0.4fpi2mDBxaCQeTVOXQm6YqAyVL-6trUqoa3hCfCMAnY",
           },
         });
-  
+        
+        console.log(response);  // Check the API response
         if (!response.ok) {
           throw new Error('Failed to fetch roles');
         }
-  
         const result = await response.json();
-  
-        // Map the roles data to the format expected by the Select component
-        const roleOptions = result.map((role: { id: number; role_name: string }) => ({
+        const roleOptions = result?.data?.map((role: { id: number; role_name: string }) => ({
           value: String(role.id),  // Use string values for consistency
-          text: role.role_name, 
+          text: role.role_name,
         }));
-  
+        console.log("This is the role result: ", result);
+        // Map the roles data to the format expected by the Select component
+        if (Array.isArray(result.data)) {
+          const roleOptions = result.data.map((role: { id: number; role_name: string }) => ({
+            value: String(role.id),
+            text: role.role_name,
+          }));
+          setRoles([{ value: '', text: 'Select Role' }, ...roleOptions]);
+        } else {
+          console.error('Roles data is not an array:', result.data);
+        }                
         // Add a default option at the beginning
         setRoles([{ value: '', text: 'Select Role' }, ...roleOptions]); 
       } catch (error) {
@@ -151,13 +159,13 @@ const UserManagement = () => {
     try {
       const response = await fetch(
         selectedUser
-          ? `${process.env.NEXT_PUBLIC_API_URL}/userDtls/${selectedUser.id}/update`
-          : `${process.env.NEXT_PUBLIC_API_URL}/userDtls/`,
+          ? `${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/update`
+          : `${process.env.NEXT_PUBLIC_API_URL}/`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTYwMTYsImV4cCI6MTczNzczMjAxNn0.up3xWE2raPe1tmAw_h1OYGvBSF9pkEInRxACag6rUVE",
           },
           body: JSON.stringify(userData),
         }
@@ -186,26 +194,52 @@ const UserManagement = () => {
   
 
   const handleDelete = (index: number) => {
-
+    // Get the selected user based on the index
+    const selectedUser = usersList[index];
+    console.log("What is this: ", selectedUser);
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       showCloseButton: true,
       showConfirmButton: true,
-      width: 450
-    }).then((result) => {
-      const newList = [...usersList];
-      newList.splice(index, 1);
-      setUsersList(newList);
+      width: 450,
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire(
-          'Deleted!',
-          'Your file has been deleted.',
-          'success'
-        )
+        try {
+          // Send DELETE request to the API
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/delete`, {
+            method: 'POST',
+            headers: {
+              'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTY0MDQsImV4cCI6MTczNzczMjQwNH0.4fpi2mDBxaCQeTVOXQm6YqAyVL-6trUqoa3hCfCMAnY",
+            },
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to delete the user');
+          }
+  
+          // On success, remove the user from the list
+          const newList = [...usersList];
+          newList.splice(index, 1);
+          setUsersList(newList);
+  
+          // Show success alert
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          );
+        } catch (error) {
+          // Handle error case
+          Swal.fire(
+            'Error!',
+            'Something went wrong. Please try again.',
+            'error'
+          );
+        }
       }
     });
-  }
+  };  
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -314,31 +348,27 @@ const UserManagement = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{key + 1}</p>
                 </td>
-
                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">{user.cidNumber}</h5>
                 </td>
-
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{user.fullName}</p>
                 </td>
-
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">{user.email}</p>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p className="text-black dark:text-white">
                     {user.userRole && Array.isArray(user.userRole) && user.userRole.length > 0
-                      ? user.userRole.map((role:any) => role.roles.role_name).join(', ')
+                      ? user.userRole.map((role: any) => role.roles.role_name).join(', ')
                       : 'No Roles'}
-                  </p>                
+                  </p>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
                     <button className="hover:text-primary" onClick={() => handleEditUser(user)}>
                       <BsPencil className="fill-current" size={20} />
                     </button>
-
                     <button className="hover:text-primary" onClick={() => handleDelete(key)}>
                       <BsTrash className="fill-current" size={18} />
                     </button>
@@ -347,6 +377,7 @@ const UserManagement = () => {
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>

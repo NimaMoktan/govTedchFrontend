@@ -1,14 +1,14 @@
 import Cookies from "js-cookie";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
-export async function POST(req: { method: string; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): any; new(): any; }; }; }){
 
-    if (req.method === "POST") {
-        console.log(req.method, "here")
-        // req.s
-        Cookies.remove("token");
+export async function POST(req: NextRequest) {
+    // Access request properties like `req.method`, `req.nextUrl`, `req.headers`, etc.
+    const { method } = req;
+  
+    if (method !== 'POST') {
+      return NextResponse.json({ error: 'Invalid method' }, { status: 405 });
     }
-
-    return NextResponse.json('success');
-
-}
+  
+    return NextResponse.json({ success: true });
+  }

@@ -9,16 +9,18 @@ import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import Select from "@/components/Inputs/Select";
-import { DataTable } from "./data-table";
+import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationGroupItem {
+interface CalibrationItem {
     id: number;
     code: string;
     description: string;
-    active: string,
-    calibration_service_id: object
+    range: string;
+    charges: number;
+    test: string;
+    calibration_group_id: number
 }
 interface Parameters {
     value: number;
@@ -26,11 +28,11 @@ interface Parameters {
 }
 
 const CalibrationItemGroup: React.FC = () => {
-    const [itemGroup, setItemGroup] = useState<CalibrationGroupItem[]>([]);
+    const [itemGroup, setItemGroup] = useState<CalibrationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
+    const [editingGroup, setEditingGroup] = useState<CalibrationItem | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
     const [parameter, setParameter] = useState<Parameters[]>([])
 
@@ -40,9 +42,9 @@ const CalibrationItemGroup: React.FC = () => {
         setEditingGroup(null);
     };
 
-    const loadItemGroup = () => {
+    const loadItem = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -53,23 +55,28 @@ const CalibrationItemGroup: React.FC = () => {
                     setItemGroup(data.data);
                 } else {
                     setItemGroup([])
+                    toast.error(data.message, { position: "top-right", autoClose: 1000 })
                 }
                 setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
+    const handleSubmit = (values: { 
+        code: string; 
+        description: string; 
+        range: string;
+        charges: number;
+        test: string;
+        calibration_group_id: number }, resetForm: () => void) => {
 
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${editingGroup?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/${editingGroup?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/`;
 
         const method = isEditing ? "POST" : "POST";
-
-        console.log(values, "HERE")
 
         fetch(url, {
             method,
@@ -94,14 +101,14 @@ const CalibrationItemGroup: React.FC = () => {
                 toast.success(response.messsage,
                     { position: "top-right", autoClose: 1000 }
                 );
-                loadItemGroup();
+                loadItem();
                 toggleModal();
                 resetForm();
             })
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (itemGroup: CalibrationGroupItem) => {
+    const handleDelete = (itemGroup: CalibrationItem) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -125,7 +132,7 @@ const CalibrationItemGroup: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadItemGroup();
+                        loadItem();
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -136,15 +143,15 @@ const CalibrationItemGroup: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationGroupItem) => {
-        setEditingGroup(service);
+    const handleEdit = (item: CalibrationItem) => {
+        setEditingGroup(item);
         setIsEditing(true);
         setShowModal("block");
     };
 
     useEffect(() => {
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -160,7 +167,6 @@ const CalibrationItemGroup: React.FC = () => {
                         }));
 
                         setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);
-                        console.log(paramOptions)
 
                     } else {
                         setParameter([])
@@ -168,7 +174,7 @@ const CalibrationItemGroup: React.FC = () => {
                     setIsLoading(false)
                 })
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItemGroup();
+            loadItem();
         }
     }, [token]);
 
@@ -178,7 +184,7 @@ const CalibrationItemGroup: React.FC = () => {
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Item Group" />
+            <Breadcrumb pageName="Calibration Item" />
             <div className="flex flex-col gap-10">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
@@ -192,51 +198,73 @@ const CalibrationItemGroup: React.FC = () => {
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
-                                    active: editingGroup?.active || "Y",
-                                    calibration_service_id: editingGroup?.calibration_service_id || "",
+                                    range: editingGroup?.range || "",
+                                    charges: editingGroup?.charges || "",
+                                    test: editingGroup?.test || "",
+                                    calibration_group_id: editingGroup?.calibration_group_id || "",
                                 }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
-                                    calibration_service_id: Yup.number().required("Description is required"),
+                                    range: Yup.string().required("Range is required"),
+                                    charges: Yup.string().required("Charage is required"),
+                                    test: Yup.string().required("Test is required"),
+                                    calibration_group_id: Yup.number().required("Item Group is required"),
                                 })}
-                                onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
+                                onSubmit={(values, { resetForm }) => {
+                                    const formattedValues = {
+                                        ...values,
+                                        charges: Number(values.charges),
+                                        calibration_group_id: Number(values.calibration_group_id),
+                                    };
+                                    handleSubmit(formattedValues, resetForm);
+                                }}
                             >
                                 <Form>
-                                    <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Input label="Code" name="code" type="text" placeholder="Enter code" />
                                     </div>
-                                    <div className="mb-4">
-                                        <Input
+
+                                    <div className="w-full xl:w-1/2">
+                                    <Input
                                             label="Description"
                                             name="description"
                                             type="text"
                                             placeholder="Enter description"
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="mb-4">
-                                        <Select
-                                            label="Calibration Parameters"
-                                            name="calibration_service_id"
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Input label="Range" name="range" type="text" placeholder="Enter Range" />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                    <Input
+                                            label="Charges"
+                                            name="charges"
+                                            type="text"
+                                            placeholder="Enter Charges"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Select
+                                            label="Group Item"
+                                            name="calibration_group_id"
                                             options={parameter}
                                         />
                                     </div>
 
-                                    <div className="mb-4">
-                                        <Select
-                                            label="Status"
-                                            name="active"
-                                            options={[{
-                                                value: "Y",
-                                                text: "YES"
-                                            },
-                                            {
-                                                value: "N",
-                                                text: "NO"
-                                            }]}
-                                        />
+                                    <div className="w-full xl:w-1/2">
+                                    
                                     </div>
+                                </div>
+
 
                                     <div className="flex justify-between">
                                         <button

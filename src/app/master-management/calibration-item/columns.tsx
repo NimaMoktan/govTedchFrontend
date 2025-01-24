@@ -17,9 +17,10 @@ export type CalibrationGroup = {
   id: number;
   code: string;
   description: string;
-  calibration_service_id: object;
-  active: string;
-  calibrationServiceDto?: any;
+  range: string;
+    charges: number;
+    test: string;
+    calibration_group_id: number;
 };
 
 export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void) : ColumnDef<CalibrationGroup>[] => [
@@ -56,36 +57,34 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
     },
   },
   {
-    accessorKey: "calibrationServiceDto",
+    accessorKey: "parameter",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Parameter
+          Item Group
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     cell: ({ row }) => {
-      const {calibrationServiceDto} = row.original;
-     
-      return (<p>{calibrationServiceDto.description}</p>)
+      const calibration_service_id = row.original;
+      // const parameterName = calibrationService?.filter((item, index) => item.id === calibration_service_id);
+
+      return (<p>
+        MASS
+      </p>)
     }
   },
   {
     accessorKey: "active",
     header: () => "Status",
     cell: ({ row }) => {
-      const status = row.original.active;
-      return (<p
-        className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
-          ? "bg-success text-success"
-          : "bg-danger text-danger"
-          }`}
-      >
-        {status === "Y" ? "Active" : "Inactive"}
+      const status = row.original;
+      return (<p>
+        g
       </p>)
     }
   },
@@ -105,7 +104,6 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
             <DropdownMenuItem
               onClick={() => handleDelete(row.original)}
             >
-
               <BsTrash className="fill-current" color="red" fill="red" size={18} />
               Delete
             </DropdownMenuItem>
