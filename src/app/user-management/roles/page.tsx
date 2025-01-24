@@ -23,12 +23,20 @@ const RolesPage: React.FC = () => {
     const [privileges, setPrivileges] = useState<{ id: string; name: string }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedRole, setSelectedRole] = useState<FormValues | null>(null);
+    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [isEditing, setIsEditing] = useState(false)
 
-    const showModalHandler = (role: FormValues | null = null) => {
-        setSelectedRole(role);
-        console.log("This is the selected role: ", role); // Log the role directly
+    const showModalHandler = () => {
+        
         setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
+        setIsEditing(false)
     };
+
+    const handleEdit = (role : FormValues) => {
+        setIsEditing(true)
+        setSelectedRole(role);
+        setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
+    }
 
     const handleSubmit = async (values: FormValues, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
@@ -44,8 +52,8 @@ const RolesPage: React.FC = () => {
 
         try {
             let response;
-            if (selectedRole.id != null) {
-                const updatePrivilegesFormatted = selectedRole.privileges.map((privilege) => ({
+            if (isEditing) {
+                const updatePrivilegesFormatted = selectedRole?.privileges.map((privilege) => ({
                     id: privilege.id,
                     code: privilege.code,
                     name: privilege.name,
@@ -68,7 +76,7 @@ const RolesPage: React.FC = () => {
                     {
                         method: "POST",
                         headers: {
-                            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTc3MDUsImV4cCI6MTczNzczMzcwNX0.VMUSsvDJ1KM4xPvFZ3slWWA9TSK9smv92H6A73G-Vj4", // Replace with your actual token
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify(updatePayload),
@@ -79,7 +87,7 @@ const RolesPage: React.FC = () => {
                 response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
                     method: "POST",
                     headers: {
-                        Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTc3MDUsImV4cCI6MTczNzczMzcwNX0.VMUSsvDJ1KM4xPvFZ3slWWA9TSK9smv92H6A73G-Vj4", // Replace with correct token
+                        Authorization: `Bearer ${token}`, // Replace with correct token
                         "Content-Type": "application/json",
                     },
                     body: payload,
@@ -117,12 +125,13 @@ const RolesPage: React.FC = () => {
         }
     };
 
+
     const handleLoadRoles = async () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
                 method: "GET",
                 headers: {
-                    Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTQyNDUsImV4cCI6MTczNzczMDI0NX0.4_KeFJW8AgejTAjuIHOctvQnBJiWjrICQNK0W9dqZjw", // Replace with correct token
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -149,7 +158,7 @@ const RolesPage: React.FC = () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/privileges/`, {
                 method: "GET",
                 headers: {
-                    Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTQyNDUsImV4cCI6MTczNzczMDI0NX0.4_KeFJW8AgejTAjuIHOctvQnBJiWjrICQNK0W9dqZjw", // Replace with correct token
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -211,7 +220,7 @@ const RolesPage: React.FC = () => {
                                 <Form>
                                     <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 p-5">
                                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                            {selectedRole ? "Edit Role" : "Create New Role"}
+                                            {isEditing ? "Edit Role" : "Create New Role"}
                                         </h3>
                                         <Input
                                             label="Role Code"
@@ -305,7 +314,7 @@ const RolesPage: React.FC = () => {
                                         <td className="border px-4 py-2">{role.role_name}</td>
                                         <td className="border px-4 py-2">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => showModalHandler(role)} className="text-blue-500 hover:text-blue-700">
+                                                <button onClick={() => handleEdit(role)} className="text-blue-500 hover:text-blue-700">
                                                     <BsPencil size={18} />
                                                 </button>
                                                 <button

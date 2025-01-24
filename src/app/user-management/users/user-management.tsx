@@ -20,12 +20,12 @@ const UserManagement = () => {
   }
 
   const [roles, setRoles] = useState<{ value: string; text: string }[]>([]);
-  const [token] = useState(localStorage.getItem('token'))
   const [showModal, setShowModal] = useState<boolean>(false);
   const [usersList, setUsersList] = useState<any[]>([]); // Adjusted type to any for flexibility
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
   const handleCreateUser = () => {
     setSelectedUser(null); // Ensure no data is pre-filled for creating new user
@@ -48,7 +48,7 @@ const UserManagement = () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
           method: 'GET',
           headers: {
-            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTYwMTYsImV4cCI6MTczNzczMjAxNn0.up3xWE2raPe1tmAw_h1OYGvBSF9pkEInRxACag6rUVE",
+            'Authorization': `Bearer ${token}`,
           },
         });
   
@@ -79,7 +79,7 @@ const UserManagement = () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
           method: 'GET',
           headers: {
-            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTY0MDQsImV4cCI6MTczNzczMjQwNH0.4fpi2mDBxaCQeTVOXQm6YqAyVL-6trUqoa3hCfCMAnY",
+            'Authorization': ``,
           },
         });
         
@@ -165,7 +165,7 @@ const UserManagement = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTYwMTYsImV4cCI6MTczNzczMjAxNn0.up3xWE2raPe1tmAw_h1OYGvBSF9pkEInRxACag6rUVE",
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(userData),
         }
@@ -210,7 +210,7 @@ const UserManagement = () => {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/delete`, {
             method: 'POST',
             headers: {
-              'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEZWVwYWsiLCJpYXQiOjE3Mzc2OTY0MDQsImV4cCI6MTczNzczMjQwNH0.4fpi2mDBxaCQeTVOXQm6YqAyVL-6trUqoa3hCfCMAnY",
+              'Authorization': `Bearer ${token}`,
             },
           });
   
