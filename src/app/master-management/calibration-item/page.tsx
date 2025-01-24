@@ -251,12 +251,22 @@ const CalibrationItemGroup: React.FC = () => {
 
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Test"
+                                    <Select
+                                            label="Test "
                                             name="test"
-                                            type="text"
-                                            placeholder="Enter Test"
+                                            options={[{
+                                                value: "",
+                                                text: "Select Test"
+                                            },{
+                                                value: "On-Site",
+                                                text: "On-Site"
+                                            },
+                                            {
+                                                value: "In-Lab",
+                                                text: "In-Lab"
+                                            }]}
                                         />
+                                    
                                     </div>
 
                                     <div className="w-full xl:w-1/2">

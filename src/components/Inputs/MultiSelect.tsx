@@ -90,7 +90,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
                 <input
                   placeholder="Select an option"
                   className="h-full w-full appearance-none bg-transparent p-1 px-2 outline-none"
-                  disabled
+                  
                 />
               </div>
             )}

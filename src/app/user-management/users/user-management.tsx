@@ -19,6 +19,11 @@ const UserManagement = () => {
     active: string;
   }
 
+  interface RoleDropdown {
+    value: string;
+    text: string;
+  }
+
   const [roles, setRoles] = useState<{ value: string; text: string }[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [usersList, setUsersList] = useState<any[]>([]); // Adjusted type to any for flexibility
@@ -26,6 +31,7 @@ const UserManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([])
 
   const handleCreateUser = () => {
     setSelectedUser(null); // Ensure no data is pre-filled for creating new user
@@ -79,11 +85,10 @@ const UserManagement = () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
           method: 'GET',
           headers: {
-            'Authorization': ``,
+            'Authorization': `Bearer ${token}`,
           },
         });
         
-        console.log(response);  // Check the API response
         if (!response.ok) {
           throw new Error('Failed to fetch roles');
         }
@@ -99,7 +104,7 @@ const UserManagement = () => {
             value: String(role.id),
             text: role.role_name,
           }));
-          setRoles([{ value: '', text: 'Select Role' }, ...roleOptions]);
+          setRoleDropdown([{ value: '', text: 'Select Role' }, ...roleOptions]);
         } else {
           console.error('Roles data is not an array:', result.data);
         }                
@@ -312,7 +317,7 @@ const UserManagement = () => {
                   <Input label="Username" type="text" placeholder="Enter username" name="username" />
                   <Input label="Email" type="email" placeholder="Enter email address" name="email" />
                   <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobile_number" />
-                  <MultiSelect label="Role" name="role" options={roles} />
+                  <MultiSelect label="Role" name="role" options={roleDropdown} />
                 </div>
                 <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                   <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-5 py-2.5">

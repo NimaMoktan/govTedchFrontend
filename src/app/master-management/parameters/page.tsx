@@ -139,7 +139,7 @@ const CalibrationParameters: React.FC = () => {
         if (token) {
             loadServices();
         }
-    }, [token]);
+    }, [isEditing]);
 
     if(isLoading){
         return <Loader/>

@@ -48,7 +48,7 @@ export default function Login() {
         setAuthenticated(true);
         toast.success("Login successful!", {
           position: "top-right",
-          autoClose: 2500,
+          autoClose: 1500,
         });
 
         document.cookie = `token=${data.jwt}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
