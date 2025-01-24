@@ -35,9 +35,54 @@ const RolesPage: React.FC = () => {
     const handleEdit = (role : FormValues) => {
         setIsEditing(true)
         setSelectedRole(role);
+        console.log(role, "This is the role");
         setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
     }
-
+    
+    const handleDelete = async (roleId: string) => {
+        // Show confirmation dialog before proceeding with the delete action
+        const confirmDelete = await Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+        });
+    
+        if (confirmDelete.isConfirmed) {
+            try {
+                console.log("This is the roleID: ", roleId);
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/roles/${roleId}/delete`,
+                    {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+    
+                if (response.ok) {
+                    Swal.fire("Deleted!", "The role has been deleted.", "success");
+                    handleLoadRoles(); // Refresh the role list after deletion
+                } else {
+                    const errorData = await response.json();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: errorData?.message || "Something went wrong. Please try again.",
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An unexpected error occurred. Please try again.",
+                });
+            }
+        }
+    };    
     const handleSubmit = async (values: FormValues, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
             id: Number(privilegeId),
@@ -93,28 +138,34 @@ const RolesPage: React.FC = () => {
                     body: payload,
                 });
             }
-
             if (response.ok) {
                 Swal.fire({
+                    title: selectedRole ? "Role Updated!" : "Role Created!",
+                    text: selectedRole
+                        ? "The role has been updated successfully."
+                        : "The role has been created successfully.",
                     icon: "success",
-                    title: selectedRole ? "Role updated successfully!" : "Role created successfully!",
-                    timer: 2000,
-                    showConfirmButton: false,
-                    }).then(() => {
-                    // Reload the page after the success message
+                    confirmButtonText: "Great, Thanks!",
+                    confirmButtonColor: "#4caf50", // Green color for success
+                    allowOutsideClick: false, // Prevent closing when clicking outside
+                    timer: 3000, // Auto close after 3 seconds
+                }).then(() => {
                     window.location.reload();
-                    });
-                    resetForm();
-                    showModalHandler();
-                    handleLoadRoles();
-                } else {
-                    const errorData = await response.json();
-                    Swal.fire({
+                });
+                resetForm();
+                showModalHandler();
+                handleLoadRoles();
+            } else {
+                const errorData = await response.json();
+                Swal.fire({
+                    title: "Oops! Something went wrong",
+                    text: errorData?.message || "Please try again later.",
                     icon: "error",
-                    title: "Error",
-                    text: errorData?.message || "Something went wrong. Please try again.",
-                    });
-                }              
+                    confirmButtonText: "Retry",
+                    confirmButtonColor: "#f44336", // Red color for error
+                    allowOutsideClick: false, // Prevent closing when clicking outside
+                });
+            }                        
         } catch (error) {
             console.error("Unexpected Error:", error);
             Swal.fire({
@@ -124,8 +175,6 @@ const RolesPage: React.FC = () => {
             });
         }
     };
-
-
     const handleLoadRoles = async () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
@@ -134,13 +183,14 @@ const RolesPage: React.FC = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             if (!res.ok) {
                 toast.error("Failed to fetch roles.");
                 return;
             }
 
             const response = await res.json();
+            console.log("This is the rolesFetched: ", response);
+
             if (response?.data && Array.isArray(response.data)) {
                 setRoles(response.data);
             } else {
@@ -206,7 +256,7 @@ const RolesPage: React.FC = () => {
                             initialValues={{
                                 code: selectedRole?.code || "",
                                 role_name: selectedRole?.role_name || "",
-                                privileges: selectedRole?.privileges || [],
+                                privileges: selectedRole?.privileges.map((privilege) => privilege.id.toString()) || [], // Make sure privileges are strings
                                 active: selectedRole?.active || "Y", // Default to "Y" for active
                             }}
                             validationSchema={Yup.object({
@@ -214,84 +264,75 @@ const RolesPage: React.FC = () => {
                                 role_name: Yup.string().required("Role name is required"),
                             })}
                             onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
-                            enableReinitialize={true}  // This will make sure the form is reinitialized when selectedRole changes
-                        >
+                            enableReinitialize={true} // This will make sure the form is reinitialized when selectedRole changes
+                            >
                             {({ values, handleChange, handleBlur, setFieldValue }) => (
                                 <Form>
-                                    <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 p-5">
-                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                            {isEditing ? "Edit Role" : "Create New Role"}
-                                        </h3>
-                                        <Input
-                                            label="Role Code"
-                                            type="text"
-                                            placeholder="Enter role code"
-                                            name="code"
-                                        />
-                                        <Input
-                                            label="Role Name"
-                                            type="text"
-                                            placeholder="Enter role name"
-                                            name="role_name"
-                                        />
-                                        <div className="flex flex-col">
-                                            <label htmlFor="active" className="block text-gray-700 dark:text-white mb-2">
-                                                Status
-                                            </label>
-                                            <Field
-                                                as="select"
-                                                name="active"
-                                                id="active"
-                                                className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600"
-                                            >
-                                                <option value="Y">Active</option>
-                                                <option value="N">Inactive</option>
-                                            </Field>
-                                        </div>
-
-                                        <div className="mt-4">
-                                            <label className="block text-gray-700 dark:text-white mb-2">
-                                                Assign Privileges
-                                            </label>
-                                            <div className="grid grid-cols-6 gap-2">
-                                                {privileges.map((privilege) => (
-                                                    <div key={privilege.id} className="flex items-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="privileges"
-                                                            value={privilege.id}
-                                                            id={`privilege-${privilege.id}`}
-                                                            onChange={handleChange}
-                                                            onBlur={handleBlur}
-                                                            className="mr-2"
-                                                        />
-                                                        <label htmlFor={`privilege-${privilege.id}`} className="text-gray-700 dark:text-white">
-                                                            {privilege.name}
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex justify-end gap-2 mt-4">
-                                            <button
-                                                type="button"
-                                                onClick={showModalHandler}
-                                                className="px-4 py-2 text-sm text-gray-600 bg-gray-200 rounded-lg"
-                                            >
-                                                Close
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg"
-                                            >
-                                                Save
-                                            </button>
-                                        </div>
+                                <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 p-5">
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                    {isEditing ? "Edit Role" : "Create New Role"}
+                                    </h3>
+                                    <Input label="Role Code" type="text" placeholder="Enter role code" name="code" />
+                                    <Input label="Role Name" type="text" placeholder="Enter role name" name="role_name" />
+                                    <div className="flex flex-col">
+                                    <label htmlFor="active" className="block text-gray-700 dark:text-white mb-2">
+                                        Status
+                                    </label>
+                                    <Field
+                                        as="select"
+                                        name="active"
+                                        id="active"
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                                    >
+                                        <option value="Y">Active</option>
+                                        <option value="N">Inactive</option>
+                                    </Field>
                                     </div>
+
+                                    {/* <div className="mt-4">
+                                    <label className="block text-gray-700 dark:text-white mb-2">Assign Privileges</label>
+                                    <div className="grid grid-cols-6 gap-2">
+                                        {privileges.map((privilege) => (
+                                        <div key={privilege.id} className="flex items-center">
+                                            <input
+                                            type="checkbox"
+                                            name="privileges"
+                                            value={privilege.id.toString()} // Ensure that this matches the data type (string)
+                                            id={`privilege-${privilege.id}`}
+                                            checked={values.privileges.includes(privilege.id.toString())} // Same here
+                                            onChange={() => {
+                                                const newPrivileges = values.privileges.includes(privilege.id.toString())
+                                                ? values.privileges.filter((id: string) => id !== privilege.id.toString())
+                                                : [...values.privileges, privilege.id.toString()];
+                                                setFieldValue("privileges", newPrivileges); // Update the selected privileges
+                                            }}
+                                            onBlur={handleBlur}
+                                            className="mr-2"
+                                            />
+                                            <label htmlFor={`privilege-${privilege.id}`} className="text-gray-700 dark:text-white">
+                                            {privilege.name}
+                                            </label>
+                                        </div>
+                                        ))}
+                                    </div>
+                                    </div> */}
+
+                                    <div className="flex justify-end gap-2 mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={showModalHandler}
+                                        className="px-4 py-2 text-sm text-gray-600 bg-gray-200 rounded-lg"
+                                    >
+                                        Close
+                                    </button>
+                                    <button type="submit" className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg">
+                                        Save
+                                    </button>
+                                    </div>
+                                </div>
                                 </Form>
                             )}
-                        </Formik>
+                            </Formik>
 
                         </div>
                     </div>
@@ -319,8 +360,7 @@ const RolesPage: React.FC = () => {
                                                 </button>
                                                 <button
                                                     className="text-red-500 hover:text-red-700"
-                                                    onClick={() => console.log("Delete role")} // Add your delete logic
-                                                >
+                                                    onClick={() => handleDelete(role.id)}>
                                                     <BsTrash size={18} />
                                                 </button>
                                             </div>
