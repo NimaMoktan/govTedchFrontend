@@ -13,19 +13,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
-export type CalibrationGroup = {
-    calibrationGroup: any;
+export type OutLet = {
     id: number;
     code: string;
     description: string;
-    range: string;
-    charges: number;
-    test: string;
-    calibration_group_id: number;
+    no_pumps: string;
+    location: string;
+    dzongkhagId: number;
+    rate: number;
+    quantity: number;
     active: string;
 };
 
-export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void): ColumnDef<CalibrationGroup>[] => [
+export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id: OutLet) => void): ColumnDef<OutLet>[] => [
     {
         accessorKey: "id",
         header: "Id"
@@ -59,23 +59,17 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
         },
     },
     {
-        accessorKey: "parameter",
+        accessorKey: "location",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Item Group
+                    Location
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
-        },
-        cell: ({ row }) => {
-            const group = row.original.calibrationGroup;
-            return (<p>
-                {group.description}
-            </p>)
         }
     },
     {

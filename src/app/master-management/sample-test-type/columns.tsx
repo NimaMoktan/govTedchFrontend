@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
-export type CalibrationType = {
+export type TestType = {
   id: number;
   code: string;
   description: string;
   active: string
 };
 
-export const columns = (handleEdit: (calibrationType: CalibrationType) => void, handleDelete: (id: CalibrationType) => void) : ColumnDef<CalibrationType>[] => [
+export const columns = (handleEdit: (testType: TestType) => void, handleDelete: (id: TestType) => void) : ColumnDef<TestType>[] => [
   {
     accessorKey: "id",
     header: "Id"

@@ -13,19 +13,19 @@ import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationService {
+interface OrganizationItem {
     id: number;
     code: string;
     description: string;
     active: string
 }
 
-const CalibrationParameters: React.FC = () => {
-    const [services, setServices] = useState<CalibrationService[]>([]);
+const OrganizationPage: React.FC = () => {
+    const [services, setServices] = useState<OrganizationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingService, setEditingService] = useState<CalibrationService | null>(null);
+    const [editingService, setEditingService] = useState<OrganizationItem | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
     const toggleModal = () => {
@@ -36,7 +36,7 @@ const CalibrationParameters: React.FC = () => {
 
     const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/organization/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,8 +58,8 @@ const CalibrationParameters: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/organization/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/organization/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -94,7 +94,7 @@ const CalibrationParameters: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (service: CalibrationService) => {
+    const handleDelete = (service: OrganizationItem) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -105,7 +105,7 @@ const CalibrationParameters: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/organization/${service.id}/delete`,
                     {},
                     {
                         headers: {
@@ -129,7 +129,7 @@ const CalibrationParameters: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationService) => {
+    const handleEdit = (service: OrganizationItem) => {
         setEditingService(service);
         setIsEditing(true);
         setShowModal("block");
@@ -147,7 +147,7 @@ const CalibrationParameters: React.FC = () => {
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Service Management" />
+            <Breadcrumb pageName="Organization List" />
             <div className="flex flex-col gap-10">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
@@ -223,4 +223,4 @@ const CalibrationParameters: React.FC = () => {
     );
 };
 
-export default CalibrationParameters;
+export default OrganizationPage;

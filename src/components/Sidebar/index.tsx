@@ -62,8 +62,8 @@ const menuGroups = [
         label: "Product/Material Master",
         route: "#",
         children: [
-          { label: "Test Type", route: "/ui/alerts" },
-          { label: "Sample Test Type", route: "/ui/buttons" },
+          { label: "Type of Sample", route: "/master-management/sample-test-type" },
+          { label: "Test Type", route: "/master-management/test-type" },
         ],
       },
       {
@@ -73,7 +73,7 @@ const menuGroups = [
         label: "Verification Master",
         route: "#",
         children: [
-          { label: "Fuel Retail Outlet", route: "/material_feedback" },
+          { label: "Fuel Outlet", route: "/master-management/fuel-outlet" },
         ],
       },
       {
@@ -83,9 +83,9 @@ const menuGroups = [
         label: "Common Master",
         route: "#",
         children: [
-          { label: "Laboratory Testing Site", route: "/material_feedback" },
-          { label: "Dzongkhag", route: "/material_feedback" },
-          { label: "Organization List", route: "/material_feedback" },
+          { label: "Laboratory Testing Site", route: "/master-management/laboratory-testing-site" },
+          { label: "Dzongkhag", route: "/master-management/dzongkhag" },
+          { label: "Organization List", route: "/master-management/organization" },
         ],
       },
       

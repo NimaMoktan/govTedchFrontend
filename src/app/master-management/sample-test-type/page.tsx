@@ -13,19 +13,19 @@ import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationService {
+interface SampleType {
     id: number;
     code: string;
     description: string;
     active: string
 }
 
-const CalibrationParameters: React.FC = () => {
-    const [services, setServices] = useState<CalibrationService[]>([]);
+const SampleTestType: React.FC = () => {
+    const [sampleType, setSampleType] = useState<SampleType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingService, setEditingService] = useState<CalibrationService | null>(null);
+    const [editingService, setEditingService] = useState<SampleType | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
     const toggleModal = () => {
@@ -36,34 +36,32 @@ const CalibrationParameters: React.FC = () => {
 
     const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         })
             .then((res) => res.json())
             .then((data) => {
-                if(data.data != null){
-                    setServices(data.data);
-                }else{
-                    setServices([])
+                if (data.data != null) {
+                    setSampleType(data.data);
+                } else {
+                    setSampleType([])
                 }
                 setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
+    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
 
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`;
 
         const method = isEditing ? "POST" : "POST";
-
-        console.log(values, "HERE")
 
         fetch(url, {
             method,
@@ -94,7 +92,7 @@ const CalibrationParameters: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (service: CalibrationService) => {
+    const handleDelete = (sample: SampleType) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -105,7 +103,7 @@ const CalibrationParameters: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/${sample.id}/delete`,
                     {},
                     {
                         headers: {
@@ -116,8 +114,8 @@ const CalibrationParameters: React.FC = () => {
                 const { data } = response;
                 if (data.statusCode == 200) {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
-                    
-                    setTimeout(()=>{
+
+                    setTimeout(() => {
                         loadServices();
                     }, 2000)
                 } else {
@@ -129,8 +127,8 @@ const CalibrationParameters: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationService) => {
-        setEditingService(service);
+    const handleEdit = (sample: SampleType) => {
+        setEditingService(sample);
         setIsEditing(true);
         setShowModal("block");
     };
@@ -139,19 +137,19 @@ const CalibrationParameters: React.FC = () => {
         if (token) {
             loadServices();
         }
-    }, [token]);
+    }, [isEditing]);
 
-    if(isLoading){
-        return <Loader/>
+    if (isLoading) {
+        return <Loader />
     }
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Service Management" />
-            <div className="flex flex-col gap-10">
+            <Breadcrumb pageName="Type of Sample" />
+            <div className="flex flex-col gap-2">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
-                    
+
                     <div
                         className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
@@ -170,6 +168,7 @@ const CalibrationParameters: React.FC = () => {
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
                                 <Form>
+
                                     <div className="mb-4">
                                         <Input label="Code" name="code" type="text" placeholder="Enter code" />
                                     </div>
@@ -189,7 +188,7 @@ const CalibrationParameters: React.FC = () => {
                                             options={[{
                                                 value: "Y",
                                                 text: "YES"
-                                            }, 
+                                            },
                                             {
                                                 value: "N",
                                                 text: "NO"
@@ -216,11 +215,11 @@ const CalibrationParameters: React.FC = () => {
                             </Formik>
                         </div>
                     </div>
-                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal}/>
+                    <DataTable columns={columns(handleEdit, handleDelete)} data={sampleType} handleAdd={toggleModal} />
                 </div>
             </div>
         </DefaultLayout>
     );
 };
 
-export default CalibrationParameters;
+export default SampleTestType;

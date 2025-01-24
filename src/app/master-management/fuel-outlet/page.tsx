@@ -9,30 +9,34 @@ import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import Select from "@/components/Inputs/Select";
-import { DataTable } from "./data-table";
+import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationGroupItem {
+interface OutLetItem {
     id: number;
     code: string;
     description: string;
-    active: string,
-    calibration_service_id: object
+    no_pumps: string;
+    location: string;
+    dzongkhagId: number;
+    quantity: number;
+    rate: number;
+    active: string;
 }
-interface Parameters {
+interface Dzongkhag {
     value: number;
     text: string;
 }
 
-const CalibrationItemGroup: React.FC = () => {
-    const [itemGroup, setItemGroup] = useState<CalibrationGroupItem[]>([]);
+const FuelOutLet: React.FC = () => {
+    const [itemGroup, setItemGroup] = useState<OutLetItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
+    const [editingGroup, setEditingGroup] = useState<OutLetItem | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [parameter, setParameter] = useState<Parameters[]>([])
+    const [dzoList, setDzoList] = useState<Dzongkhag[]>([])
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -40,9 +44,9 @@ const CalibrationItemGroup: React.FC = () => {
         setEditingGroup(null);
     };
 
-    const loadItemGroup = () => {
+    const loadItem = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/outlet/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -53,19 +57,26 @@ const CalibrationItemGroup: React.FC = () => {
                     setItemGroup(data.data);
                 } else {
                     setItemGroup([])
+                    toast.error(data.message, { position: "top-right", autoClose: 1000 })
                 }
                 setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
-
-        setIsLoading(true);
+    const handleSubmit = (values: { 
+        code: string; 
+        description: string; 
+        no_pumps: string;
+        location: string;
+        quantity: number;
+        rate: number;
+        dzongkhagId: number;
+    }, resetForm: () => void) => {
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${editingGroup?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/outlet/${editingGroup?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/outlet/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -92,14 +103,16 @@ const CalibrationItemGroup: React.FC = () => {
                 toast.success(response.messsage,
                     { position: "top-right", autoClose: 1000 }
                 );
-                loadItemGroup();
+                setTimeout(()=> {
+                    loadItem();
+                }, 2000)
                 toggleModal();
                 resetForm();
             })
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (itemGroup: CalibrationGroupItem) => {
+    const handleDelete = (itemGroup: OutLetItem) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -110,7 +123,7 @@ const CalibrationItemGroup: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${itemGroup.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/outlet/${itemGroup.id}/delete`,
                     {},
                     {
                         headers: {
@@ -123,7 +136,7 @@ const CalibrationItemGroup: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadItemGroup();
+                        loadItem();
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -134,15 +147,15 @@ const CalibrationItemGroup: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationGroupItem) => {
-        setEditingGroup(service);
+    const handleEdit = (item: OutLetItem) => {
+        setEditingGroup(item);
         setIsEditing(true);
         setShowModal("block");
     };
 
     useEffect(() => {
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/dzongkhag/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -157,16 +170,15 @@ const CalibrationItemGroup: React.FC = () => {
                             text: param.description,
                         }));
 
-                        setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);
-                        console.log(paramOptions)
+                        setDzoList([{ value: '', text: 'Select Dzongkhag' }, ...paramOptions]);
 
                     } else {
-                        setParameter([])
+                        setDzoList([])
                     }
                     setIsLoading(false)
                 })
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItemGroup();
+            loadItem();
         }
     }, [isEditing]);
 
@@ -176,7 +188,7 @@ const CalibrationItemGroup: React.FC = () => {
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Item Group" />
+            <Breadcrumb pageName="Fuel Outlet" />
             <div className="flex flex-col gap-2">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
@@ -190,39 +202,82 @@ const CalibrationItemGroup: React.FC = () => {
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
+                                    no_pumps: editingGroup?.no_pumps || "",
+                                    location: editingGroup?.location || "",
+                                    dzongkhagId: editingGroup?.location || "",
+                                    quantity: editingGroup?.quantity || "",
+                                    rate: editingGroup?.rate || "",
                                     active: editingGroup?.active || "Y",
-                                    calibration_service_id: editingGroup?.calibration_service_id || "",
                                 }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
-                                    calibration_service_id: Yup.number().required("Description is required"),
+                                    no_pumps: Yup.string().required("Number of is required"),
+                                    location: Yup.string().required("Location is required"),
+                                dzongkhagId: Yup.string().required("Dzongkhag is required"),
+                                    quantity: Yup.string().required("Quantity is required"),
+                                    rate: Yup.string().required("Rate is required")
                                 })}
-                                onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
-                            >
+                                onSubmit={(values, { resetForm }) => {
+                                    handleSubmit(values, resetForm);
+                                }} >
                                 <Form>
-                                    <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Input label="Code" name="code" type="text" placeholder="Enter code" />
                                     </div>
-                                    <div className="mb-4">
-                                        <Input
+
+                                    <div className="w-full xl:w-1/2">
+                                    <Input
                                             label="Description"
                                             name="description"
                                             type="text"
                                             placeholder="Enter description"
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="mb-4">
-                                        <Select
-                                            label="Calibration Parameters"
-                                            name="calibration_service_id"
-                                            options={parameter}
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Input label="Number of Pumps" name="no_pumps" type="number" placeholder="Enter Number of Pumps" />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                    <Input
+                                            label="Location"
+                                            name="location"
+                                            type="text"
+                                            placeholder="Enter Location Name"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Input label="Quantity" name="quantity" type="number" placeholder="Enter Quantity" />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                    <Input
+                                            label="Rate"
+                                            name="rate"
+                                            type="text"
+                                            placeholder="Enter Rate"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Select
+                                            label="Dzongkhag"
+                                            name="dzongkhagId"
+                                            options={dzoList}
                                         />
                                     </div>
 
-                                    <div className="mb-4">
-                                        <Select
+                                    <div className="w-full xl:w-1/2">
+                                    <Select
                                             label="Status"
                                             name="active"
                                             options={[{
@@ -235,6 +290,8 @@ const CalibrationItemGroup: React.FC = () => {
                                             }]}
                                         />
                                     </div>
+                                </div>
+
 
                                     <div className="flex justify-between">
                                         <button
@@ -262,4 +319,4 @@ const CalibrationItemGroup: React.FC = () => {
     );
 };
 
-export default CalibrationItemGroup;
+export default FuelOutLet;

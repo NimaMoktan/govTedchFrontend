@@ -20,7 +20,9 @@ interface CalibrationItem {
     range: string;
     charges: number;
     test: string;
-    calibration_group_id: number
+    calibration_group_id: number,
+    active: string;
+    calibrationGroup: any
 }
 interface Parameters {
     value: number;
@@ -70,8 +72,6 @@ const CalibrationItemGroup: React.FC = () => {
         test: string;
         calibration_group_id: number }, resetForm: () => void) => {
 
-        setIsLoading(true);
-
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/${editingGroup?.id}/update`
             : `${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/`;
@@ -119,7 +119,7 @@ const CalibrationItemGroup: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${itemGroup.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationItems/${itemGroup.id}/delete`,
                     {},
                     {
                         headers: {
@@ -144,6 +144,7 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     const handleEdit = (item: CalibrationItem) => {
+        console.log(item)
         setEditingGroup(item);
         setIsEditing(true);
         setShowModal("block");
@@ -176,7 +177,7 @@ const CalibrationItemGroup: React.FC = () => {
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
             loadItem();
         }
-    }, [token]);
+    }, [isEditing]);
 
     if (isLoading) {
         return <Loader />
@@ -185,7 +186,7 @@ const CalibrationItemGroup: React.FC = () => {
     return (
         <DefaultLayout>
             <Breadcrumb pageName="Calibration Item" />
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-2">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
@@ -202,6 +203,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     charges: editingGroup?.charges || "",
                                     test: editingGroup?.test || "",
                                     calibration_group_id: editingGroup?.calibration_group_id || "",
+                                    active: editingGroup?.active || "Y",
                                 }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
@@ -211,15 +213,11 @@ const CalibrationItemGroup: React.FC = () => {
                                     test: Yup.string().required("Test is required"),
                                     calibration_group_id: Yup.number().required("Item Group is required"),
                                 })}
-                                onSubmit={(values, { resetForm }) => {
-                                    const formattedValues = {
-                                        ...values,
-                                        charges: Number(values.charges),
-                                        calibration_group_id: Number(values.calibration_group_id),
-                                    };
-                                    handleSubmit(formattedValues, resetForm);
-                                }}
-                            >
+                                onSubmit={(values, { resetForm }) => handleSubmit({
+                                    ...values,
+                                    charges: Number(values.charges),
+                                    calibration_group_id: Number(values.calibration_group_id)
+                                }, resetForm) } >
                                 <Form>
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
@@ -253,10 +251,36 @@ const CalibrationItemGroup: React.FC = () => {
 
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
+                                    <Input
+                                            label="Test"
+                                            name="test"
+                                            type="text"
+                                            placeholder="Enter Test"
+                                        />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
                                     <Select
                                             label="Group Item"
                                             name="calibration_group_id"
                                             options={parameter}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                    <Select
+                                            label="Status"
+                                            name="active"
+                                            options={[{
+                                                value: "Y",
+                                                text: "YES"
+                                            },
+                                            {
+                                                value: "N",
+                                                text: "NO"
+                                            }]}
                                         />
                                     </div>
 

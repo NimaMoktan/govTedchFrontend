@@ -22,8 +22,12 @@ export type CalibrationType = {
 
 export const columns = (handleEdit: (calibrationType: CalibrationType) => void, handleDelete: (id: CalibrationType) => void) : ColumnDef<CalibrationType>[] => [
   {
-    accessorKey: "id",
-    header: "Id"
+    accessorKey: "index",
+    header: "SL",
+    cell: ({ row }) => {
+      const sl = row.index;
+      return (<p>{sl+1}</p>)
+    },
   },
   {
     accessorKey: "code",
@@ -66,35 +70,6 @@ export const columns = (handleEdit: (calibrationType: CalibrationType) => void, 
       >
         {status === "Y" ? "Active" : "Inactive"}
       </p>)
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => handleDelete(row.original)}
-            >
-
-              <BsTrash className="fill-current" color="red" fill="red" size={18} />
-              Delete
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-              <BsPencil className="fill-current" size={20} />
-              Edit
-              </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
     },
   }
 ];

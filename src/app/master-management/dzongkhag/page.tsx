@@ -13,7 +13,7 @@ import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 
-interface CalibrationService {
+interface Dzongkhag {
     id: number;
     code: string;
     description: string;
@@ -21,11 +21,11 @@ interface CalibrationService {
 }
 
 const CalibrationParameters: React.FC = () => {
-    const [services, setServices] = useState<CalibrationService[]>([]);
+    const [dzoList, setDzoList] = useState<Dzongkhag[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingService, setEditingService] = useState<CalibrationService | null>(null);
+    const [editingService, setEditingService] = useState<Dzongkhag | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
     const toggleModal = () => {
@@ -34,9 +34,9 @@ const CalibrationParameters: React.FC = () => {
         setEditingService(null);
     };
 
-    const loadServices = () => {
+    const loadDzongkhag = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/dzongkhag/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -44,9 +44,9 @@ const CalibrationParameters: React.FC = () => {
             .then((res) => res.json())
             .then((data) => {
                 if(data.data != null){
-                    setServices(data.data);
+                    setDzoList(data.data);
                 }else{
-                    setServices([])
+                    setDzoList([])
                 }
                 setIsLoading(false)
             })
@@ -63,8 +63,6 @@ const CalibrationParameters: React.FC = () => {
 
         const method = isEditing ? "POST" : "POST";
 
-        console.log(values, "HERE")
-
         fetch(url, {
             method,
             headers: {
@@ -80,7 +78,7 @@ const CalibrationParameters: React.FC = () => {
                         isEditing ? "Service updated successfully" : "Service created successfully",
                         { position: "top-right", autoClose: 1000 }
                     );
-                    loadServices();
+                    loadDzongkhag();
                     toggleModal();
                     resetForm();
                 } else {
@@ -94,7 +92,7 @@ const CalibrationParameters: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };
 
-    const handleDelete = (service: CalibrationService) => {
+    const handleDelete = (service: Dzongkhag) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -118,7 +116,7 @@ const CalibrationParameters: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
                     
                     setTimeout(()=>{
-                        loadServices();
+                        loadDzongkhag();
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -129,7 +127,7 @@ const CalibrationParameters: React.FC = () => {
         });
     };
 
-    const handleEdit = (service: CalibrationService) => {
+    const handleEdit = (service: Dzongkhag) => {
         setEditingService(service);
         setIsEditing(true);
         setShowModal("block");
@@ -137,9 +135,9 @@ const CalibrationParameters: React.FC = () => {
 
     useEffect(() => {
         if (token) {
-            loadServices();
+            loadDzongkhag();
         }
-    }, [token]);
+    }, [isEditing]);
 
     if(isLoading){
         return <Loader/>
@@ -147,8 +145,8 @@ const CalibrationParameters: React.FC = () => {
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Calibration Service Management" />
-            <div className="flex flex-col gap-10">
+            <Breadcrumb pageName="Dzongkhag List" />
+            <div className="flex flex-col gap-2">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
                     
@@ -216,7 +214,7 @@ const CalibrationParameters: React.FC = () => {
                             </Formik>
                         </div>
                     </div>
-                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal}/>
+                    <DataTable columns={columns(handleEdit, handleDelete)} data={dzoList} handleAdd={toggleModal}/>
                 </div>
             </div>
         </DefaultLayout>

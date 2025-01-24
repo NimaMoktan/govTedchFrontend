@@ -13,14 +13,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
-export type CalibrationType = {
-  id: number;
-  code: string;
-  description: string;
-  active: string
+export type TestType = {
+    id: number;
+    sampleCode: string;
+    code: string;
+    description: string;
+    quantityRequired: string;
+    ratesInNu: number | string;
+    testSiteCode: string;
+    active: string
 };
 
-export const columns = (handleEdit: (calibrationType: CalibrationType) => void, handleDelete: (id: CalibrationType) => void) : ColumnDef<CalibrationType>[] => [
+export const columns = (handleEdit: (testType: TestType) => void, handleDelete: (id: TestType) => void) : ColumnDef<TestType>[] => [
   {
     accessorKey: "id",
     header: "Id"
@@ -53,6 +57,37 @@ export const columns = (handleEdit: (calibrationType: CalibrationType) => void, 
       )
     },
   },
+
+  {
+    accessorKey: "quantityRequired",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Quantity Required
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+  },
+
+  {
+    accessorKey: "ratesInNu",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Rate in Nu.
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+  },
+
   {
     accessorKey: "active",
     header: () => "Status",
