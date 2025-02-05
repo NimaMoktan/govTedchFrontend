@@ -51,7 +51,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -82,7 +82,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -139,7 +139,7 @@ const UserManagement = () => {
         userName: values.username,
         email: values.email,
         mobileNumber: values.mobile_number || null,
-        roleId: values.role.length > 0 ? Number(values.role[0]) : 1,
+        active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
         })),
@@ -151,7 +151,7 @@ const UserManagement = () => {
         userName: values.username,
         email: values.email,
         mobileNumber: values.mobile_number || null,
-        roleId: values.role.length > 0 ? Number(values.role[0]) : 1,
+        active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
         })),
@@ -164,8 +164,8 @@ const UserManagement = () => {
     try {
       const response = await fetch(
         selectedUser
-          ? `${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/update`
-          : `${process.env.NEXT_PUBLIC_API_URL}/`,
+          ? `${process.env.NEXT_PUBLIC_API_URL}/core/user/${selectedUser.id}/update`
+          : `${process.env.NEXT_PUBLIC_API_URL}/core/user/`,
         {
           method: 'POST',
           headers: {
@@ -212,7 +212,7 @@ const UserManagement = () => {
       if (result.isConfirmed) {
         try {
           // Send DELETE request to the API
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/core/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,

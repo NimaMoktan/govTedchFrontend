@@ -21,6 +21,7 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const [authenticated, setAuthenticated] = useState(false)
   const [os, setOs] = useState('');
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
   const router = useRouter();
 
@@ -29,7 +30,7 @@ export default function Login() {
     resetForm: { (nextState?: Partial<FormikState<{ username: string; password: string }>> | undefined): void }
   ) => {
     setIsLoading(true);
-
+    console.log("This is the username & password: ", values.username, values.password);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authenticate`, {
         method: "POST",
@@ -41,20 +42,42 @@ export default function Login() {
           password: values.password,
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         setAuthenticated(true);
         toast.success("Login successful!", {
           position: "top-right",
           autoClose: 1500,
         });
-
-        document.cookie = `token=${data.jwt}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
+  
+        const token = data.jwt;  // ✅ Store token from API response
+        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
         localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.jwt);
-
+        localStorage.setItem("token", token);
+  
+        // ✅ Use the token directly in the next API call
+        try {
+          const userDetailsResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/core/user/${values.username}/userDtls`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`, // ✅ Use freshly received token
+                "Content-Type": "application/json",
+              },
+            }
+          );
+  
+          const userDetails = await userDetailsResponse.json();
+          console.log("User Details:", userDetails);
+  
+          localStorage.setItem("userDetails", JSON.stringify(userDetails.data));
+        } catch (userDetailsError) {
+          console.error("Error fetching user details:", userDetailsError);
+        }
+  
         setTimeout(() => {
           router.push("/dashboard");
         }, 2000);
@@ -66,12 +89,7 @@ export default function Login() {
         throw new Error(data.message || `HTTP error! Status: ${response.status}`);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
       resetForm({
@@ -81,7 +99,7 @@ export default function Login() {
         },
       });
     }
-  };
+  };  
 
   const detectDeviceType = () => {
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -191,9 +209,9 @@ export default function Login() {
                   </div>
                   <div className="w-full mt-6">
                     <button type="submit" disabled={isLoading} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center">
-                      {isLoading ? <IoReloadSharp size={18} className="animate-spin -ml-1 mr-3 h-5 w-5 text-white mr-2" />
-                        : (authenticated ? <CiUnlock size={18} className="-ml-1 mr-3 h-5 w-5 text-white mr-2" />
-                          : <CiLock size={18} className="-ml-1 mr-3 h-5 w-5 text-white mr-2" />)}
+                      {isLoading ? <IoReloadSharp size={18} className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                        : (authenticated ? <CiUnlock size={18} className="-ml-1 mr-3 h-5 w-5 text-white" />
+                          : <CiLock size={18} className="-ml-1 mr-3 h-5 w-5 text-white" />)}
                       Login
                     </button>
 

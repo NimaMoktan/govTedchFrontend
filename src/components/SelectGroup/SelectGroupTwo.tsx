@@ -4,11 +4,21 @@ import { useField } from "formik";
 
 interface SelectGroupTwoProps {
   name: string;
+  options: { value: string; label: string }[]; 
+  onChange ?: (value: string) => void;
 }
 
-const SelectGroupTwo: React.FC<SelectGroupTwoProps> = ({ name }) => {
+const SelectGroupTwo: React.FC<SelectGroupTwoProps> = ({ name, options, onChange }) => {
   const [field, meta, helpers] = useField(name);
-
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    console.log("Selected value: ", value);  // Debugging the selected value
+    helpers.setValue(value);  // Update Formik field
+    if (onChange) {
+      console.log("Calling parent onChange");
+      onChange(value);  // Call the parent onChange handler
+    }
+  };
   return (
     <div>
       {/* Dropdown container */}
@@ -48,17 +58,17 @@ const SelectGroupTwo: React.FC<SelectGroupTwoProps> = ({ name }) => {
         {/* Select element connected to Formik */}
         <select
           {...field}
-          onChange={(e) => {
-            helpers.setValue(e.target.value);
-          }}
+          onChange={handleChange}
           className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
             field.value ? "text-black dark:text-white" : "text-body dark:text-bodydark z-10"
           }`}
         >
           <option value="">Select an equipment/instrument</option>
-          <option value="Machines">Machines</option>
-          <option value="Gadget">Gadget</option>
-          <option value="Drones">Drones</option>
+          {(options || []).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+            ))}
         </select>
 
         {/* Right icon */}

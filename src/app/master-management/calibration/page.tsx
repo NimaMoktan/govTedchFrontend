@@ -18,7 +18,7 @@ interface CalibrationGroupItem {
     code: string;
     description: string;
     active: string,
-    calibration_service_id: object
+    calibrationServiceDto: { id: number } | null; // Ensure it's an object with an ID
 }
 interface Parameters {
     value: number;
@@ -42,7 +42,8 @@ const CalibrationItemGroup: React.FC = () => {
 
     const loadItemGroup = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`, {
+            method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -64,8 +65,8 @@ const CalibrationItemGroup: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${editingGroup?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${editingGroup?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -80,12 +81,26 @@ const CalibrationItemGroup: React.FC = () => {
             .then((res) => {
 
                 if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: isEditing ? 'Calibration updated successfully' : 'Calibration created successfully',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        position: 'top-end', // Adjust position if needed
+                        toast: true
+                    });  
                     return res.json()
                 } else {
-                    toast.error(
-                        isEditing ? "Service updated successfully" : "Service created successfully",
-                        { position: "top-right", autoClose: 1000 }
-                    );
+                    Swal.fire({
+                            icon: 'error',
+                            title: "Error! Please try again",
+                            timer: 2000,
+                            showConfirmButton: false,
+                            position: 'top-end', // Adjust position if needed
+                            toast: true
+                        }).then(()=>{
+                            window.location.reload();
+                        });  
                     throw new Error("Failed to save service");
                 }
             }).then((response) =>{
@@ -110,7 +125,7 @@ const CalibrationItemGroup: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationGroup/${itemGroup.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${itemGroup.id}/delete`,
                     {},
                     {
                         headers: {
@@ -141,8 +156,13 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     useEffect(() => {
+        console.log("Editing Group:", editingGroup); // Check what's in calibration_service_id
+        console.log("Parameter Options:", parameter); // Validate options are loaded
+    }, [editingGroup, parameter]);
+
+    useEffect(() => {
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -185,18 +205,20 @@ const CalibrationItemGroup: React.FC = () => {
                         className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
-                        <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
+                        <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-5xl max-h-full">
                             <Formik
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
                                     active: editingGroup?.active || "Y",
-                                    calibration_service_id: editingGroup?.calibration_service_id || "",
-                                }}
+                                    calibration_service_id: editingGroup?.calibrationServiceDto 
+                                    ? editingGroup.calibrationServiceDto.id 
+                                    : "",
+                                    }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
-                                    calibration_service_id: Yup.number().required("Description is required"),
+                                    calibration_service_id: Yup.number().required("Calibration parameter is required"),
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >

@@ -1,25 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { useRouter } from "next/navigation";
 
+type UserDetails = {
+  fullName: string;
+  email: string;
+  imageUrl: string;
+  roles: string[];  // Add roles here
+};
+
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userLoaded, setUserLoaded] = useState(false);
+  const [userDetails, setUserDetails] = useState<UserDetails>({
+    fullName: "Loading...",
+    email: "Loading...",
+    imageUrl: "/images/user/default.jpg",
+    roles: [],  // Ensure roles is included in initial state
+  });
 
   const router = useRouter();
 
+  useEffect(() => {
+    // Fetch stored user details from localStorage
+    const storedUser = localStorage.getItem("userDetails");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      
+      // Extract roles from userRole array
+      const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
+      console.log("This is the user details: ", userRoles, storedUser);
+      setUserDetails({
+        fullName: parsedUser.fullName,
+        email: parsedUser.email,
+        imageUrl: "/images/user/jigme.jpg",
+        roles: userRoles,  // Now this is valid
+      });
+    }
+  }, []);
+  
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', {
         method: 'post'
       });
+      localStorage.removeItem("userDetails");  
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
-  
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -30,9 +62,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Jigme Choeling
+            {userDetails.fullName}
           </span>
-          <span className="block text-xs">Super Admin</span>
+          <span className="block text-xs">{userDetails.email}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -97,7 +129,14 @@ const DropdownUser = () => {
                 My Profile
               </Link>
             </li>
-            
+            {/* Show only if the user has Admin role */}
+            {userDetails.roles.includes("ADM") && (
+              <li>
+                <Link href="/admin" className="flex items-center gap-3.5 text-sm font-medium hover:text-primary">
+                  Admin Panel
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 href="/settings"

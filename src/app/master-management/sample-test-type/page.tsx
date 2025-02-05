@@ -36,7 +36,7 @@ const SampleTestType: React.FC = () => {
 
     const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,8 +58,8 @@ const SampleTestType: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -103,7 +103,7 @@ const SampleTestType: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/${sample.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${sample.id}/delete`,
                     {},
                     {
                         headers: {

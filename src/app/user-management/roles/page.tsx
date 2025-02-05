@@ -1,160 +1,194 @@
-"use client"
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { BiUserPlus } from "react-icons/bi";
-import { BsPencil, BsTrash } from "react-icons/bs";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+import Select from "@/components/Inputs/Select";
+import { DataTable } from "./table";
+import { columns } from "./columns";
+import Loader from "@/components/common/Loader";
 
+interface SampleType {
+    id: number;
+    code: string;
+    role_name: string;
+    active: string
+}
 interface FormValues {
     code: string;
     role_name: string;
     privileges: string[]; // Assuming privilege IDs are strings
     active: string; // Assuming this is a string like "Y" or "N"
 }
-
-const RolesPage: React.FC = () => {
-    const [showModal, setShowModal] = useState("hidden");
-    const [roles, setRoles] = useState<{ code: string; role_name: string }[]>([]);
-    const [privileges, setPrivileges] = useState<{ id: string; name: string }[]>([]);
+const SampleTestType: React.FC = () => {
+    const [sampleType, setSampleType] = useState<SampleType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedRole, setSelectedRole] = useState<FormValues | null>(null);
+    const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingRole, setEditingRole] = useState<FormValues | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [isEditing, setIsEditing] = useState(false)
+    const [selectedRole, setSelectedRole] = useState<FormValues | null>(null);
+    const [privileges, setPrivileges] = useState<{ id: string; name: string }[]>([]);
+    const [roles, setRoles] = useState<{ code: string; role_name: string }[]>([]);
 
     const showModalHandler = () => {
         
         setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
         setIsEditing(false)
     };
-
-    const handleEdit = (role : FormValues) => {
-        setIsEditing(true)
-        setSelectedRole(role);
-        console.log(role, "This is the role");
-        setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
-    }
-    
-    const handleDelete = async (roleId: string) => {
-        // Show confirmation dialog before proceeding with the delete action
-        const confirmDelete = await Swal.fire({
-            title: "Are you sure?",
-            text: "This action cannot be undone.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "No, cancel!",
-        });
-    
-        if (confirmDelete.isConfirmed) {
+    const toggleModal = () => {
+        setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
+        setIsEditing(false);
+        setEditingRole(null);
+    };
+    const handleLoadPrivileges = async () => {
             try {
-                console.log("This is the roleID: ", roleId);
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/roles/${roleId}/delete`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/privileges/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
     
-                if (response.ok) {
-                    Swal.fire("Deleted!", "The role has been deleted.", "success");
-                    handleLoadRoles(); // Refresh the role list after deletion
+                if (!res.ok) {
+                    toast.error("Failed to fetch privileges.");
+                    return;
+                }
+    
+                const response = await res.json();
+                if (response?.data && Array.isArray(response.data)) {
+                    setPrivileges(response.data);
                 } else {
-                    const errorData = await response.json();
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: errorData?.message || "Something went wrong. Please try again.",
-                    });
+                    toast.error("Invalid response data.");
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "An unexpected error occurred. Please try again.",
-                });
+                toast.error("An error occurred while fetching privileges.");
             }
-        }
-    };    
-    const handleSubmit = async (values: FormValues, resetForm: () => void) => {
+        };
+        
+    const loadServices = () => {
+        setIsLoading(true);
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.data != null) {
+                    setSampleType(data.data);
+                } else {
+                    setSampleType([])
+                }
+                setIsLoading(false)
+            })
+            .catch((err) => toast.error(err.message, { position: "top-right" }));
+    };
+
+    const handleSubmit = async (
+        values: { code: string; role_name: string; active: string; privileges: string[] },
+        resetForm: () => void
+    ) => {
+        setIsLoading(true); // Start loading indicator
+    
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
             id: Number(privilegeId),
         }));
-
-        const payload = JSON.stringify({
+    
+        // Determine the API URL and HTTP method based on whether it's editing or creating
+        const url = isEditing
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/roles/${selectedRole.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/roles/`;
+    
+        const method = "POST"; // Always POST in both cases
+    
+        const Payload = JSON.stringify({
             code: values.code,
             role_name: values.role_name,
             active: values.active,
             privileges: privilegesFormatted,
         });
-
+    
         try {
             let response;
+            let privilegesResponse;
+    
             if (isEditing) {
+                // If editing, prepare update Payload with existing privileges from selectedRole
                 const updatePrivilegesFormatted = selectedRole?.privileges.map((privilege) => ({
-                    id: privilege.id,
-                    code: privilege.code,
-                    name: privilege.name,
-                    active: privilege.active,
+                    id: privilege.id
                 }));
-            
-                // The payload now has the structure you're aiming for
                 const updatePayload = {
                     code: values.code,
                     role_name: values.role_name,
                     active: values.active,
-                    privileges: updatePrivilegesFormatted, // No need to map here, we already formatted the privileges
-                };
-                // Log the data to check the correct structure
-                console.log("Data being sent to the API:", JSON.stringify(updatePayload, null, 2));
-            
-                // Now send the payload via the fetch request
-                response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/roles/${selectedRole.id}/update`,
-                    {
-                        method: "POST",
+                    privileges: updatePrivilegesFormatted,
+                };  
+                console.log("Update Payload:", JSON.stringify(updatePayload, null, 2));
+    
+                // Make both API requests in parallel
+                [response, privilegesResponse] = await Promise.all([
+                    fetch(url, {
+                        method,
                         headers: {
                             Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify(updatePayload),
-                    }
-                );
+                    }),
+                    fetch(url, {
+                        method,
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(updatePayload),
+                    }),
+                ]);
+    
+                // Process responses
+                const responseData = await response.json();
+                const privilegesResponseData = await privilegesResponse.json();
+    
+                console.log("Response Data:", responseData);
+                console.log("Privileges Response Data:", privilegesResponseData);
+    
+                if (privilegesResponseData.statusCode !== 200) {
+                    throw new Error(privilegesResponseData.message);
+                }
             } else {
-                // Create new role
-                response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
-                    method: "POST",
+                // If creating a new role
+                console.log("Create Payload:", Payload);
+    
+                response = await fetch(url, {
+                    method,
                     headers: {
-                        Authorization: `Bearer ${token}`, // Replace with correct token
+                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
-                    body: payload,
+                    body: Payload,
                 });
             }
             if (response.ok) {
                 Swal.fire({
-                    title: selectedRole ? "Role Updated!" : "Role Created!",
-                    text: selectedRole
+                    title: isEditing ? "Role Updated!" : "Role Created!",
+                    text: isEditing
                         ? "The role has been updated successfully."
                         : "The role has been created successfully.",
                     icon: "success",
                     confirmButtonText: "Great, Thanks!",
                     confirmButtonColor: "#4caf50", // Green color for success
                     allowOutsideClick: false, // Prevent closing when clicking outside
-                    timer: 3000, // Auto close after 3 seconds
                 }).then(() => {
                     window.location.reload();
                 });
                 resetForm();
                 showModalHandler();
-                handleLoadRoles();
             } else {
                 const errorData = await response.json();
                 Swal.fire({
@@ -165,91 +199,80 @@ const RolesPage: React.FC = () => {
                     confirmButtonColor: "#f44336", // Red color for error
                     allowOutsideClick: false, // Prevent closing when clicking outside
                 });
-            }                        
+            }  
         } catch (error) {
             console.error("Unexpected Error:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "An unexpected error occurred. Please try again.",
+            toast.error("An unexpected error occurred. Please try again.", {
+                position: "top-right",
+                autoClose: 1000,
             });
-        }
-    };
-    const handleLoadRoles = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/roles/`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!res.ok) {
-                toast.error("Failed to fetch roles.");
-                return;
-            }
-
-            const response = await res.json();
-            console.log("This is the rolesFetched: ", response);
-
-            if (response?.data && Array.isArray(response.data)) {
-                setRoles(response.data);
-            } else {
-                toast.error("Invalid response data.");
-            }
-        } catch (error) {
-            toast.error("An error occurred while fetching roles.");
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Stop loading indicator
         }
+    };    
+
+    const handleDelete = (role : FormValues) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/${role.id}/delete`,
+                    {},
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+                console.log("This is the role ID: ", role.id);
+                const { data } = response;
+                if (data.statusCode == 200) {
+                    Swal.fire("Deleted!", "The role has been deleted.", "success").then(()=>{
+                        window.location.reload();
+                    });
+                } else {
+                    toast.error(data.message,
+                        { position: "top-right", autoClose: 1000 }
+                    );
+                }
+            }
+        });
     };
 
-    const handleLoadPrivileges = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/privileges/`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) {
-                toast.error("Failed to fetch privileges.");
-                return;
-            }
-
-            const response = await res.json();
-            if (response?.data && Array.isArray(response.data)) {
-                setPrivileges(response.data);
-            } else {
-                toast.error("Invalid response data.");
-            }
-        } catch (error) {
-            toast.error("An error occurred while fetching privileges.");
-        }
+    const handleEdit = (role : FormValues) => {
+        setSelectedRole(role);
+        // setEditingRole(role);
+        setIsEditing(true);
+        setShowModal("block");
     };
 
     useEffect(() => {
-        handleLoadRoles();
-        handleLoadPrivileges();
-    }, []);
+        if (token) {
+            loadServices();
+            handleLoadPrivileges();
+        }
+    }, [isEditing]);
+
+    if (isLoading) {
+        return <Loader />
+    }
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Roles" />
-            <div className="flex flex-col gap-10">
+            <Breadcrumb pageName="Type of Roles" />
+            <div className="flex flex-col gap-2">
+                <ToastContainer />
                 <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-                    <div className="flex max-w-full justify-between items-center mb-5 ">
-                        <h1 className="dark:text-white">Role List</h1>
-                        <button
-                            onClick={showModalHandler}
-                            className="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-4 xl:px-4"
-                        >
-                            <BiUserPlus className="text-white" size={20} /> Add Role
-                        </button>
-                    </div>
 
                     <div
-                        className={`${showModal} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-9999 flex justify-center items-center w-full md:inset-0 max-h-full bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-in-out opacity-100`}
+                        className={`overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-9999 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-in-out opacity-100 ${showModal === "block" ? "block" : "hidden"
+                            }`}
                     >
                         <div className="relative p-4 w-full max-w-5xl max-h-full transition-transform duration-300 ease-in-out transform scale-95">
                         <Formik<FormValues>
@@ -333,47 +356,13 @@ const RolesPage: React.FC = () => {
                                 </Form>
                             )}
                             </Formik>
-
                         </div>
                     </div>
-
-                    <div className="max-w-full overflow-x-auto">
-                        <table className="w-full table-auto border-2">
-                            <thead>
-                                <tr className="bg-gray-200 text-center">
-                                    <th className="px-4 py-2">SL</th>
-                                    <th className="px-4 py-2">Code</th>
-                                    <th className="px-4 py-2">Role Name</th>
-                                    <th className="px-4 py-2">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {roles.map((role, index) => (
-                                    <tr key={index} className="text-center">
-                                        <td className="border px-4 py-2">{index + 1}</td>
-                                        <td className="border px-4 py-2">{role.code}</td>
-                                        <td className="border px-4 py-2">{role.role_name}</td>
-                                        <td className="border px-4 py-2">
-                                            <div className="flex justify-center gap-2">
-                                                <button onClick={() => handleEdit(role)} className="text-blue-500 hover:text-blue-700">
-                                                    <BsPencil size={18} />
-                                                </button>
-                                                <button
-                                                    className="text-red-500 hover:text-red-700"
-                                                    onClick={() => handleDelete(role.id)}>
-                                                    <BsTrash size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <DataTable columns={columns(handleEdit, handleDelete)} data={sampleType} handleAdd={toggleModal} />
                 </div>
             </div>
         </DefaultLayout>
     );
 };
 
-export default RolesPage;
+export default SampleTestType;

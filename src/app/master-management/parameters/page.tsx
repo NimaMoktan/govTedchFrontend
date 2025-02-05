@@ -36,7 +36,7 @@ const CalibrationParameters: React.FC = () => {
 
     const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,8 +58,8 @@ const CalibrationParameters: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -76,18 +76,28 @@ const CalibrationParameters: React.FC = () => {
             .then((res) => {
                 if (res.ok) {
 
-                    toast.success(
-                        isEditing ? "Service updated successfully" : "Service created successfully",
-                        { position: "top-right", autoClose: 1000 }
-                    );
+                    Swal.fire({
+                        icon: 'success',
+                        title: isEditing ? 'Service updated successfully' : 'Service created successfully',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        position: 'top-end', // Adjust position if needed
+                        toast: true
+                    });                    
                     loadServices();
                     toggleModal();
                     resetForm();
                 } else {
-                    toast.error(
-                        isEditing ? "Service updated successfully" : "Service created successfully",
-                        { position: "top-right", autoClose: 1000 }
-                    );
+                    Swal.fire({
+                        icon: 'error',
+                        title: isEditing ? 'Service updated failed' : 'Service creation failed',
+                        showConfirmButton: false,
+                        timer: 1000,
+                        position: 'top-end', // Adjust position if needed
+                        toast: true
+                    }).then(()=>{
+                        window.location.reload();
+                    }); 
                     throw new Error("Failed to save service");
                 }
             })
@@ -105,7 +115,7 @@ const CalibrationParameters: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${service.id}/delete`,
                     {},
                     {
                         headers: {
@@ -115,11 +125,14 @@ const CalibrationParameters: React.FC = () => {
                 );
                 const { data } = response;
                 if (data.statusCode == 200) {
-                    toast.success(data.message, { position: "top-right", autoClose: 1000 });
-                    
-                    setTimeout(()=>{
-                        loadServices();
-                    }, 2000)
+                    Swal.fire({
+                        icon: 'success',
+                        title: data.message,
+                        showConfirmButton: true,
+                        position: 'center'
+                    }).then(()=>{
+                        window.location.reload();
+                    });
                 } else {
                     toast.error(data.message,
                         { position: "top-right", autoClose: 1000 }

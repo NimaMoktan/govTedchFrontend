@@ -1,12 +1,11 @@
 "use client";
-import { useState } from "react";
-import { Formik, Form, Field } from "formik";
+import { useState, useEffect } from "react";
+import { Formik, Form, Field, useFormikContext} from "formik";
 import SelectGroupTwo from "@/components/SelectGroup/SelectGroupTwo";
 import FileInput from "@/components/Inputs/FileInput";
-import * as Yup from "yup"; // Import Yup for validation
-import Swal from "sweetalert2"; // Import SweetAlert2
+import * as Yup from "yup";
+import Swal from "sweetalert2";
 
-// Define the types for the form values
 interface FormValues {
   cid: string;
   fullName: string;
@@ -18,103 +17,216 @@ interface FormValues {
   model: string[];
   quantity: number[];
   amount: number[];
+  total_quantity: number[];
 }
 
-// Yup validation schema
 const validationSchema = Yup.object().shape({
-  cid: Yup.string().required("Citizenship Identity Details is required."),
-  fullName: Yup.string().required("Full Name is required."),
-  address: Yup.string().required("Address is required."),
-  contactNumber: Yup.number()
-  .typeError("Contact Number must be a number") // Ensures the value is a number
-  .positive("Contact Number must be positive.")
-  .required("Contact Number is required."),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required."),
-  equipment: Yup.array().of(
-      Yup.string().required("Equipment selection is required.")
-    ),
-  manufacturer: Yup.array().of(
-    Yup.string().required("Manufacturer/Type/Brand is required.")
-  ),
-  model: Yup.array()
-  .of(Yup.string().required("Model/Serial Number/Range is required."))
-  .min(1, "At least one model is required."),
-  quantity: Yup.array().of(
-    Yup.number().positive("Quantity must be positive").required("Quantity is required.")
-  ),
-  amount: Yup.array().of(
-    Yup.number().positive("Amount must be positive").required("Amount is required.")
-  ),
-  // Add conditional validation for equipment
-  equipmentValidation: Yup.array().test(
-    "equipment-validation",
-    "If equipment[2] is selected, equipment[1] must be selected.",
-    function(value) {
-      const { equipment } = this.parent; // Access the current form values
-
-      // Check if equipment[2] is selected, but equipment[1] is not selected
-      if (equipment[2] && !equipment[1]) {
-        return false; // Show error if equipment[1] is not selected
-      }
-      return true;
-    }
-  ),
+  // Your validation schema
 });
+
 const ApplicationSubmitForm = () => {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [equipmentList, setEquipmentList] = useState([{}]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track the submitting state
+  const [equipmentOptions, setEquipmentOptions] = useState<{ value: string; label: string }[]>([]);
+  const [userDetails, setUserDetails] = useState({
+    cid: "",
+    fullName: "",
+    address: "",
+    contactNumber: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    // Fetch the stored user details from localStorage
+    const storedUser = localStorage.getItem("userDetails");
+    console.log("This is the stored user details: ", storedUser);
+
+    // Fetch equipment data from API
+    const fetchEquipment = async () => {
+      const token = localStorage.getItem("token");
+    
+      if (!token) {
+        console.error("No authentication token found!");
+        return;
+      }
+    
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+    
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        }
+    
+        const data = await response.json();
+        console.log("Full API Response:", data); // Debugging log
+    
+        // Check if response contains the expected data structure
+        if (!data || !Array.isArray(data.data)) {
+          throw new Error("Invalid response format: Expected 'data' to be an array.");
+        }
+    
+        // Map the data to equipment options
+        setEquipmentOptions(
+          data.data.map((item: any) => ({
+            value: item.id,
+            label: item.description, // Assuming you want 'description' as the dropdown label
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching equipment data:", error);
+      }
+    };
+    fetchEquipment();
+  }, []);
 
   const addEquipment = () => {
-    setEquipmentList([...equipmentList, {}]);
-  };
+    setEquipmentList((prevList) => [
+      ...prevList,
+      {
+        equipment: "",
+        manufacturer: "",
+        model: "",
+        quantity: 0,
+        amount: 0,
+        total_quantity: 0,
+      },
+    ]);
+  };  
 
   const removeEquipment = (index: number) => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
   };
 
+  const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("Fetched Data: ", data);
+      if (data && data.status === 'OK') {
+        const equipmentData = data.data;
+        const manufacturer = equipmentData ? equipmentData.manufacturer : '';
+        const range = equipmentData ? equipmentData.range : '';
+        const rate = equipmentData ? equipmentData.charges || 0 : 0; // Ensure rate is fetched correctly
+  
+        // Set fields for this equipment
+        setFieldValue(`manufacturer[${index}]`, manufacturer);
+        setFieldValue(`model[${index}]`, range);
+        setFieldValue(`amount[${index}]`, rate); // Set the rate (amount) for the equipment
+      } else {
+        console.error('API Error:', data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };  
+
+  const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
+    // Ensure that the amount is correctly fetched as a number
+    const amount = Number(values.amount[index]) || 0; 
+    const totalAmount = amount * quantity; // Calculate total amount
+    console.log("This is the data: ", totalAmount, amount, quantity);
+  
+    // Set the total amount and quantity values
+    setFieldValue(`total_quantity[${index}]`, totalAmount); // Update total_quantity
+    setFieldValue(`quantity[${index}]`, quantity); // Update quantity
+  };
+
+  const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
+    setSubmitting(true);
+  
+    const payload = {
+      cid: values.cid,
+      clientName: values.fullName,
+      clientAddress: values.address,
+      contactNumber: values.contactNumber,
+      emailAddress: values.email,
+      deviceRegistry: values.equipment.map((_, index) => ({
+        quantity: values.quantity[index],
+        testItemId: Number(values.equipment[index]), // Ensure it's a number
+        manufacturerOrTypeOrBrand: values.manufacturer[index],
+        serialNumberOrModel: values.model[index],
+      })),
+    };
+  
+    console.log("Submitting Payload:", payload); // Debugging log
+  
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/register`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+  
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+  
+      Swal.fire({
+        title: "Success",
+        text: "Your application has been successfully submitted.",
+        icon: "success",
+        confirmButtonText: "Ok",
+      });
+  
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Something went wrong while submitting the form.",
+        icon: "error",
+        confirmButtonText: "Try Again",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };  
+
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
       <Formik
         initialValues={{
-          cid: "",
-          fullName: "",
-          address: "",
-          contactNumber: "",
-          email: "",
+          cid: userDetails.cid,
+          fullName: userDetails.fullName,
+          address: userDetails.address,
+          contactNumber: userDetails.contactNumber,
+          email: userDetails.email,
           equipment: equipmentList.map(() => ""),
           manufacturer: equipmentList.map(() => ""),
           model: equipmentList.map(() => ""),
           quantity: equipmentList.map(() => 0),
           amount: equipmentList.map(() => 0),
+          total_quantity: equipmentList.map(() => 0),
         }}
         validationSchema={validationSchema}
-        onSubmit={async (values) => {
-          console.log('submitting data')
-          setIsSubmitting(true); // Change button text to "Submitting..."
-        
-          // Simulate form submission process (you can replace this with your actual API call)
-          setTimeout(() => {
-            Swal.fire({
-              title: "Success",
-              text: "Your application has been successfully submitted.",
-              icon: "success",
-              confirmButtonText: "Ok",
-            }).then(() => {
-              // You can reset the form or take any other actions after success.
-              // For example, you can reset the form:
-              // resetForm();
-              // Or navigate to another page, etc.
-        
-              setIsSubmitting(false); // Reset the button state
-            });
-          }, 2000); // Simulate a delay for submission
-        }}        
+        onSubmit={handleSubmit} 
       >
-
-        {({ handleSubmit, errors, touched, isValid }) => (
-          <Form onSubmit={handleSubmit}>
+        {({ handleSubmit, errors, values, touched, isValid, setFieldValue }) => (
+          <Form onSubmit={handleSubmit}> 
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <div className="w-full xl:w-1/2">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -182,15 +294,19 @@ const ApplicationSubmitForm = () => {
               {errors.email && touched.email && <div className="text-red-500">{errors.email}</div>}
             </div>
 
-            {/* This is the section where I want to dulicated when the user clicks on the add more button broder: */}
-            {equipmentList.map((_, index) => (
-              <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none focus:border-primary dark:border-form-strokedark">
+             {/* This is the section where I want to dulicated when the user clicks on the add more button broder: */}
+              {equipmentList.map((_, index) => (
+              <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 mt-5 text-black outline-none focus:border-primary dark:border-form-strokedark">
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   <div className="w-full xl:w-1/2">
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                       Select an equipment/instrument
                     </label>
-                    <SelectGroupTwo name={`equipment[${index}]`} />
+                    <SelectGroupTwo
+                      name={`equipment[${index}]`}
+                      options={equipmentOptions}
+                      onChange={(selectedEquipmentId) => handleEquipmentChange(index, selectedEquipmentId, setFieldValue)}
+                    />
                     {errors.equipment && touched.equipment && errors.equipment && (
                       <div className="text-red-500">{errors.equipment}</div>
                     )}
@@ -232,16 +348,20 @@ const ApplicationSubmitForm = () => {
                   </label>
                   <Field
                     name={`quantity[${index}]`}
-                    type="number"
+                    type="text"
                     placeholder="Enter The Quantity Of Equipment"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleQuantityChange(index, Number(e.target.value), setFieldValue, values)
+                    }
                   />
                   {errors.quantity && touched.quantity && typeof errors.quantity === 'string' && (
                     <div className="text-red-500">{errors.quantity}</div>
                   )}
                 </div>
               </div>
-              <div className="mb-6">
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                     Rate/Amount
                   </label>
@@ -255,6 +375,23 @@ const ApplicationSubmitForm = () => {
                   {errors.amount && touched.amount && typeof errors.amount === 'string' && (
                     <div className="text-red-500">{errors.amount}</div>
                   )}
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                    Total Amount
+                  </label>
+                  <Field
+                    name={`total_quantity[${index}]`}
+                    type="text"
+                    placeholder="Enter The Total Amount"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                    value={values.total_quantity && values.total_quantity[index] !== undefined ? values.total_quantity[index] : ''}  // Safe access
+                    readOnly
+                  />
+                  {errors.quantity && touched.quantity && typeof errors.quantity === 'string' && (
+                    <div className="text-red-500">{errors.quantity}</div>
+                  )}
+                </div>
               </div>
 
                 <button type="button" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 mx-auto flex justify-center" onClick={() => removeEquipment(index)}>
@@ -262,6 +399,7 @@ const ApplicationSubmitForm = () => {
                 </button>
               </div>
             ))}
+
             <button
               type="button"
               className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 mx-auto flex justify-center mt-4"
@@ -269,23 +407,22 @@ const ApplicationSubmitForm = () => {
             >
               Add More
             </button>
-            {/* add more section sends */}
-            
+
             <div className="mb-6 mt-5">
               <h3 className="font-medium text-black dark:text-white">
                 Additional Information (Optional)
               </h3>
-                <FileInput label="Upload Specific Document" />
+              <FileInput label="Upload Specific Document" />
             </div>
 
             <button
-                type="submit"
-                className="w-full rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90"
-                disabled={!isValid || isSubmitting} // Disable if form is invalid or submitting
-                style={{cursor: "pointer"}}
-              >
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </button>
+              type="submit"
+              className="w-full rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90"
+              disabled={!isValid || isSubmitting}
+              style={{ cursor: "pointer" }}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Application"}
+            </button>
           </Form>
         )}
       </Formik>
