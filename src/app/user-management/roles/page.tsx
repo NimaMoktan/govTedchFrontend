@@ -90,12 +90,14 @@ const SampleTestType: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = async (
-        values: { code: string; role_name: string; active: string; privileges: string[] },
-        resetForm: () => void
-    ) => {
-        setIsLoading(true); // Start loading indicator
+    const handleEdit = (role : FormValues) => {
+        setIsEditing(true)
+        setSelectedRole(role);
+        setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
+    }
     
+
+    const handleSubmit = async (values: FormValues, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
             id: Number(privilegeId),
         }));

@@ -2,13 +2,14 @@
 // import { Package } from "@/types/package";
 // import Link from "next/link";
 import { BiUserPlus } from "react-icons/bi";
-import { BsPencil, BsTrash } from "react-icons/bs";
 import { useState, useEffect } from 'react';
 import { Formik, Form, FormikState } from "formik";
 import * as Yup from 'yup';
 import MultiSelect from "@/components/Inputs/MultiSelect";
 import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
+import { DataTable } from "./table";
+import { columns } from "./columns";
 
 const UserManagement = () => {
   interface Role {
@@ -49,6 +50,7 @@ const UserManagement = () => {
   };
   
   useEffect(() => {
+
     const fetchUsers = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/`, {
@@ -65,6 +67,7 @@ const UserManagement = () => {
         const result = await response.json();  
         // Check if 'data' is an array
         if (Array.isArray(result.data)) {
+          console.log(result.data)
           setUsersList(result.data);  // Set the data to the state if it's an array
         } else {
           console.error('Fetched data is not an array:', result);
@@ -158,8 +161,6 @@ const UserManagement = () => {
       };
     }
   
-    // Log the data being sent for debugging purposes
-    console.log("Data being sent to API:", JSON.stringify(userData, null, 2));
   
     try {
       const response = await fetch(
@@ -198,10 +199,9 @@ const UserManagement = () => {
   };
   
 
-  const handleDelete = (index: number) => {
-    // Get the selected user based on the index
-    const selectedUser = usersList[index];
-    console.log("What is this: ", selectedUser);
+  const handleDelete = (user: any) => {
+    
+    // const selectedUser = usersList[index];
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -210,32 +210,26 @@ const UserManagement = () => {
       width: 450,
     }).then(async (result) => {
       if (result.isConfirmed) {
+        const updatedData = usersList.filter(item => item.id !== user.id);
         try {
-          // Send DELETE request to the API
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${selectedUser.id}/core/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${user.id}/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
             },
           });
+          setUsersList(updatedData)
   
           if (!response.ok) {
             throw new Error('Failed to delete the user');
           }
   
-          // On success, remove the user from the list
-          const newList = [...usersList];
-          newList.splice(index, 1);
-          setUsersList(newList);
-  
-          // Show success alert
           Swal.fire(
             'Deleted!',
             'Your file has been deleted.',
             'success'
           );
         } catch (error) {
-          // Handle error case
           Swal.fire(
             'Error!',
             'Something went wrong. Please try again.',
@@ -249,16 +243,7 @@ const UserManagement = () => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="flex max-w-full justify-between items-center mb-5 ">
-        <h1 className="dark:text-white">User List</h1>
-        <button
-          onClick={handleCreateUser}
-          className="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-4 xl:px-4"
-        >
-          <span>
-            <BiUserPlus className="text-white" size={20} />
-          </span>
-          Add User
-        </button>
+        
       </div>
       {showCreateModal || showEditModal ? (
         <div
@@ -284,7 +269,8 @@ const UserManagement = () => {
               cid: Yup.string().required('CID is required').min(11, 'Must be at least 11 characters'),
               full_name: Yup.string().required('Full name is required').min(3, 'Must be at least 3 characters'),
               email: Yup.string().required('Email address is required').email('Invalid email address'),
-              role: Yup.array().min(1, 'Role is required') // Adjust validation to handle array type
+              role: Yup.array().min(1, 'Role is required'), // Adjust validation to handle array type
+              // mobile_number: Yup.array().required('Mobile Number is required').min(8,'Enter atleast 8 characters.') // Adjust validation to handle array type
             })}
             onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}  // Pass the handleSubmit here
           >
@@ -316,7 +302,7 @@ const UserManagement = () => {
                   <Input label="Full Name" type="text" placeholder="Enter your full name" name="full_name" />
                   <Input label="Username" type="text" placeholder="Enter username" name="username" />
                   <Input label="Email" type="email" placeholder="Enter email address" name="email" />
-                  <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobile_number" />
+                  <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobileNumber" />
                   <MultiSelect label="Role" name="role" options={roleDropdown} />
                 </div>
                 <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -336,54 +322,7 @@ const UserManagement = () => {
       ) : null}
 
       <div className="max-w-full overflow-x-auto">
-      <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[50px] px-4 py-4 font-medium text-black dark:text-white">SL</th>
-              <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11">CID</th>
-              <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">Full Name</th>
-              <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">Email</th>
-              <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">Role</th>
-              <th className="px-4 py-4 font-medium text-black dark:text-white">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usersList.map((user, key) => (
-              <tr key={key}>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{key + 1}</p>
-                </td>
-                <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">{user.cidNumber}</h5>
-                </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{user.fullName}</p>
-                </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{user.email}</p>
-                </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {user.userRole && Array.isArray(user.userRole) && user.userRole.length > 0
-                      ? user.userRole.map((role: any) => role.roles.role_name).join(', ')
-                      : 'No Roles'}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <div className="flex items-center space-x-3.5">
-                    <button className="hover:text-primary" onClick={() => handleEditUser(user)}>
-                      <BsPencil className="fill-current" size={20} />
-                    </button>
-                    <button className="hover:text-primary" onClick={() => handleDelete(key)}>
-                      <BsTrash className="fill-current" size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-
-        </table>
+      <DataTable columns={columns(handleEditUser, handleDelete)} data={usersList} handleAdd={handleCreateUser}/>
       </div>
     </div>
   );
