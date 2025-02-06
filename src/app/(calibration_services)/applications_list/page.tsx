@@ -35,7 +35,11 @@ const ApplicationList: React.FC = () => {
       });
       const { data } = list.data;
       console.log(data);
-      setApplicatoinList(data);
+      if(!data){
+        setApplicatoinList([]);
+      }else{
+        setApplicatoinList(data);
+      }
     } catch (error) {
       console.error("Error fetching application list", error);
     } finally {

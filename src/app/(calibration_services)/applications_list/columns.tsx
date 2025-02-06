@@ -1,9 +1,11 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import moment from "moment";
 import { Button } from "@/components/ui/button";
 
 export type Application = {
+  createdDate: any;
   id: number;
   applicationNumber: string;
   active: string;
@@ -41,6 +43,10 @@ export const columns: ColumnDef<Application>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const date = row.original.createdDate;
+      return <p>{ moment(date).format('YYYY-MM-DD HH:SS')}</p>;
+    }
   },
   {
     accessorKey: "status",

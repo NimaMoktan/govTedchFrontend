@@ -126,7 +126,6 @@ const ApplicationSubmitForm = () => {
         const manufacturer = equipmentData ? equipmentData.manufacturer : '';
         const range = equipmentData ? equipmentData.range : '';
         const rate = equipmentData ? equipmentData.charges || 0 : 0; // Ensure rate is fetched correctly
-  
         // Set fields for this equipment
         setFieldValue(`manufacturer[${index}]`, manufacturer);
         setFieldValue(`model[${index}]`, range);
@@ -152,29 +151,33 @@ const ApplicationSubmitForm = () => {
 
   const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
     setSubmitting(true);
-  
     const payload = {
       cid: values.cid,
       clientName: values.fullName,
       clientAddress: values.address,
       contactNumber: values.contactNumber,
       emailAddress: values.email,
+      organizationId: 1,
       deviceRegistry: values.equipment.map((_, index) => ({
         quantity: values.quantity[index],
         testItemId: Number(values.equipment[index]), // Ensure it's a number
         manufacturerOrTypeOrBrand: values.manufacturer[index],
         serialNumberOrModel: values.model[index],
+
       })),
     };
   
-    console.log("Submitting Payload:", payload); // Debugging log
-  
     try {
+      const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/calibrationForm/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
+          "userId": parsedUser.userName,
+          "userName": parsedUser.userName,
         },
         body: JSON.stringify(payload),
       });

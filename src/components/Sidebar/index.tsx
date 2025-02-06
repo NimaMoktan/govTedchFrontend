@@ -228,11 +228,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             // "Submit Application" (second child) is only for TNT users
                             return userDetails.roles.includes("TNT")|| userDetails.roles.includes("ADM");
                           }
+                          if (index === 0) {
+                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM");
+                          }
                           // Other children (0, 2, 3) are for ADM & CHF
-                          return userDetails.roles.includes("ADM") || userDetails.roles.includes("CHF");
+                          return userDetails.roles.includes("ADM");
                         });
                       }
-                    
                       return (
                         <SidebarItem
                           key={menuIndex}
