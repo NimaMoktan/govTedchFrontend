@@ -212,7 +212,7 @@ const UserManagement = () => {
       if (result.isConfirmed) {
         const updatedData = usersList.filter(item => item.id !== user.id);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${user.id}/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/${user.id}/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,

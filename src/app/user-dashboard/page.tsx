@@ -1,6 +1,7 @@
-import ECommerce from "@/components/Dashboard/E-commerce";
+// import ECommerce from "@/components/Dashboard/E-commerce";
 import { Metadata } from "next";
 import UserLayout from "@/components/Layouts/UserLayout";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
 export default function Home () {
   return (
     <>
-    <UserLayout>
+    <DefaultLayout>
         <h3>Welcome To User Dashboard</h3>
-    </UserLayout>
+    </DefaultLayout>
     </>
   );
 }

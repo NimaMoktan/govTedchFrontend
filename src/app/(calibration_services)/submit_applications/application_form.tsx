@@ -37,55 +37,55 @@ const ApplicationSubmitForm = () => {
     email: "",
   });
 
+  // Fetch equipment data from API
+  const fetchEquipment = async () => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      console.error("No authentication token found!");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Full API Response:", data); // Debugging log
+  
+      // Check if response contains the expected data structure
+      if (!data || !Array.isArray(data.data)) {
+        throw new Error("Invalid response format: Expected 'data' to be an array.");
+      }
+  
+      // Map the data to equipment options
+      setEquipmentOptions(
+        data.data.map((item: any) => ({
+          value: item.id,
+          label: item.description, // Assuming you want 'description' as the dropdown label
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching equipment data:", error);
+    }
+  };
+
   useEffect(() => {
     // Fetch the stored user details from localStorage
     const storedUser = localStorage.getItem("userDetails");
-    console.log("This is the stored user details: ", storedUser);
-
-    // Fetch equipment data from API
-    const fetchEquipment = async () => {
-      const token = localStorage.getItem("token");
-    
-      if (!token) {
-        console.error("No authentication token found!");
-        return;
-      }
-    
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-    
-        if (!response.ok) {
-          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-        }
-    
-        const data = await response.json();
-        console.log("Full API Response:", data); // Debugging log
-    
-        // Check if response contains the expected data structure
-        if (!data || !Array.isArray(data.data)) {
-          throw new Error("Invalid response format: Expected 'data' to be an array.");
-        }
-    
-        // Map the data to equipment options
-        setEquipmentOptions(
-          data.data.map((item: any) => ({
-            value: item.id,
-            label: item.description, // Assuming you want 'description' as the dropdown label
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching equipment data:", error);
-      }
-    };
+  
     fetchEquipment();
   }, []);
 
@@ -170,7 +170,7 @@ const ApplicationSubmitForm = () => {
     console.log("Submitting Payload:", payload); // Debugging log
   
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/register`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/calibrationForm/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

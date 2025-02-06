@@ -219,7 +219,15 @@ const FuelOutLet: React.FC = () => {
                                     rate: Yup.string().required("Rate is required")
                                 })}
                                 onSubmit={(values, { resetForm }) => {
-                                    handleSubmit(values, resetForm);
+                                    handleSubmit(
+                                        {
+                                            ...values,
+                                            quantity: Number(values.quantity),
+                                            rate: Number(values.rate),
+                                            dzongkhagId: Number(values.dzongkhagId)
+                                        },
+                                        resetForm
+                                    );
                                 }} >
                                 <Form>
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">

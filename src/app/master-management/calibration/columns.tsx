@@ -17,9 +17,8 @@ export type CalibrationGroup = {
   id: number;
   code: string;
   description: string;
-  calibration_service_id: object;
+  calibration_service_id: number;
   active: string;
-  calibrationServiceDto?: any;
 };
 
 export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void) : ColumnDef<CalibrationGroup>[] => [
@@ -54,25 +53,6 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
         </Button>
       )
     },
-  },
-  {
-    accessorKey: "calibrationServiceDto",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Parameter
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const {calibrationServiceDto} = row.original;
-     
-      return (<p>{calibrationServiceDto.description}</p>)
-    }
   },
   {
     accessorKey: "active",

@@ -36,7 +36,7 @@ const OrganizationPage: React.FC = () => {
 
     const loadServices = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/organization/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,8 +58,8 @@ const OrganizationPage: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/organization/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/organization/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/clientList/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -105,7 +105,7 @@ const OrganizationPage: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/organization/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/clientList/${service.id}/delete`,
                     {},
                     {
                         headers: {

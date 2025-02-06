@@ -36,7 +36,7 @@ const CalibrationParameters: React.FC = () => {
 
     const loadDzongkhag = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/labSite/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/labSite/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,8 +58,8 @@ const CalibrationParameters: React.FC = () => {
         setIsLoading(true);
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/labSite/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/labSite/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/labSite/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/labSite/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -103,7 +103,7 @@ const CalibrationParameters: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/labSite/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/labSite/${service.id}/delete`,
                     {},
                     {
                         headers: {

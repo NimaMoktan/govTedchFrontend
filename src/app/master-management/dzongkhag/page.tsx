@@ -36,7 +36,7 @@ const CalibrationParameters: React.FC = () => {
 
     const loadDzongkhag = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/dzongkhag/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

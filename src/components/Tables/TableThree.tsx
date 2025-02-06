@@ -163,7 +163,7 @@ const TableThree = () => {
                       </div>
                     </div>
                     <div className="mb-4.5">
-                      <Switcher label="Verified" name="status" />
+                      <Switcher label="Verified" name="status" checked={true}/>
                     </div>
                     <div className="mb-4 5">
                       <FileInput label="Upload Profile Picture" />

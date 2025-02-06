@@ -166,7 +166,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       
       // Extract roles from userRole array
       const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
-      console.log("This is the user details: ", userRoles, storedUser);
+      // console.log("This is the user details: ", userRoles, storedUser);
       setUserDetails({
         fullName: parsedUser.fullName,
         email: parsedUser.email,

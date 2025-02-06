@@ -18,8 +18,8 @@ interface CalibrationGroupItem {
     code: string;
     description: string;
     active: string,
-    calibrationServiceDto: { id: number } | null; // Ensure it's an object with an ID
 }
+
 interface Parameters {
     value: number;
     text: string;
@@ -211,9 +211,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
                                     active: editingGroup?.active || "Y",
-                                    calibration_service_id: editingGroup?.calibrationServiceDto 
-                                    ? editingGroup.calibrationServiceDto.id 
-                                    : "",
+                                    calibration_service_id: editingGroup?.id || "",
                                     }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),

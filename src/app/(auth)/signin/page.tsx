@@ -14,6 +14,7 @@ import Link from "next/link";
 import { CiUnlock, CiLock } from "react-icons/ci";
 import { IoReloadSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import { param } from 'jquery';
 
 export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
@@ -111,7 +112,7 @@ export default function Login() {
   const natsListener = useCallback(async (threadId : any) => {
 
     const sendToServer = async (params : {
-      username: any; params : any
+      username: any; name: any; params : any
 }) => {
       try {
 
@@ -121,10 +122,46 @@ export default function Login() {
         });
 
         document.cookie = `token=${params.username}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
-        console.log("I HERE")
+        // console.log("I HERE")
+        localStorage.setItem("user", JSON.stringify(params.username));
+        localStorage.setItem("userDetails", JSON.stringify({
+          "active": "Y",
+          "cidNumber": params.username,
+          "created_by": null,
+          "created_date": "2025-02-04 08:21:24",
+          "email": null,
+          "fullName": params.name,
+          "id": 17,
+          "last_updated_by": null,
+          "last_updated_date": "2025-02-04 08:21:24",
+          "mobileNumber": null,
+          "userName": params.username,
+          "userRole": [
+            {
+              "created_by": null,
+              "created_date": "2025-02-04 08:21:24",
+              "id": 6,
+              "last_updated_by": null,
+              "last_updated_date": "2025-02-04 08:21:24",
+              "roles": {
+                "active": "Y",
+                "code": "TNT",
+                "created_by": null,
+                "created_date": null,
+                "id": 2,
+                "last_updated_by": null,
+                "last_updated_date": null,
+                "privileges": [],
+                "role_name": "Client"
+              },
+              "userRoleId": 17
+            }
+          ]
+        }
+        ));
         setTimeout(() => {
           router.push("/user-dashboard");
-        }, 2000);
+        }, 1500);
         
       } catch (error) {
         setErrorMessage("Error submitting data");
@@ -143,9 +180,10 @@ export default function Login() {
       for await (const m of sub) {
         const data = JSON.parse(sc.decode(m.data));
         if (data?.data?.verification_result === 'ProofValidated') {
-          const { "EID": empID, "ID Number": cid } = data.data.requested_presentation.revealed_attrs;
+          const { "Full Name": fullName, "ID Number": cid } = data.data.requested_presentation.revealed_attrs;
           await sendToServer({
             username: cid[0].value,
+            name: fullName[0].value,
             params: undefined
           });
           conn.close();

@@ -62,7 +62,7 @@ const PermissionsPage: React.FC = () => {
     }
 
     const handleSubmit = (values: { role?: string; status?: any; },
-        resetForm: { (nextState?: Partial<FormikState<{ permission: string; }>> | undefined): void; (): void; }) => {
+        resetForm: { (nextState?: Partial<FormikState<{ role: string; status: boolean; }>> | undefined): void; (): void; }) => {
         setPermissions([...premissions, {
             permission: values.role || '',
             createDate: `Jan 13,2024`,
@@ -117,10 +117,12 @@ const PermissionsPage: React.FC = () => {
                         <div className="relative p-4 w-full max-w-5xl max-h-full transition-transform duration-300 ease-in-out transform scale-95">
                             <Formik
                                 initialValues={{
-                                    permission: '',
+                                    role: '',
+                                    status: false,
                                 }}
                                 validationSchema={Yup.object({
-                                    permission: Yup.string().required("Role name is required"),
+                                    role: Yup.string().required("Role name is required"),
+                                    status: Yup.boolean(),
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
@@ -146,7 +148,7 @@ const PermissionsPage: React.FC = () => {
                                                     </div>
 
                                                     <div className="w-full xl:w-1/2 mt-10">
-                                                        <Switcher name='status' label='Status' />
+                                                        <Switcher name='status' label='Status' checked={false}/>
                                                     </div>
                                                 </div>
 

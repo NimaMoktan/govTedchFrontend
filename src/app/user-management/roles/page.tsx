@@ -17,9 +17,11 @@ interface SampleType {
     id: number;
     code: string;
     role_name: string;
-    active: string
+    privileges: string[]; // Add this line
+    active: string;
 }
 interface FormValues {
+    id?: number; // Add this line
     code: string;
     role_name: string;
     privileges: string[]; // Assuming privilege IDs are strings
@@ -90,11 +92,11 @@ const SampleTestType: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleEdit = (role : FormValues) => {
-        setIsEditing(true)
-        setSelectedRole(role);
-        setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
-    }
+    // const handleEdit = (role : FormValues) => {
+    //     setIsEditing(true)
+    //     setSelectedRole(role);
+    //     setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
+    // }
     
 
     const handleSubmit = async (values: FormValues, resetForm: () => void) => {
@@ -104,7 +106,7 @@ const SampleTestType: React.FC = () => {
     
         // Determine the API URL and HTTP method based on whether it's editing or creating
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/core/roles/${selectedRole.id}/update`
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/roles/${selectedRole?.id}/update`
             : `${process.env.NEXT_PUBLIC_API_URL}/core/roles/`;
     
         const method = "POST"; // Always POST in both cases
@@ -123,7 +125,7 @@ const SampleTestType: React.FC = () => {
             if (isEditing) {
                 // If editing, prepare update Payload with existing privileges from selectedRole
                 const updatePrivilegesFormatted = selectedRole?.privileges.map((privilege) => ({
-                    id: privilege.id
+                    id: privilege
                 }));
                 const updatePayload = {
                     code: values.code,
@@ -281,7 +283,7 @@ const SampleTestType: React.FC = () => {
                             initialValues={{
                                 code: selectedRole?.code || "",
                                 role_name: selectedRole?.role_name || "",
-                                privileges: selectedRole?.privileges.map((privilege) => privilege.id.toString()) || [], // Make sure privileges are strings
+                                privileges: selectedRole?.privileges.map((privilege) => privilege.toString()) || [], // Make sure privileges are strings
                                 active: selectedRole?.active || "Y", // Default to "Y" for active
                             }}
                             validationSchema={Yup.object({
