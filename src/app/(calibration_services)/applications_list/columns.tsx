@@ -8,7 +8,7 @@ export type Application = {
   createdDate: any;
   id: number;
   applicationNumber: string;
-  active: string;
+  status: string;
 };
 
 export const columns: ColumnDef<Application>[] = [
@@ -52,16 +52,16 @@ export const columns: ColumnDef<Application>[] = [
     accessorKey: "status",
     header: () => "status",
     cell: ({ row }) => {
-      const status = row.original.active;
+      const status = row.original.status;
       return (
         <p
           className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-            status === "Submission"
+            status === "Verified"
               ? "bg-success text-success"
               : "bg-danger text-danger"
           }`}
         >
-          {status === "Submission" ? "Approved" : "Submission"}
+          {status}
         </p>
       );
     },

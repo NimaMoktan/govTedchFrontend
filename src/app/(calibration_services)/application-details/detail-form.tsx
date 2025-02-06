@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { parse } from 'path';
 import Input from '@/components/Inputs/Input';
 import Select from '@/components/Inputs/Select';
 import { Form, Formik } from 'formik';
+import { toast } from 'react-toastify';
 
 interface ApplicationDetails {
     id: string;
@@ -87,8 +87,15 @@ const DetailForm: React.FC = () => {
                 }
             }
         );
-
-        console.log(response)
+        if(response.status === 200){
+            toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }else{
+            toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
+            
+        }
 
     }
 
@@ -225,7 +232,7 @@ const DetailForm: React.FC = () => {
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} />
+                        <Select label="Select Status" name="status" options={[{ value: "Verified", text: "Verify" }, { value: "reject", text: "Reject" }]} />
                     </div>
                     <div className="w-full xl:w-1/2">
 

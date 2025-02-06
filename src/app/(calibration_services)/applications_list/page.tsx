@@ -9,7 +9,7 @@ import { columns } from "./columns";
 interface Application {
   id: string;
   applicationNumber: string;
-  active: string;
+  status: string;
 }
 import Loader from "@/components/common/Loader";
 import axios from "axios";
