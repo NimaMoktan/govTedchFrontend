@@ -260,7 +260,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     description: Yup.string().required("Description is required"),
                                     range: Yup.string().required("Range is required"),
                                     charges: Yup.string().required("Charges is required"),
-                                    test: Yup.string().required("Test is required"),
+                                    test: Yup.string().required("Calibration is required"),
                                     calibration_group_id: Yup.number().required("Item Group is required"),
                                 })}
                                 onSubmit={(values, { resetForm }) => {
@@ -311,13 +311,13 @@ const CalibrationItemGroup: React.FC = () => {
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
                                     <Select
-                                        label="Test"
+                                        label="Calibration"
                                         name="test"
                                         options={[
-                                            { value: "", text: "Select Test" },
-                                            { value: "OST", text: "On Site Testing" },
+                                            { value: "", text: "Select Calibration" },
+                                            { value: "ON", text: "On Site Testing" },
                                             { value: "ILT", text: "In Lab Testing" },
-                                            ...(editingGroup?.test && !["OST", "ILT"].includes(editingGroup.test)
+                                            ...(editingGroup?.test && !["ON", "ILT"].includes(editingGroup.test)
                                                 ? [{ value: editingGroup.test, text: editingGroup.test }] // ✅ Add unexpected DB value
                                                 : []
                                             ),

@@ -44,11 +44,15 @@ const FuelOutLet: React.FC = () => {
         setEditingGroup(null);
     };
 
+    const storedUser = localStorage.getItem("userDetails");
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     const loadItem = () => {
         setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/outlet/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/outlet/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
+                "userId": parsedUser.id,
+                "userName": parsedUser.userName,
             },
         })
             .then((res) => res.json())
@@ -75,8 +79,8 @@ const FuelOutLet: React.FC = () => {
     }, resetForm: () => void) => {
 
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/outlet/${editingGroup?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/outlet/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/outlet/${editingGroup?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/outlet/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -85,6 +89,8 @@ const FuelOutLet: React.FC = () => {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
+                "userId": parsedUser.id,
+                "userName": parsedUser.userName,
             },
             body: JSON.stringify(values),
         })
@@ -123,11 +129,13 @@ const FuelOutLet: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/outlet/${itemGroup.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/outlet/${itemGroup.id}/delete`,
                     {},
                     {
                         headers: {
-                            "Authorization": `Bearer ${token}`
+                            "Authorization": `Bearer ${token}`,
+                            "userId": parsedUser.id,
+                            "userName": parsedUser.userName,
                         }
                     }
                 );
@@ -155,7 +163,7 @@ const FuelOutLet: React.FC = () => {
 
     useEffect(() => {
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/dzongkhag/`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -215,7 +223,7 @@ const FuelOutLet: React.FC = () => {
                                     no_pumps: Yup.string().required("Number of is required"),
                                     location: Yup.string().required("Location is required"),
                                 dzongkhagId: Yup.string().required("Dzongkhag is required"),
-                                    quantity: Yup.string().required("Quantity is required"),
+                                    quantity: Yup.string().required("Number of nozzles is required"),
                                     rate: Yup.string().required("Rate is required")
                                 })}
                                 onSubmit={(values, { resetForm }) => {
@@ -262,7 +270,7 @@ const FuelOutLet: React.FC = () => {
 
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
-                                    <Input label="Quantity" name="quantity" type="number" placeholder="Enter Quantity" />
+                                    <Input label="Number of nozzles" name="quantity" type="number" placeholder="Enter number of nozzles" />
                                     </div>
 
                                     <div className="w-full xl:w-1/2">

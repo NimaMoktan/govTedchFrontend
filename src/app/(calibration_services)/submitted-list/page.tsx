@@ -9,7 +9,7 @@ import { columns } from "./columns";
 interface Application {
     id: string;
     applicationNumber: string;
-    status: string;
+    active: string;
 }
 import Loader from "@/components/common/Loader";
 import axios from "axios";
@@ -35,11 +35,7 @@ const ApplicationList: React.FC = () => {
         });
         const { data } = list.data;
         console.log(data);
-        if(!data){
-          setApplicatoinList([]);
-        }else{
-          setApplicatoinList(data);
-        }
+        setApplicatoinList(data);
         } catch (error) {
         console.error("Error fetching application list", error);
         } finally {

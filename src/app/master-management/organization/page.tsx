@@ -15,8 +15,10 @@ import Loader from "@/components/common/Loader";
 
 interface OrganizationItem {
     id: number;
-    code: string;
     description: string;
+    address: string;
+    contact: string;
+    email: string;
     active: string
 }
 
@@ -43,9 +45,9 @@ const OrganizationPage: React.FC = () => {
         })
             .then((res) => res.json())
             .then((data) => {
-                if(data.data != null){
+                if (data.data != null) {
                     setServices(data.data);
-                }else{
+                } else {
                     setServices([])
                 }
                 setIsLoading(false)
@@ -53,7 +55,7 @@ const OrganizationPage: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
+    const handleSubmit = (values: { address: string; description: string; email: string; contact: string; active: string }, resetForm: () => void) => {
 
         setIsLoading(true);
 
@@ -62,8 +64,6 @@ const OrganizationPage: React.FC = () => {
             : `${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`;
 
         const method = isEditing ? "POST" : "POST";
-
-        console.log(values, "HERE")
 
         fetch(url, {
             method,
@@ -116,8 +116,8 @@ const OrganizationPage: React.FC = () => {
                 const { data } = response;
                 if (data.statusCode == 200) {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
-                    
-                    setTimeout(()=>{
+
+                    setTimeout(() => {
                         loadServices();
                     }, 2000)
                 } else {
@@ -141,17 +141,17 @@ const OrganizationPage: React.FC = () => {
         }
     }, [isEditing]);
 
-    if(isLoading){
-        return <Loader/>
+    if (isLoading) {
+        return <Loader />
     }
 
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Organization List" />
+            <Breadcrumb pageName="Client List" />
             <div className="flex flex-col gap-10">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
-                    
+
                     <div
                         className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
@@ -159,27 +159,59 @@ const OrganizationPage: React.FC = () => {
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
                                 initialValues={{
-                                    code: editingService?.code || "",
                                     description: editingService?.description || "",
+                                    address: editingService?.address || "",
+                                    email: editingService?.email || "",
+                                    contact: editingService?.contact || "",
                                     active: editingService?.active || "Y"
                                 }}
                                 validationSchema={Yup.object({
-                                    code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
+                                    address: Yup.string().required("Address is required"),
+                                    contact: Yup.string().required("Contact is required"),
+                                    email: Yup.string().required("Email is required"),
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
                                 <Form>
-                                    <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Client Name"
+                                                name="description"
+                                                type="text"
+                                                placeholder="Enter client name"
+                                            />
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label={`Address`}
+                                                name="address"
+                                                type="text"
+                                                placeholder="Enter client address" />
+                                        </div>
                                     </div>
-                                    <div className="mb-4">
-                                        <Input
-                                            label="Description"
-                                            name="description"
-                                            type="text"
-                                            placeholder="Enter description"
-                                        />
+
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Contact"
+                                                name="contact"
+                                                type="text"
+                                                placeholder="Enter client contact"
+                                            />
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label={`Email`}
+                                                name="email"
+                                                type="email"
+                                                placeholder="Enter Client Email" />
+                                        </div>
                                     </div>
 
                                     <div className="mb-4">
@@ -189,7 +221,7 @@ const OrganizationPage: React.FC = () => {
                                             options={[{
                                                 value: "Y",
                                                 text: "YES"
-                                            }, 
+                                            },
                                             {
                                                 value: "N",
                                                 text: "NO"
@@ -216,7 +248,7 @@ const OrganizationPage: React.FC = () => {
                             </Formik>
                         </div>
                     </div>
-                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal}/>
+                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal} />
                 </div>
             </div>
         </DefaultLayout>

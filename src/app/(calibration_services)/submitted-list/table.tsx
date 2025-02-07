@@ -93,7 +93,7 @@ export function DataTable<TData extends { applicationNumber: any; id: string; ac
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
-                    router.push(`application-details?applicationNumber=${row.original.applicationNumber}&id=${row.original.id}`);
+                    router.push(`application-details?applicationNumber=${row.original.applicationNumber}`);
                     }}
                 >
                     {row.getVisibleCells().map((cell) => (

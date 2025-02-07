@@ -299,8 +299,13 @@ const SampleTestType: React.FC = () => {
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                                     {isEditing ? "Edit Role" : "Create New Role"}
                                     </h3>
+                                    <div className="mb-4 mt-4">
+
                                     <Input label="Role Code" type="text" placeholder="Enter role code" name="code" />
+                                    </div>
+                                    <div className="mb-4">
                                     <Input label="Role Name" type="text" placeholder="Enter role name" name="role_name" />
+                                    </div>
                                     <div className="flex flex-col">
                                     <label htmlFor="active" className="block text-gray-700 dark:text-white mb-2">
                                         Status

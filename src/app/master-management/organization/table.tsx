@@ -59,24 +59,42 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center py-4">
+        
         <Input
-          placeholder="Filter Code..."
-          value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("code")?.setFilterValue(event.target.value)
-          }
-          className="max-w-[250px]"
-        />
-        <Input
-          placeholder="Search by description"
+          placeholder="Search by name"
           value={(table.getColumn("description")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("description")?.setFilterValue(event.target.value)
           }
-          className="max-w-[250px] ml-6"
+          className="max-w-[250px]"
         />
+        <Input
+          placeholder="Filter Address"
+          value={(table.getColumn("address")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("address")?.setFilterValue(event.target.value)
+          }
+          className="max-w-[250px] ml-2"
+        />
+        <Input
+          placeholder="Filter Contact"
+          value={(table.getColumn("contact")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("contact")?.setFilterValue(event.target.value)
+          }
+          className="max-w-[250px] ml-2"
+        />
+        <Input
+          placeholder="Filter Email"
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="max-w-[250px] ml-2"
+        />
+
         <button onClick={handleAdd}
-          className="ml-10 right-10 gap-2 bg-blue-500 text-white px-4 py-2 btn-sm rounded-lg hover:bg-blue-600"
+          className="ml-2 right-10 gap-2 bg-blue-500 text-white px-4 py-1 btn-sm rounded-lg hover:bg-blue-600"
         >
           Add New
         </button>

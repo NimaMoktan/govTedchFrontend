@@ -23,7 +23,10 @@ import {
     export const columns = (handleEdit: (testType: TestType) => void, handleDelete: (id: TestType) => void) : ColumnDef<TestType>[] => [
     {
         accessorKey: "id",
-        header: "Id"
+        header: "Id",
+        cell: ({ row }) => {        
+            return (<p>{row.index+1}</p>)
+        },
     },
     {
         accessorKey: "code",

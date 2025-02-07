@@ -96,7 +96,7 @@ const menuGroups = [
         children: [
           { label: "Laboratory Testing Site", route: "/master-management/laboratory-testing-site" },
           { label: "Dzongkhag", route: "/master-management/dzongkhag" },
-          { label: "Organization List", route: "/master-management/organization" },
+          { label: "Client List", route: "/master-management/organization" },
         ],
       },
       
@@ -116,6 +116,9 @@ const menuGroups = [
           { label: "Submit Application", route: "/submit_applications" },
           { label: "Approval", route: "/ui/buttons" },
           { label: "Verify", route: "/ui/buttons" },
+          { label: "Submitted List", route: "applications_list" },
+          { label: "Generate Report", route: "/ui/buttons" },
+          { label: "Submit Report", route: "/ui/buttons" },
         ],
       },
       {
@@ -227,6 +230,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           if (index === 1) {
                             // "Submit Application" (second child) is only for TNT users
                             return userDetails.roles.includes("TNT")|| userDetails.roles.includes("ADM");
+                          }
+                          if (index === 4) {
+                            // "Submit Application" (second child) is only for TNT users
+                            return userDetails.roles.includes("TNT");
+                          }
+                          if (index === 5) {
+                            return userDetails.roles.includes("LHD") || userDetails.roles.includes("ADM");
+                          }
+                          if (index === 6) {
+                            return userDetails.roles.includes("CLO") || userDetails.roles.includes("ADM");
                           }
                           if (index === 0) {
                             return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIT");

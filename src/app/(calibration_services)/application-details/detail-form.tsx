@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
+import { toast } from "react-toastify";
 import Input from '@/components/Inputs/Input';
 import Select from '@/components/Inputs/Select';
 import { Form, Formik } from 'formik';
-import { toast } from 'react-toastify';
 
 interface ApplicationDetails {
     id: string;
@@ -13,7 +13,7 @@ interface ApplicationDetails {
     clientName: string;
     contactNumber: string;
     emailAddress: string;
-    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; }[];
+    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; id?: number; }[];
 }
 
 const DetailForm: React.FC = () => {
@@ -23,9 +23,11 @@ const DetailForm: React.FC = () => {
         range: string; description: string
     }[]>([]);
     const [isChief, setIsChief] = useState<boolean | null>();
+    const [isDit, setIsDit] = useState<boolean | null>();
 
     const searchParams = useSearchParams();
     const applicationNumber = searchParams.get("applicationNumber");
+    const id = searchParams.get("id");
 
     const fetchEquipment = async (id: any) => {
         const token = localStorage.getItem("token");
@@ -77,7 +79,7 @@ const DetailForm: React.FC = () => {
             status: values.status
         }
 
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${applicationDetails?.id}/updateWorkflow`,data,
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
             {
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -107,7 +109,7 @@ const DetailForm: React.FC = () => {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
-                    "userId": parsedUser.id,
+                    "userId": parsedUser.id || "999",
                     "userName": parsedUser.userName,
                 }
             }
@@ -123,7 +125,9 @@ const DetailForm: React.FC = () => {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
             const hasCHF = roleList.some((role: { code: string }) => role.code === "CHF");
+            const hasDIT = roleList.some((role: { code: string }) => role.code === "DIT");
             setIsChief(hasCHF);
+            setIsDit(hasDIT);
 
         }
         fetchApplicationDetails();
@@ -242,6 +246,25 @@ const DetailForm: React.FC = () => {
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
                   Update
+                </button>
+                </Form>
+            </Formik>
+            }
+            {isDit &&
+            <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
+                <Form>
+                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                    <div className="w-full xl:w-1/2">
+                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }]} />
+                    </div>
+                    <div className="w-full xl:w-1/2">
+
+                        <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
+                        <Input label="Remarks" name="remarks" />
+                    </div>
+                </div>
+                <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
+                  Approve
                 </button>
                 </Form>
             </Formik>

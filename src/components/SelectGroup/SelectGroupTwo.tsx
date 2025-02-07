@@ -63,7 +63,7 @@ const SelectGroupTwo: React.FC<SelectGroupTwoProps> = ({ name, options, onChange
             field.value ? "text-black dark:text-white" : "text-body dark:text-bodydark z-10"
           }`}
         >
-          <option value="">Select an equipment/instrument</option>
+          <option value="">Select an options</option>
           {(options || []).map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

@@ -135,9 +135,6 @@ const UserManagement = () => {
   ) => {
     let userData;
   
-    const storedUser = localStorage.getItem("userDetails");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
     if (selectedUser) {
       userData = {
         cidNumber: values.cid,
@@ -164,7 +161,8 @@ const UserManagement = () => {
       };
     }
   
-  
+    const storedUser = localStorage.getItem("userDetails");
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     try {
       const response = await fetch(
         selectedUser
@@ -217,7 +215,7 @@ const UserManagement = () => {
       if (result.isConfirmed) {
         const updatedData = usersList.filter(item => item.id !== user.id);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/${user.id}/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/${user.id}/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
