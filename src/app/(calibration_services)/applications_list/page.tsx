@@ -7,9 +7,10 @@ import { DataTable } from "./table";
 import { columns } from "./columns";
 
 interface Application {
-    id: string;
+    id: number;
     applicationNumber: string;
     status: string;
+    createdDate: string;
 }
 import Loader from "@/components/common/Loader";
 import axios from "axios";

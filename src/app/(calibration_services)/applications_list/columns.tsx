@@ -5,7 +5,7 @@ import moment from "moment";
 import { Button } from "@/components/ui/button";
 
 export type Application = {
-  createdDate: any;
+  createdDate: string;
   id: number;
   applicationNumber: string;
   status: string;

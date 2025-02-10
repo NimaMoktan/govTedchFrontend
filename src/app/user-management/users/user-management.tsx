@@ -1,7 +1,4 @@
 "use client";
-// import { Package } from "@/types/package";
-// import Link from "next/link";
-import { BiUserPlus } from "react-icons/bi";
 import { useState, useEffect } from 'react';
 import { Formik, Form, FormikState } from "formik";
 import * as Yup from 'yup';
@@ -10,6 +7,7 @@ import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
 import { DataTable } from "./table";
 import { columns } from "./columns";
+import { useRouter } from 'next/navigation';
 
 const UserManagement = () => {
   interface Role {
@@ -33,7 +31,7 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([])
-
+  const router = useRouter();
   const handleCreateUser = () => {
     setSelectedUser(null); // Ensure no data is pre-filled for creating new user
     setShowCreateModal(true);
@@ -192,7 +190,7 @@ const UserManagement = () => {
         `The user has been successfully ${selectedUser ? 'updated' : 'created'}.`,
         'success'
       ).then(() => {
-        window.location.reload();
+
       });
       resetForm();
     } catch (error) {

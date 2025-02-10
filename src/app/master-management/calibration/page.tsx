@@ -12,12 +12,14 @@ import Select from "@/components/Inputs/Select";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
+import { useRouter } from "next/navigation";	
 
 interface CalibrationGroupItem {
     id: number;
     code: string;
     description: string;
     active: string,
+    calibration_service_id: number;
 }
 
 interface Parameters {
@@ -33,6 +35,7 @@ const CalibrationItemGroup: React.FC = () => {
     const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
     const [parameter, setParameter] = useState<Parameters[]>([])
+    const router = useRouter();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -99,7 +102,7 @@ const CalibrationItemGroup: React.FC = () => {
                             position: 'top-end', // Adjust position if needed
                             toast: true
                         }).then(()=>{
-                            window.location.reload();
+                            router.push('master-management/calibration')
                         });  
                     throw new Error("Failed to save service");
                 }

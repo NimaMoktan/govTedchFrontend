@@ -14,7 +14,6 @@ import Link from "next/link";
 import { CiUnlock, CiLock } from "react-icons/ci";
 import { IoReloadSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import { param } from 'jquery';
 
 export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
@@ -91,6 +90,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error(errorMessage, { position: "top-right", autoClose: 2000 });
     } finally {
       setIsLoading(false);
       resetForm({
@@ -200,7 +200,7 @@ export default function Login() {
     setIsLoading(true);
     setErrorMessage('');
 
-    axios.post(`http://localhost:8089/api/ndi/authentication`, { headers: { Accept: "*/*" } })
+    axios.post(`http://172.31.180:8080/api/ndi/authentication`, { headers: { Accept: "*/*" } })
       .then(response => {
         const { proofRequestURL, proofRequestThreadId } = response.data.data;
         setProofRequestURL(proofRequestURL);

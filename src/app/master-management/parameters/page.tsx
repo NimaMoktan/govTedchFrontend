@@ -12,6 +12,7 @@ import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
+import { useRouter } from "next/navigation";
 
 interface CalibrationService {
     id: number;
@@ -26,7 +27,9 @@ const CalibrationParameters: React.FC = () => {
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<CalibrationService | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token] = useState<string | null>(localStorage.getItem("token"));
+
+    const router = useRouter();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -63,8 +66,6 @@ const CalibrationParameters: React.FC = () => {
 
         const method = isEditing ? "POST" : "POST";
 
-        console.log(values, "HERE")
-
         fetch(url, {
             method,
             headers: {
@@ -96,7 +97,7 @@ const CalibrationParameters: React.FC = () => {
                         position: 'top-end', // Adjust position if needed
                         toast: true
                     }).then(()=>{
-                        window.location.reload();
+                        router.push('/master-management/patameters');
                     }); 
                     throw new Error("Failed to save service");
                 }
@@ -131,7 +132,7 @@ const CalibrationParameters: React.FC = () => {
                         showConfirmButton: true,
                         position: 'center'
                     }).then(()=>{
-                        window.location.reload();
+                        router.push('/master-management/patameters');
                     });
                 } else {
                     toast.error(data.message,

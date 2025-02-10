@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Input from '@/components/Inputs/Input';
 import Select from '@/components/Inputs/Select';
 import { Form, Formik } from 'formik';
+import { useRouter } from 'next/navigation';
 
 interface ApplicationDetails {
     id: string;
@@ -26,6 +27,7 @@ const DetailForm: React.FC = () => {
     const [isDit, setIsDit] = useState<boolean | null>();
 
     const searchParams = useSearchParams();
+    const router = useRouter();
     const applicationNumber = searchParams.get("applicationNumber");
     const id = searchParams.get("id");
 
@@ -92,7 +94,8 @@ const DetailForm: React.FC = () => {
         if(response.status === 200){
             toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
             setTimeout(() => {
-                window.location.reload();
+                router.push("/application-details");
+
             }, 1000);
         }else{
             toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });

@@ -1,13 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Formik, Form, Field, useFormikContext } from "formik";
-import SelectGroupTwo from "@/components/SelectGroup/SelectGroupTwo";
+import { Formik, Form } from "formik";
 import FileInput from "@/components/Inputs/FileInput";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 import Input from "@/components/Inputs/Input";
 import Select from "@/components/Inputs/Select";
-import { BiTrash } from "react-icons/bi";
+import { useRouter } from "next/navigation";
 
 interface FormValues {
   cid: string;
@@ -54,6 +53,7 @@ const ApplicationSubmitForm = () => {
     email: "",
     organizationId: "",
   });
+  const router = useRouter();
 
   // Fetch equipment data from API
   const fetchEquipment = async () => {
@@ -252,7 +252,7 @@ const ApplicationSubmitForm = () => {
           text: `These are your client codes: ${clientCodes}`,
           icon: "success",
           confirmButtonText: "Ok",
-        }).then(() => window.location.reload());
+        }).then(() => router.push("/applications_list"));
       } else {
         Swal.fire({
           title: "Error",

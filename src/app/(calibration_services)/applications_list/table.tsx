@@ -28,7 +28,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
     }
 
-export function DataTable<TData extends { applicationNumber: any; id: string; active: string }, TValue>({
+export function DataTable<TData extends { applicationNumber: string; id: number; status: string; createdDate: string }, TValue>({
     columns,
     data,
     }: DataTableProps<TData, TValue>) {

@@ -7,7 +7,13 @@ module.exports = {
           destination: 'http://172.31.1.80:9000/:path*', // Replace with backend URL
         },
       ];
-    },
+    }
   };
+
+  // const nextConfig = {
+  //   output: "export",
+  // };
+  
+  // module.exports = nextConfig;
   
 

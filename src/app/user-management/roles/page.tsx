@@ -8,10 +8,10 @@ import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
+import { useRouter } from "next/navigation";
 
 interface SampleType {
     id: number;
@@ -37,6 +37,7 @@ const SampleTestType: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<FormValues | null>(null);
     const [privileges, setPrivileges] = useState<{ id: string; name: string }[]>([]);
     const [roles, setRoles] = useState<{ code: string; role_name: string }[]>([]);
+    const router = useRouter();
 
     const showModalHandler = () => {
         
@@ -133,7 +134,6 @@ const SampleTestType: React.FC = () => {
                     active: values.active,
                     privileges: updatePrivilegesFormatted,
                 };  
-                console.log("Update Payload:", JSON.stringify(updatePayload, null, 2));
     
                 // Make both API requests in parallel
                 [response, privilegesResponse] = await Promise.all([
@@ -166,8 +166,6 @@ const SampleTestType: React.FC = () => {
                     throw new Error(privilegesResponseData.message);
                 }
             } else {
-                // If creating a new role
-                console.log("Create Payload:", Payload);
     
                 response = await fetch(url, {
                     method,
@@ -189,7 +187,7 @@ const SampleTestType: React.FC = () => {
                     confirmButtonColor: "#4caf50", // Green color for success
                     allowOutsideClick: false, // Prevent closing when clicking outside
                 }).then(() => {
-                    window.location.reload();
+                    router.push("/user-management/roles");
                 });
                 resetForm();
                 showModalHandler();
@@ -238,7 +236,7 @@ const SampleTestType: React.FC = () => {
                 const { data } = response;
                 if (data.statusCode == 200) {
                     Swal.fire("Deleted!", "The role has been deleted.", "success").then(()=>{
-                        window.location.reload();
+                        router.push("/user-management/roles");
                     });
                 } else {
                     toast.error(data.message,
