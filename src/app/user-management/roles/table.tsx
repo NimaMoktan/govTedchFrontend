@@ -60,23 +60,23 @@ import {
     return (
         <div>
         <div className="flex items-center py-4">
-            <Input
+            {/* <Input
             placeholder="Filter Code..."
             value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
                 table.getColumn("code")?.setFilterValue(event.target.value)
             }
             className="max-w-[250px]"
-            />
+            /> */}
             <Input
             placeholder="Search by role name"
             value={(table.getColumn("role_name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
                 table.getColumn("role_name")?.setFilterValue(event.target.value)
             }
-            className="max-w-[250px] ml-6"
+            className="max-w-[250px] ml-0"
             />
-            <div className="flex max-w-full justify-between items-center mb-0 ml-4">
+            <div className="flex w-full justify-end items-center mb-0 ml-4">
                 <button
                     onClick={handleAdd}
                     className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-4 xl:px-4"

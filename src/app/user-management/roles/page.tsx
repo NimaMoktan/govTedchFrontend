@@ -99,6 +99,14 @@ const SampleTestType: React.FC = () => {
     //     setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
     // }
     
+    const generateRandomCode = () => {
+        const codes = [
+            `ROLE-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+            `ROLE-${crypto.randomUUID().split('-')[0].toUpperCase()}`,
+            `ROLE-${Date.now().toString(36).toUpperCase()}`
+        ];
+        return codes[Math.floor(Math.random() * codes.length)]; // Pick a random one
+    };
 
     const handleSubmit = async (values: FormValues, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
@@ -113,10 +121,10 @@ const SampleTestType: React.FC = () => {
         const method = "POST"; // Always POST in both cases
     
         const Payload = JSON.stringify({
-            code: values.code,
+            code: generateRandomCode(),
             role_name: values.role_name,
             active: values.active,
-            privileges: privilegesFormatted,
+            // privileges: privilegesFormatted,
         });
     
         try {
@@ -129,10 +137,10 @@ const SampleTestType: React.FC = () => {
                     id: privilege
                 }));
                 const updatePayload = {
-                    code: values.code,
+                    code: generateRandomCode(),
                     role_name: values.role_name,
                     active: values.active,
-                    privileges: updatePrivilegesFormatted,
+                    // privileges: updatePrivilegesFormatted,
                 };  
     
                 // Make both API requests in parallel
@@ -154,7 +162,7 @@ const SampleTestType: React.FC = () => {
                         body: JSON.stringify(updatePayload),
                     }),
                 ]);
-    
+                console.log("This is the data sent for update:  ", JSON.stringify(updatePayload));
                 // Process responses
                 const responseData = await response.json();
                 const privilegesResponseData = await privilegesResponse.json();
@@ -175,6 +183,7 @@ const SampleTestType: React.FC = () => {
                     },
                     body: Payload,
                 });
+                console.log("This is the data sent for create:  ", Payload);
             }
             if (response.ok) {
                 Swal.fire({
@@ -285,7 +294,7 @@ const SampleTestType: React.FC = () => {
                                 active: selectedRole?.active || "Y", // Default to "Y" for active
                             }}
                             validationSchema={Yup.object({
-                                code: Yup.string().required("Role code is required"),
+                                // code: Yup.string().required("Role code is required"),
                                 role_name: Yup.string().required("Role name is required"),
                             })}
                             onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
@@ -297,10 +306,7 @@ const SampleTestType: React.FC = () => {
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                                     {isEditing ? "Edit Role" : "Create New Role"}
                                     </h3>
-                                    <div className="mb-4 mt-4">
-
-                                    <Input label="Role Code" type="text" placeholder="Enter role code" name="code" />
-                                    </div>
+                                    
                                     <div className="mb-4">
                                     <Input label="Role Name" type="text" placeholder="Enter role name" name="role_name" />
                                     </div>

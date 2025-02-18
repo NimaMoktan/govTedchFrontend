@@ -14,7 +14,7 @@ import {
     import { ArrowUpDown } from "lucide-react"
 
     export type TestType = {
-        code: string;
+        // code: string;
         role_name: string;
         privileges: string[]; 
         active: string; 
@@ -28,20 +28,20 @@ import {
             return (<p>{row.index+1}</p>)
         },
     },
-    {
-        accessorKey: "code",
-        header: ({ column }) => {
-        return (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-            Code
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        )
-        },
-    },
+    // {
+    //     accessorKey: "code",
+    //     header: ({ column }) => {
+    //     return (
+    //         <Button
+    //         variant="ghost"
+    //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //         Code
+    //         <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     )
+    //     },
+    // },
     {
         accessorKey: "role_name",
         header: ({ column }) => {

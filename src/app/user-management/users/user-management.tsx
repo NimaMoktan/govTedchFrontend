@@ -57,7 +57,6 @@ const UserManagement = () => {
             'Authorization': `Bearer ${token}`,
           },
         });
-  
         if (!response.ok) {
           throw new Error('Failed to fetch users');
         }
@@ -65,7 +64,7 @@ const UserManagement = () => {
         const result = await response.json();  
         // Check if 'data' is an array
         if (Array.isArray(result.data)) {
-          console.log(result.data)
+          // console.log(result.data)
           setUsersList(result.data);  // Set the data to the state if it's an array
         } else {
           console.error('Fetched data is not an array:', result);
@@ -98,7 +97,7 @@ const UserManagement = () => {
           value: String(role.id),  // Use string values for consistency
           text: role.role_name,
         }));
-        console.log("This is the role result: ", result);
+        // console.log("This is the role result: ", result);
         // Map the roles data to the format expected by the Select component
         if (Array.isArray(result.data)) {
           const roleOptions = result.data.map((role: { id: number; role_name: string }) => ({
@@ -139,7 +138,7 @@ const UserManagement = () => {
         fullName: values.full_name,
         userName: values.username,
         email: values.email,
-        mobileNumber: values.mobile_number || null,
+        mobileNumber: values.mobile_number,
         active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
@@ -151,7 +150,7 @@ const UserManagement = () => {
         fullName: values.full_name,
         userName: values.username,
         email: values.email,
-        mobileNumber: values.mobile_number || null,
+        mobileNumber: values.mobile_number,
         active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
@@ -177,7 +176,7 @@ const UserManagement = () => {
           body: JSON.stringify(userData),
         }
       );
-  
+      // console.log("These is the datas being send: ", JSON.stringify(userData));
       if (!response.ok) {
         const errorResponse = await response.text();
         throw new Error(`Failed to update user: ${errorResponse}`);
@@ -213,7 +212,7 @@ const UserManagement = () => {
       if (result.isConfirmed) {
         const updatedData = usersList.filter(item => item.id !== user.id);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/${user.id}/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/${user.id}/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -303,7 +302,7 @@ const UserManagement = () => {
                   <Input label="Full Name" type="text" placeholder="Enter your full name" name="full_name" />
                   <Input label="Username" type="text" placeholder="Enter username" name="username" />
                   <Input label="Email" type="email" placeholder="Enter email address" name="email" />
-                  <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobileNumber" />
+                  <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobile_number" />
                   <MultiSelect label="Role" name="role" options={roleDropdown} />
                 </div>
                 <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
