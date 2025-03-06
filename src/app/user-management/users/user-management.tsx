@@ -175,7 +175,6 @@ const UserManagement = () => {
           body: JSON.stringify(userData),
         }
       );
-
       if (!response.ok) {
         const errorResponse = await response.text();
 

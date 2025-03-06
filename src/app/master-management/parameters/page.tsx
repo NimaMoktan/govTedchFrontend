@@ -97,7 +97,7 @@ const CalibrationParameters: React.FC = () => {
                         position: 'top-end', // Adjust position if needed
                         toast: true
                     }).then(()=>{
-                        router.push('/master-management/patameters');
+                        router.push('/master-management/parameters');
                     }); 
                     throw new Error("Failed to save service");
                 }
@@ -132,7 +132,7 @@ const CalibrationParameters: React.FC = () => {
                         showConfirmButton: true,
                         position: 'center'
                     }).then(()=>{
-                        router.push('/master-management/patameters');
+                        router.push('/master-management/parameters');
                     });
                 } else {
                     toast.error(data.message,

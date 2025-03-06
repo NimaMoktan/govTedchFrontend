@@ -292,7 +292,7 @@ const CalibrationGroupManagement: React.FC = () => {
                       <td className="border px-4 py-2">{index + 1}</td>
                       <td className="border px-4 py-2">{group.code}</td>
                       <td className="border px-4 py-2">{group.description}</td>
-                     
+                    
                       <td className="border px-4 py-2">
                         {group.active === "true" ? "Active" : "Inactive"}
                       </td>
