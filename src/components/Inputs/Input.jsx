@@ -1,5 +1,7 @@
 import React from 'react';
 import { useField } from 'formik';
+import { Input as TextInput } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const Input = ({ label, ...props }) => {
     if (!props.name) {
@@ -10,20 +12,21 @@ const Input = ({ label, ...props }) => {
 
     return (
         <>
-            <label
-                className="mb-3 block text-sm font-medium text-black dark:text-white"
+            <Label
+                className="mb-3 block text-sm font-medium"
                 htmlFor={props.id || props.name}
             >
                 {label}
-            </label>
-            <input
+            </Label>
+            <TextInput
                 id={props.id || props.name}
                 {...field}
                 {...props}
-                className="w-full rounded rounded-lg border-[1.5px] border-stroke bg-transparent px-4 py-2 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                className={`${meta.touched && meta.error ? 'border-red-500' : ''}`}
+                size={40}
             />
             {meta.touched && meta.error ? (
-                <div className="error text-red-500">{meta.error}</div>
+                <span className="error text-red-500 text-xs ml-3">{meta.error}</span>
             ) : null}
         </>
     );

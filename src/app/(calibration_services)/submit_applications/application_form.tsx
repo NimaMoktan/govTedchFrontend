@@ -92,7 +92,7 @@ const ApplicationSubmitForm = () => {
       setEquipmentOptions(
         data.data.map((item: any) => ({
           value: item.id,
-          label: item.description, // Assuming you want 'description' as the dropdown label
+          text: item.description, // Assuming you want 'description' as the dropdown label
         }))
       );
     } catch (error) {
@@ -127,16 +127,16 @@ const ApplicationSubmitForm = () => {
         }
 
         const data = await response.json();
-        console.log("Organization Data:", data);
+        // console.log("Organization Data:", data);
 
         if (!data || !Array.isArray(data.data)) {
           throw new Error("Invalid response format: Expected 'data' to be an array.");
         }
 
         setOrganizationOptions(
-          data.data.map((org: any) => ({
+          data.data?.map((org: any) => ({
             value: org.id.toString(),
-            label: org.description,
+            text: org.description,
           }))
         );
       } catch (error) {
@@ -165,10 +165,11 @@ const ApplicationSubmitForm = () => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
   };
 
-  const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
+  const handleEquipmentChange = async (index: number, selectedEquipmentId: any) => {
+    // console.log(selectedEquipmentId.target?.value)
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId.target.value}`,
         {
           method: "GET",
           headers: {
@@ -178,16 +179,18 @@ const ApplicationSubmitForm = () => {
         }
       );
       const data = await response.json();
-      console.log("Fetched Data: ", data);
+      // console.log("Fetched Data: ", data);
       if (data && data.status === 'OK') {
         const equipmentData = data.data;
         const manufacturer = equipmentData ? equipmentData.manufacturer : '';
         const range = equipmentData ? equipmentData.range : '';
         const rate = equipmentData ? equipmentData.charges || 0 : 0; // Ensure rate is fetched correctly
         // Set fields for this equipment
-        setFieldValue(`manufacturer[${index}]`, manufacturer);
-        setFieldValue(`model[${index}]`, range);
-        setFieldValue(`amount[${index}]`, rate); // Set the rate (amount) for the equipment
+        // setFieldValue(`manufacturer[${index}]`, manufacturer);
+        // setFieldValue(`model[${index}]`, range);
+        // setFieldValue(`amount[${index}]`, rate);
+        // setFieldValue(`equipment[${index}]`, selectedEquipmentId.target.value);
+         // Set the rate (amount) for the equipment
       } else {
         console.error('API Error:', data.message);
       }
@@ -200,7 +203,7 @@ const ApplicationSubmitForm = () => {
     // Ensure that the amount is correctly fetched as a number
     const amount = Number(values.amount[index]) || 0;
     const totalAmount = amount * quantity; // Calculate total amount
-    console.log("This is the data: ", totalAmount, amount, quantity);
+    // console.log("This is the data: ", totalAmount, amount, quantity);
 
     // Set the total amount and quantity values
     setFieldValue(`total_quantity[${index}]`, totalAmount); // Update total_quantity
@@ -244,7 +247,7 @@ const ApplicationSubmitForm = () => {
       }
 
       const responseData = await response.json();
-      console.log("API Response:", responseData);
+      // console.log("API Response:", responseData);
       const clientCodes = responseData.data?.deviceRegistry?.map((device: any) => device.clientCode).join(", ");
       if (responseData.statusCode == 201) {
         Swal.fire({
@@ -356,12 +359,11 @@ const ApplicationSubmitForm = () => {
               <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 mt-5 text-black outline-none focus:border-primary dark:border-form-strokedark">
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   <div className="w-full xl:w-1/2">
-                   
                     <Select
                     label={`Equipment/Instrument`}
                       name={`equipment[${index}]`}
                       options={equipmentOptions}
-                      onChange={(selectedEquipmentId: string) => handleEquipmentChange(index, selectedEquipmentId, setFieldValue)}
+                      onChange={(selectedEquipmentId : any) => handleEquipmentChange(index, selectedEquipmentId)}
                     />
                   </div>
 
@@ -380,8 +382,7 @@ const ApplicationSubmitForm = () => {
                     label={`Range`}
                       name={`model[${index}]`}
                       type="text"
-                      placeholder="Enter The Range" readOnly
-                    />
+                      placeholder="Enter The Range" readOnly={true}                    />
                   </div>
 
                   <div className="w-full xl:w-1/2">
@@ -409,7 +410,7 @@ const ApplicationSubmitForm = () => {
                       type="number"
                       placeholder="Enter The Rate/Amount"
                       label={"Rate/Amount"}
-                      readonly />
+                      readOnly={true}/>
                   </div>
                 </div>
                 <div className="mb-4.5">
@@ -419,7 +420,7 @@ const ApplicationSubmitForm = () => {
                       placeholder="Enter The Total Amount"
                       label={"Total Amount"}
                       value={values.total_quantity && values.total_quantity[index] !== undefined ? values.total_quantity[index] : ''}  // Safe access
-                      readOnly />
+                      readOnly={true}/>
                   </div>
                 </div>
                 <div className="flex w-full items-center justify-center">

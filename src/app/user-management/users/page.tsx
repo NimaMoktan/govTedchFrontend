@@ -14,7 +14,7 @@ const UsersPage: React.FC = () => {
     return (
         <DefaultLayout>
             <Breadcrumb pageName="Users" />
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-2">
                 <UserManagement/>
             </div>
         </DefaultLayout>

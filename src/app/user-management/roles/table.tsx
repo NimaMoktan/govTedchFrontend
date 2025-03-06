@@ -1,6 +1,5 @@
 "use client"
 import * as React from "react";
-import { BiUserPlus } from "react-icons/bi";
 import {
     ColumnDef,
     flexRender,
@@ -77,12 +76,10 @@ import {
             className="max-w-[250px] ml-6"
             />
             <div className="flex max-w-full justify-between items-center mb-0 ml-4">
-                <button
-                    onClick={handleAdd}
-                    className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-4 xl:px-4"
-                >
-                    <BiUserPlus className="text-white" size={20} /> Add Role
-                </button>
+                <Button
+                    onClick={handleAdd} className="rounded-full">
+                     Add Role
+                </Button>
             </div>
         </div>
         <div className="rounded-md border">

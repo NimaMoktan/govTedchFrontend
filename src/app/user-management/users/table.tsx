@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -83,11 +84,20 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-[250px] ml-6"
         />
-        <button onClick={handleAdd}
-          className="ml-10 right-10 gap-2 bg-blue-500 text-white px-4 py-2 btn-sm rounded-lg hover:bg-blue-600"
+        <Input
+          placeholder="Search by Mobile Number"
+          value={(table.getColumn("mobileNumber")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("mobileNumber")?.setFilterValue(event.target.value)
+          }
+          className="max-w-[250px] ml-6"
+        />
+        <Button onClick={handleAdd}
+          className="ml-10 right-10 gap-2 px-4 py-2 btn-sm rounded-full"
         >
+          <BiUserPlus size={20} />
           Add New
-        </button>
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>

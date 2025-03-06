@@ -14,6 +14,10 @@ import Link from "next/link";
 import { CiUnlock, CiLock } from "react-icons/ci";
 import { IoReloadSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import applestore from "/public/images/logo/appstore.png";
+import googleplay from "/public/images/logo/googleplay.png";
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
@@ -246,13 +250,14 @@ export default function Login() {
                     <Input type="password" name="password" label={`Password`} placeholder="Enter Password" />
                   </div>
                   <div className="w-full mt-6">
-                    <button type="submit" disabled={isLoading} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center">
-                      {isLoading ? <IoReloadSharp size={18} className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                        : (authenticated ? <CiUnlock size={18} className="-ml-1 mr-3 h-5 w-5 text-white" />
-                          : <CiLock size={18} className="-ml-1 mr-3 h-5 w-5 text-white" />)}
-                      Login
-                    </button>
-
+                  <Button disabled={isLoading} className="w-full">
+                    {isLoading && 
+                    <Loader2 className="animate-spin" />
+                    }
+                    {
+                      isLoading ? "Please wait" : "Login"
+                    }
+                  </Button>
                   </div>
                 </Form>
               </Formik>
@@ -357,7 +362,7 @@ export default function Login() {
                     rel="noopener noreferrer"
                   >
                     <Image
-                      src="/images/logo/googleplay.png"
+                      src={googleplay}
                       className="w-[99px] h-[30px]"
                       alt="Google Play Store"
                       width={100}
@@ -371,7 +376,7 @@ export default function Login() {
                     className="ml-3"
                   >
                     <Image
-                      src="/images/logo/appstore.png"
+                      src={applestore}
                       className="w-[99px] h-[30px]"
                       alt="Apple App Store"
                       width={100}
@@ -379,7 +384,6 @@ export default function Login() {
                     />
                   </a>
                 </div>
-
               </div>
             </div>
           </div>

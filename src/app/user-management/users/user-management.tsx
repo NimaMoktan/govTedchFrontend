@@ -7,7 +7,17 @@ import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+import { Card,
+  CardContent} from '@/components/ui/card';
 
 const UserManagement = () => {
   interface Role {
@@ -24,61 +34,51 @@ const UserManagement = () => {
   }
 
   const [roles, setRoles] = useState<{ value: string; text: string }[]>([]);
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [usersList, setUsersList] = useState<any[]>([]); // Adjusted type to any for flexibility
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token] = useState<string | null>(localStorage.getItem("token"));
   const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([])
-  const router = useRouter();
   const handleCreateUser = () => {
-    setSelectedUser(null); // Ensure no data is pre-filled for creating new user
+    setSelectedUser(null);
     setShowCreateModal(true);
   };
-  
+
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
     setShowEditModal(true);
   };
-  
+
   const closeModal = () => {
     setShowCreateModal(false);
     setShowEditModal(false);
   };
-  
-  useEffect(() => {
 
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
-        }
-  
-        const result = await response.json();  
-        // Check if 'data' is an array
-        if (Array.isArray(result.data)) {
-          console.log(result.data)
-          setUsersList(result.data);  // Set the data to the state if it's an array
-        } else {
-          console.error('Fetched data is not an array:', result);
-          setUsersList([]); // Optionally set an empty array if it's not an array
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
       }
-    };
-  
-    fetchUsers();
-  }, [token]);
-  
+
+      const result = await response.json();
+      if (Array.isArray(result.data)) {
+        setUsersList(result.data);
+      } else {
+        setUsersList([]);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -89,17 +89,15 @@ const UserManagement = () => {
             'Authorization': `Bearer ${token}`,
           },
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch roles');
         }
         const result = await response.json();
         const roleOptions = result?.data?.map((role: { id: number; role_name: string }) => ({
-          value: String(role.id),  // Use string values for consistency
+          value: String(role.id),
           text: role.role_name,
         }));
-        console.log("This is the role result: ", result);
-        // Map the roles data to the format expected by the Select component
         if (Array.isArray(result.data)) {
           const roleOptions = result.data.map((role: { id: number; role_name: string }) => ({
             value: String(role.id),
@@ -108,17 +106,17 @@ const UserManagement = () => {
           setRoleDropdown([{ value: '', text: 'Select Role' }, ...roleOptions]);
         } else {
           console.error('Roles data is not an array:', result.data);
-        }                
-        // Add a default option at the beginning
-        setRoles([{ value: '', text: 'Select Role' }, ...roleOptions]); 
+        }
+        setRoles([{ value: '', text: 'Select Role' }, ...roleOptions]);
       } catch (error) {
         console.error('Error fetching roles:', error);
       }
     };
-  
+
+    fetchUsers();
     fetchRoles();
-  }, [token]);
-  
+  }, [token, selectedUser]);
+
   const handleSubmit = async (
     values: {
       username?: string;
@@ -132,14 +130,14 @@ const UserManagement = () => {
     resetForm: (nextState?: Partial<FormikState<any>> | undefined) => void
   ) => {
     let userData;
-  
+
     if (selectedUser) {
       userData = {
         cidNumber: values.cid,
         fullName: values.full_name,
         userName: values.username,
         email: values.email,
-        mobileNumber: values.mobile_number || null,
+        mobileNumber: values.mobile_number,
         active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
@@ -151,14 +149,14 @@ const UserManagement = () => {
         fullName: values.full_name,
         userName: values.username,
         email: values.email,
-        mobileNumber: values.mobile_number || null,
+        mobileNumber: values.mobile_number,
         active: "Y",
         userRoles: values.role.map((role) => ({
           id: Number(role),
         })),
       };
     }
-  
+
     const storedUser = localStorage.getItem("userDetails");
     const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     try {
@@ -177,10 +175,11 @@ const UserManagement = () => {
           body: JSON.stringify(userData),
         }
       );
-  
+
       if (!response.ok) {
         const errorResponse = await response.text();
-        throw new Error(`Failed to update user: ${errorResponse}`);
+
+        throw new Error(`${errorResponse}`);
       }
 
       setShowCreateModal(false);  // Ensure modal is hidden after success
@@ -194,15 +193,13 @@ const UserManagement = () => {
       });
       resetForm();
     } catch (error) {
-      console.error('Error:', error);
-      Swal.fire('Error!', `There was an issue ${selectedUser ? 'updating' : 'creating'} the user.`, 'error');
+      console.error("ERROR", error);
     }
   };
-  
+
 
   const handleDelete = (user: any) => {
-    
-    // const selectedUser = usersList[index];
+
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -213,18 +210,18 @@ const UserManagement = () => {
       if (result.isConfirmed) {
         const updatedData = usersList.filter(item => item.id !== user.id);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/${user.id}/delete`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/${user.id}/delete`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
             },
           });
           setUsersList(updatedData)
-  
+
           if (!response.ok) {
             throw new Error('Failed to delete the user');
           }
-  
+
           Swal.fire(
             'Deleted!',
             'Your file has been deleted.',
@@ -239,93 +236,80 @@ const UserManagement = () => {
         }
       }
     });
-  };  
+  };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="flex max-w-full justify-between items-center mb-5 ">
-        
-      </div>
-      {showCreateModal || showEditModal ? (
-        <div
-          aria-hidden="false"
-          className={`${
-            showCreateModal || showEditModal
-              ? 'block'
-              : 'hidden'
-          } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-9999 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-in-out opacity-100`}
+    <>
+      <Dialog open={showCreateModal || showEditModal} onOpenChange={closeModal}>
+        <Formik
+          initialValues={{
+            username: selectedUser?.userName || '',
+            cid: selectedUser?.cidNumber || '',
+            full_name: selectedUser?.fullName || '',
+            email: selectedUser?.email || '',
+            mobile_number: selectedUser?.mobileNumber || '',
+            role: selectedUser?.userRole?.map((role: any) => role.roles.id.toString()) || [],  // Prepopulate roles
+          }}
+          validationSchema={Yup.object({
+            username: Yup.string().required('Username is required').min(3, 'Must be at least 3 characters'),
+            cid: Yup.string().required('CID is required').min(11, 'Must be at least 11 characters'),
+            full_name: Yup.string().required('Full name is required').min(3, 'Must be at least 3 characters'),
+            email: Yup.string().required('Email address is required').email('Invalid email address'),
+            role: Yup.array().min(1, 'Role is required'),
+            mobile_number: Yup.number().required('Mobile Number is required').min(8, 'Enter atleast 8 characters.')
+          })}
+          onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}  // Pass the handleSubmit here
         >
-          <div className="relative p-4 w-full max-w-5xl max-h-full transition-transform duration-300 ease-in-out transform scale-95">
-          <Formik
-            initialValues={{
-              username: selectedUser?.userName || '',
-              cid: selectedUser?.cidNumber || '',
-              full_name: selectedUser?.fullName || '',
-              email: selectedUser?.email || '',
-              mobile_number: selectedUser?.mobileNumber || '',
-              role: selectedUser?.userRole?.map((role: any) => role.roles.id.toString()) || [],  // Prepopulate roles
-            }}
-            validationSchema={Yup.object({
-              username: Yup.string().required('Username is required').min(3, 'Must be at least 3 characters'),
-              cid: Yup.string().required('CID is required').min(11, 'Must be at least 11 characters'),
-              full_name: Yup.string().required('Full name is required').min(3, 'Must be at least 3 characters'),
-              email: Yup.string().required('Email address is required').email('Invalid email address'),
-              role: Yup.array().min(1, 'Role is required'), // Adjust validation to handle array type
-              // mobile_number: Yup.array().required('Mobile Number is required').min(8,'Enter atleast 8 characters.') // Adjust validation to handle array type
-            })}
-            onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}  // Pass the handleSubmit here
-          >
-            <Form>
-              {/* Form structure here */}
-              <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {selectedUser ? 'Edit User' : 'Create New User'}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                      />
-                    </svg>
-                  </button>
+          <Form>
+            <DialogContent className='z-[10000] w-full max-w-5xl'>
+              <DialogHeader>
+                <DialogTitle>{selectedUser ? "Edit User" : "Create User"}</DialogTitle>
+                <DialogDescription>
+                  Fill all the required field to create new user
+                </DialogDescription>
+              </DialogHeader>
+              <div className="p-4 md:p-5 space-y-4 -mt-2">
+                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                  <div className="w-full xl:w-1/2">
+                    <Input label="CID" type="text" autoComplete="off" placeholder="Enter your CID" name="cid" />
+                  </div>
+                  <div className="w-full xl:w-1/2">
+                    <Input label="Full Name" autoComplete="off" type="text" placeholder="Enter your full name" name="full_name" />
+                  </div>
                 </div>
-                <div className="p-4 md:p-5 space-y-4 -mt-2">
-                  <Input label="CID" type="text" placeholder="Enter your CID" name="cid" />
-                  <Input label="Full Name" type="text" placeholder="Enter your full name" name="full_name" />
-                  <Input label="Username" type="text" placeholder="Enter username" name="username" />
-                  <Input label="Email" type="email" placeholder="Enter email address" name="email" />
-                  <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobileNumber" />
-                  <MultiSelect label="Role" name="role" options={roleDropdown} />
+
+                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                  <div className="w-full xl:w-1/2">
+                    <Input label="Username" type="text" placeholder="Enter username" name="username" />
+                  </div>
+                  <div className="w-full xl:w-1/2">
+                    <Input label="Email" type="email" placeholder="Enter email address" name="email" />
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                  <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-full text-sm px-5 py-2.5">
-                    {selectedUser ? 'Update' : 'Save'}
-                  </button>
-                  <button type="button" onClick={closeModal} className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 bg-white rounded-full border border-gray-200 hover:bg-gray-100">
-                    Close
-                  </button>
+
+                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                  <div className="w-full xl:w-1/2">
+                    <Input label="Phone Number" type="text" placeholder="Enter phone number" name="mobile_number" />
+                  </div>
+                  <div className="w-full xl:w-1/2">
+                    <MultiSelect label="Role" name="role" options={roleDropdown} />
+                  </div>
                 </div>
               </div>
-            </Form>
-          </Formik>
-
-          </div>
-        </div>
-      ) : null}
-
-      <div className="max-w-full overflow-x-auto">
-      <DataTable columns={columns(handleEditUser, handleDelete)} data={usersList} handleAdd={handleCreateUser}/>
-      </div>
-    </div>
+              <DialogFooter>
+                <Button type="submit" className='rounded-full mx-2'>{selectedUser ? 'Update Update' : 'Create User'}</Button>
+                <Button type="button" className='rounded-full mx-2' variant={`destructive`} onClick={closeModal}>Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Form>
+        </Formik>
+      </Dialog>
+      <Card className="w-full">
+        <CardContent className="max-w-full overflow-x-auto">
+          <DataTable columns={columns(handleEditUser, handleDelete)} data={usersList} handleAdd={handleCreateUser} />
+        </CardContent>
+      </Card >
+    </>
   );
 };
 

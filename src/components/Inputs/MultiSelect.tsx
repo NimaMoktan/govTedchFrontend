@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useField, FieldProps } from "formik";
-// import { BiDownArrow, BiArrowFromTop } from "react-icons/bi";
-import { IoIosArrowDown } from "react-icons/io";
+import { useField } from "formik";
+import { Input } from "@/components/ui/input";
 
 interface Option {
   value: string;
@@ -41,12 +40,13 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
     const newSelected = selected.includes(value)
       ? selected.filter((v) => v !== value)
       : [...selected, value];
-    setSelected(newSelected);
+    setSelected(newSelected.filter(Boolean));
     helpers.setValue(newSelected);
   };
 
   const removeOption = (value: string) => {
     const newSelected = selected.filter((v) => v !== value);
+    
     setSelected(newSelected);
     helpers.setValue(newSelected);
   };
@@ -56,21 +56,20 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
       {label && (
         <label
           htmlFor={name}
-          className="mb-3 block text-sm font-medium text-black dark:text-white"
+          className="mb-3 block text-sm font-medium"
         >
           {label}
         </label>
       )}
       <div ref={triggerRef} onClick={toggleDropdown}>
-        <div className="mb-2 flex rounded border border-stroke py-2 pl-3 pr-3 outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input">
-          <div className="flex flex-auto flex-wrap gap-3">
+        <div className="mb-2 flex outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input">
+          <div className="flex flex-auto flex-wrap rounded border border-stroke">
             {selected.length > 0 ? (
               selected.map((value) => {
                 const option = options.find((opt) => opt.value === value);
-                return (
-                  <div
+                return (<div
                     key={value}
-                    className="flex items-center justify-center rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm font-medium dark:border-strokedark dark:bg-white/30"
+                    className="flex items-center justify-center bg-gray px-2.5 py-1.5 text-sm font-medium dark:border-strokedark dark:bg-white/30 m-1"
                   >
                     <div className="max-w-full flex-initial">{option?.text}</div>
                     <div
@@ -82,27 +81,18 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
                     >
                       ✕
                     </div>
-                  </div>
-                );
+                  </div>)
               })
             ) : (
               <div className="flex-1">
-                <input
+                <Input
                   placeholder="Select an option"
-                  className="h-full w-full appearance-none bg-transparent p-1 px-2 outline-none"
-                  
+                  size={40}
                 />
               </div>
             )}
           </div>
-          <div className="flex w-8 items-center py-1 pl-1 pr-1">
-            <button
-              type="button"
-              className="h-6 w-6 cursor-pointer outline-none focus:outline-none"
-            >
-              <IoIosArrowDown />
-            </button>
-          </div>
+          
         </div>
       </div>
       {show && (
@@ -111,6 +101,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
           className="absolute left-0 top-full z-40 w-full max-h-40 overflow-y-auto rounded bg-white shadow dark:bg-form-input"
         >
           {options.map((option) => (
+            
             <div
               key={option.value}
               className={`cursor-pointer px-4 py-2 hover:bg-primary/5 ${

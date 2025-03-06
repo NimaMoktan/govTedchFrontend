@@ -1,16 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BsTrash, BsPencil } from "react-icons/bs";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-
-} from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
 export type CalibrationType = {

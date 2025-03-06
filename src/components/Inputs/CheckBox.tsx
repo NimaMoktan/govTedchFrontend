@@ -1,4 +1,5 @@
 import { useState } from "react";
+// import { Checkbox } from "@/components/ui/checkbox";
 
 const CheckBox = () => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
