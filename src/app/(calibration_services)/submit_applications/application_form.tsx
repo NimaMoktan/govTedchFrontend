@@ -43,6 +43,7 @@ const ApplicationSubmitForm = () => {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [equipmentList, setEquipmentList] = useState([{}]);
+  const [selectedEquipment, setSelectedEquipment] = useState<{ [key: number]: any }>({});
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string; label: string }[]>([]);
   const [equipmentOptions, setEquipmentOptions] = useState<{ value: string; label: string }[]>([]);
   const [userDetails, setUserDetails] = useState({
@@ -95,6 +96,7 @@ const ApplicationSubmitForm = () => {
           text: item.description, // Assuming you want 'description' as the dropdown label
         }))
       );
+    console.log("Fetched Equipment Data:", data.data);
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
@@ -165,11 +167,17 @@ const ApplicationSubmitForm = () => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
   };
 
-  const handleEquipmentChange = async (index: number, selectedEquipmentId: any) => {
-    // console.log(selectedEquipmentId.target?.value)
+  const handleEquipmentChange = async (index: number, selectedEquipmentId: any, setFieldValue: Function) => {
+    const equipmentId = selectedEquipmentId.target?.value;
+  
+    setSelectedEquipment((prev) => ({
+      ...prev,
+      [index]: equipmentId,
+    }));
+  
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId.target.value}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${equipmentId}`,
         {
           method: "GET",
           headers: {
@@ -178,21 +186,21 @@ const ApplicationSubmitForm = () => {
           },
         }
       );
+  
       const data = await response.json();
-      // console.log("Fetched Data: ", data);
-      if (data && data.status === 'OK') {
+  
+      if (data && data.status === "OK") {
         const equipmentData = data.data;
-        const manufacturer = equipmentData ? equipmentData.manufacturer : '';
-        const range = equipmentData ? equipmentData.range : '';
-        const rate = equipmentData ? equipmentData.charges || 0 : 0; // Ensure rate is fetched correctly
-        // Set fields for this equipment
-        // setFieldValue(`manufacturer[${index}]`, manufacturer);
-        // setFieldValue(`model[${index}]`, range);
-        // setFieldValue(`amount[${index}]`, rate);
-        // setFieldValue(`equipment[${index}]`, selectedEquipmentId.target.value);
-         // Set the rate (amount) for the equipment
+        const manufacturer = equipmentData ? equipmentData.manufacturer : "";
+        const range = equipmentData ? equipmentData.range : "";
+        const rate = equipmentData ? equipmentData.charges || 0 : 0;
+  
+        // Update Formik values dynamically
+        setFieldValue(`manufacturer[${index}]`, manufacturer);
+        setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
+        setFieldValue(`amount[${index}]`, rate);
       } else {
-        console.error('API Error:', data.message);
+        console.error("API Error:", data.message);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -353,90 +361,102 @@ const ApplicationSubmitForm = () => {
               </div>
             </div>
 
-
             {/* This is the section where I want to dulicated when the user clicks on the add more button broder: */}
             {equipmentList.map((_, index) => (
-              <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 mt-5 text-black outline-none focus:border-primary dark:border-form-strokedark">
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <Select
-                    label={`Equipment/Instrument`}
-                      name={`equipment[${index}]`}
-                      options={equipmentOptions}
-                      onChange={(selectedEquipmentId : any) => handleEquipmentChange(index, selectedEquipmentId)}
-                    />
-                  </div>
+            <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 mt-5 text-black outline-none focus:border-primary dark:border-form-strokedark">
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <Select
+                    label="Equipment/Instrument"
+                    name={`equipment[${index}]`}
+                    options={equipmentOptions}
+                    
+                  />
+                </div>
 
-                  <div className="w-full xl:w-1/2">
-                    <Input
+                <div className="w-full xl:w-1/2">
+                  <Input
                     label={`Manufacturer/Type/Brand`}
-                      name={`manufacturer[${index}]`}
-                      type="text"
-                      placeholder="Enter Manufacturer/Type/Brand"/>
-                  </div>
-                </div>
-
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <Input
-                    label={`Range`}
-                      name={`model[${index}]`}
-                      type="text"
-                      placeholder="Enter The Range" readOnly={true}                    />
-                  </div>
-
-                  <div className="w-full xl:w-1/2">
-                    <Input
-                    label={`Model/Seriel Number`}
-                      name={`serialNumberOrModel[${index}]`}
-                      type="text"
-                      placeholder="Enter The Model/Seriel Number"/>
-                  </div>
-                </div>
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <Input
-                      label={`Quantity Of Equipment`}
-                      name={`quantity[${index}]`}
-                      type="number"
-                      placeholder="Enter The Quantity Of Equipment"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        handleQuantityChange(index, Number(e.target.value), setFieldValue, values)
-                      }
-                    />
-                  </div>
-                  <div className="w-full xl:w-1/2">
-                    <Input name={`amount[${index}]`}
-                      type="number"
-                      placeholder="Enter The Rate/Amount"
-                      label={"Rate/Amount"}
-                      readOnly={true}/>
-                  </div>
-                </div>
-                <div className="mb-4.5">
-                  <div className="w-full xl:w-1/2">
-                    <Input name={`total_quantity[${index}]`}
-                      type="number"
-                      placeholder="Enter The Total Amount"
-                      label={"Total Amount"}
-                      value={values.total_quantity && values.total_quantity[index] !== undefined ? values.total_quantity[index] : ''}  // Safe access
-                      readOnly={true}/>
-                  </div>
-                </div>
-                <div className="flex w-full items-center justify-center">
-
-                  <button type="button" className="right-10 gap-2 bg-red-500 text-white px-4 py-2 btn-sm rounded-lg hover:bg-gray-600" onClick={() => removeEquipment(index)}>
-                    Remove
-                  </button>
+                    name={`manufacturer[${index}]`}
+                    type="text"
+                    placeholder="Enter Manufacturer/Type/Brand"
+                    value={values.manufacturer[index]} // Bind to Formik's value for manufacturer
+                  />
                 </div>
               </div>
-            ))}
+
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <Input
+                    label={`Range`}
+                    name={`model[${index}]`}
+                    type="text"
+                    placeholder="Enter The Range"
+                    value={values.model[index]} // Bind to Formik's value for range/model
+                    readOnly={true}
+                  />
+                </div>
+
+                <div className="w-full xl:w-1/2">
+                  <Input
+                    label={`Model/Serial Number`}
+                    name={`serialNumberOrModel[${index}]`}
+                    type="text"
+                    placeholder="Enter The Model/Serial Number"
+                    value={values.serialNumberOrModel[index]} // Bind to Formik's value for model/serial number
+                  />
+                </div>
+              </div>
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <Input
+                    label={`Quantity Of Equipment`}
+                    name={`quantity[${index}]`}
+                    type="number"
+                    placeholder="Enter The Quantity Of Equipment"
+                    value={values.quantity[index]} // Bind to Formik's value for quantity
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleQuantityChange(index, Number(e.target.value), setFieldValue, values)
+                    }
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <Input
+                    name={`amount[${index}]`}
+                    type="number"
+                    placeholder="Enter The Rate/Amount"
+                    label={"Rate/Amount"}
+                    value={values.amount[index]} // Bind to Formik's value for rate/amount
+                    readOnly={true}
+                  />
+                </div>
+              </div>
+              <div className="mb-4.5">
+                <div className="w-full xl:w-1/2">
+                  <Input
+                    name={`total_quantity[${index}]`}
+                    type="number"
+                    placeholder="Enter The Total Amount"
+                    label={"Total Amount"}
+                    value={values.total_quantity[index]} // Bind to Formik's value for total amount
+                    readOnly={true}
+                  />
+                </div>
+              </div>
+              <div className="flex w-full items-center justify-center">
+                <button type="button" className="right-10 gap-2 bg-red-500 text-white px-4 py-2 btn-sm rounded-lg hover:bg-gray-600" onClick={() => removeEquipment(index)}>
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+
 
             <div className="flex w-full items-center justify-center">
 
               <button
                 type="button"
-                className="mt-2 ml-5 bg-green-500 text-white px-4 py-2 rounded rounded-lg hover:bg-green-600"
+                className="mt-2 ml-5 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                 onClick={addEquipment}
               >
                 Add More
@@ -457,11 +477,11 @@ const ApplicationSubmitForm = () => {
 
               <button
                 type="submit"
-                className="w-ful mt-2 ml-5 bg-blue-500 text-white px-4 py-2 rounded rounded-lg hover:bg-blue-600"
+                className="w-ful mt-2 ml-5 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 disabled={!isValid || isSubmitting}
               style={{ cursor: "pointer" }}
               >
-                 {isSubmitting ? "Submitting..." : "Submit Application"}
+                {isSubmitting ? "Submitting..." : "Submit Application"}
               </button>
               </div>
 
@@ -472,4 +492,4 @@ const ApplicationSubmitForm = () => {
   );
 };
 
-export default ApplicationSubmitForm;	
+export default ApplicationSubmitForm;

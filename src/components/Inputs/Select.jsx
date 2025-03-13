@@ -9,17 +9,17 @@ import {
     SelectTrigger,
     SelectValue,
     SelectGroup
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
-const SelectDropDown = ({ label, ...props }) => {
+const SelectDropDown = ({ label, options, ...props }) => {
     if (!props.name) {
-        throw new Error("The 'name' prop is required for the SelectMultiple component.");
+        throw new Error("The 'name' prop is required for the SelectDropDown component.");
     }
 
-    const [field, meta] = useField(props);
+    const [field, meta, helpers] = useField(props);
 
     return (
-        <>
+        <div>
             <Label
                 className="mb-3 block text-sm font-medium"
                 htmlFor={props.id || props.name}
@@ -28,15 +28,17 @@ const SelectDropDown = ({ label, ...props }) => {
             </Label>
             <Select
                 id={props.id || props.name}
-                {...field}
-                {...props}
+                value={field.value || undefined} // default to undefined
+                onValueChange={(value) => helpers.setValue(value)}
+                aria-invalid={meta.touched && meta.error ? "true" : "false"}
+                aria-labelledby={props.id || props.name}
             >
                 <SelectTrigger>
-                    <SelectValue placeholder="" />
+                    <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
-                        {props.options?.map((option, index) => (
+                        {options?.map((option, index) => (
                             <SelectItem key={index} value={option.value}>
                                 {option.text}
                             </SelectItem>
@@ -45,9 +47,9 @@ const SelectDropDown = ({ label, ...props }) => {
                 </SelectContent>
             </Select>
             {meta.touched && meta.error ? (
-                <div className="error text-red-500">{meta.error}</div>
+                <div className="mt-1 text-sm text-red-500">{meta.error}</div>
             ) : null}
-        </>
+        </div>
     );
 };
 
