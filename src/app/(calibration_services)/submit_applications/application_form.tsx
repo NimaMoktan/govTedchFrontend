@@ -93,7 +93,7 @@ const ApplicationSubmitForm = () => {
       setEquipmentOptions(
         data.data.map((item: any) => ({
           value: item.id,
-          label: item.description, // Use the description as the label
+          text: item.description, // Assuming you want 'description' as the dropdown label
         }))
       );
     console.log("Fetched Equipment Data:", data.data);
@@ -168,42 +168,43 @@ const ApplicationSubmitForm = () => {
   };
 
   const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
-    setSelectedEquipment((prev) => ({
+      setSelectedEquipment((prev) => ({
         ...prev,
-        [index]: selectedEquipmentId,
-    }));
+        [index]: selectedEquipmentId, // Directly use the value from onValueChange
+      }));
 
-    try {
+      try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            }
+          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
 
         const data = await response.json();
 
         if (data && data.status === "OK") {
-            const equipmentData = data.data;
-            const manufacturer = equipmentData?.manufacturer || "";
-            const range = equipmentData?.range || "";
-            const rate = equipmentData?.charges || 0;
+          const equipmentData = data.data;
+          const manufacturer = equipmentData?.manufacturer || "";
+          const range = equipmentData?.range || "";
+          const rate = equipmentData?.charges || 0;
 
-            // Update Formik values dynamically
-            setFieldValue(`manufacturer[${index}]`, manufacturer);
-            setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
-            setFieldValue(`amount[${index}]`, rate);
+          // Update Formik values dynamically
+          setFieldValue(`manufacturer[${index}]`, manufacturer);
+          setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
+          setFieldValue(`amount[${index}]`, rate);
         } else {
-            console.error("API Error:", data.message);
+          console.error("API Error:", data.message);
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Error fetching data:", error);
-    }
-};
+      }
+  };
+
 
   const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
     // Ensure that the amount is correctly fetched as a number
@@ -355,7 +356,7 @@ const ApplicationSubmitForm = () => {
                 label="Client List"
                 name="organizationId"
                 options={organizationOptions}
-                onValueChange={() => console.log("Reaching Here!")}
+                onValueChange={console.log("Reaching Here!")}
               />
               </div>
             </div>
@@ -376,6 +377,7 @@ const ApplicationSubmitForm = () => {
                     setFieldValue(`equipment[${index}]`, value); // Update Formik state
                   }}
                 />
+
                 </div>
 
                 <div className="w-full xl:w-1/2">

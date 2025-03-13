@@ -9,7 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
     SelectGroup,
-} from "@/components/ui/select";
+    } from "@/components/ui/select";
 
 const SelectDropDown = ({ label, options, onValueChange, ...props }) => {
     if (!props.name) {
@@ -20,40 +20,40 @@ const SelectDropDown = ({ label, options, onValueChange, ...props }) => {
 
     return (
         <div>
-            <Label className="mb-3 block text-sm font-medium" htmlFor={props.id || props.name}>
-                {label}
-            </Label>
-            <Select
-                id={props.id || props.name}
-                value={field.value || ""} // Ensure Formik's value is passed to the Select field
-                onValueChange={(value) => {
-                    console.log("SelectDropDown onValueChange triggered with:", value);
-                    helpers.setValue(value); // Update Formik state
-                    if (onValueChange) {
-                        onValueChange(value); // Handle value change callback if provided
-                    }
-                }}
-                aria-invalid={meta.touched && meta.error ? "true" : "false"}
-                aria-labelledby={props.id || props.name}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="Select an option">
-                        {options.find((option) => option.value === field.value)?.label || "Select an option"}
-                    </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        {options.map((option, index) => (
-                            <SelectItem key={index} value={option.value}>
-                                {option.label}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
-            {meta.touched && meta.error ? (
-                <div className="mt-1 text-sm text-red-500">{meta.error}</div>
-            ) : null}
+        <Label className="mb-3 block text-sm font-medium" htmlFor={props.id || props.name}>
+            {label}
+        </Label>
+        <Select
+            id={props.id || props.name}
+            value={field.value || ""}
+            onValueChange={(value) => {
+            console.log("SelectDropDown onValueChange triggered with:", value);
+            helpers.setValue(value);
+            if (onValueChange) {
+                onValueChange(value); // Handle value change callback if provided
+            }
+            }}
+            aria-invalid={meta.touched && meta.error ? "true" : "false"}
+            aria-labelledby={props.id || props.name}
+        >
+            <SelectTrigger>
+            <SelectValue placeholder="Select an option">
+                {options.find((option) => option.value === field.value)?.text || "Select an option"}
+            </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+            <SelectGroup>
+                {options.map((option, index) => (
+                <SelectItem key={index} value={option.value}>
+                    {option.text}
+                </SelectItem>
+                ))}
+            </SelectGroup>
+            </SelectContent>
+        </Select>
+        {meta.touched && meta.error ? (
+            <div className="mt-1 text-sm text-red-500">{meta.error}</div>
+        ) : null}
         </div>
     );
 };
