@@ -8,10 +8,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    SelectGroup
+    SelectGroup,
 } from "@/components/ui/select";
 
-const SelectDropDown = ({ label, options, ...props }) => {
+const SelectDropDown = ({ label, options, onValueChange, ...props }) => {
     if (!props.name) {
         throw new Error("The 'name' prop is required for the SelectDropDown component.");
     }
@@ -20,27 +20,32 @@ const SelectDropDown = ({ label, options, ...props }) => {
 
     return (
         <div>
-            <Label
-                className="mb-3 block text-sm font-medium"
-                htmlFor={props.id || props.name}
-            >
+            <Label className="mb-3 block text-sm font-medium" htmlFor={props.id || props.name}>
                 {label}
             </Label>
             <Select
                 id={props.id || props.name}
-                value={field.value || undefined} // default to undefined
-                onValueChange={(value) => helpers.setValue(value)}
+                value={field.value || ""} // Ensure Formik's value is passed to the Select field
+                onValueChange={(value) => {
+                    console.log("SelectDropDown onValueChange triggered with:", value);
+                    helpers.setValue(value); // Update Formik state
+                    if (onValueChange) {
+                        onValueChange(value); // Handle value change callback if provided
+                    }
+                }}
                 aria-invalid={meta.touched && meta.error ? "true" : "false"}
                 aria-labelledby={props.id || props.name}
             >
                 <SelectTrigger>
-                    <SelectValue placeholder="Select an option" />
+                    <SelectValue placeholder="Select an option">
+                        {options.find((option) => option.value === field.value)?.label || "Select an option"}
+                    </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
-                        {options?.map((option, index) => (
+                        {options.map((option, index) => (
                             <SelectItem key={index} value={option.value}>
-                                {option.text}
+                                {option.label}
                             </SelectItem>
                         ))}
                     </SelectGroup>

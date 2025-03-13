@@ -93,7 +93,7 @@ const ApplicationSubmitForm = () => {
       setEquipmentOptions(
         data.data.map((item: any) => ({
           value: item.id,
-          text: item.description, // Assuming you want 'description' as the dropdown label
+          label: item.description, // Use the description as the label
         }))
       );
     console.log("Fetched Equipment Data:", data.data);
@@ -167,45 +167,43 @@ const ApplicationSubmitForm = () => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
   };
 
-  const handleEquipmentChange = async (index: number, selectedEquipmentId: any, setFieldValue: Function) => {
-    const equipmentId = selectedEquipmentId.target?.value;
-  
+  const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
     setSelectedEquipment((prev) => ({
-      ...prev,
-      [index]: equipmentId,
+        ...prev,
+        [index]: selectedEquipmentId,
     }));
-  
+
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${equipmentId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        if (data && data.status === "OK") {
+            const equipmentData = data.data;
+            const manufacturer = equipmentData?.manufacturer || "";
+            const range = equipmentData?.range || "";
+            const rate = equipmentData?.charges || 0;
+
+            // Update Formik values dynamically
+            setFieldValue(`manufacturer[${index}]`, manufacturer);
+            setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
+            setFieldValue(`amount[${index}]`, rate);
+        } else {
+            console.error("API Error:", data.message);
         }
-      );
-  
-      const data = await response.json();
-  
-      if (data && data.status === "OK") {
-        const equipmentData = data.data;
-        const manufacturer = equipmentData ? equipmentData.manufacturer : "";
-        const range = equipmentData ? equipmentData.range : "";
-        const rate = equipmentData ? equipmentData.charges || 0 : 0;
-  
-        // Update Formik values dynamically
-        setFieldValue(`manufacturer[${index}]`, manufacturer);
-        setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
-        setFieldValue(`amount[${index}]`, rate);
-      } else {
-        console.error("API Error:", data.message);
-      }
     } catch (error) {
-      console.error("Error fetching data:", error);
+        console.error("Error fetching data:", error);
     }
-  };
+};
 
   const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
     // Ensure that the amount is correctly fetched as a number
@@ -353,11 +351,12 @@ const ApplicationSubmitForm = () => {
                   placeholder="Enter your email address" />
               </div>
               <div className="w-full xl:w-1/2">
-                <Select
-                  label={`Client List`}
-                  name="organizationId"
-                  options={organizationOptions}
-                />
+              <Select
+                label="Client List"
+                name="organizationId"
+                options={organizationOptions}
+                onValueChange={() => console.log("Reaching Here!")}
+              />
               </div>
             </div>
 
@@ -366,12 +365,17 @@ const ApplicationSubmitForm = () => {
             <div key={index} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 mt-5 text-black outline-none focus:border-primary dark:border-form-strokedark">
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <Select
-                    label="Equipment/Instrument"
-                    name={`equipment[${index}]`}
-                    options={equipmentOptions}
-                    
-                  />
+                <Select
+                  label="Equipment/Instrument"
+                  name={`equipment[${index}]`}
+                  options={equipmentOptions}
+                  value={values.equipment[index]}
+                  onValueChange={(value: string) => {
+                    console.log("Selected Equipment:", value);
+                    handleEquipmentChange(index, value, setFieldValue);
+                    setFieldValue(`equipment[${index}]`, value); // Update Formik state
+                  }}
+                />
                 </div>
 
                 <div className="w-full xl:w-1/2">
