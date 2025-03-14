@@ -3,10 +3,10 @@ import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
-import React, { useEffect, useState } from "react";
-import Loader from "@/components/common/Loader";
+import React from "react";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { LoadingProvider } from "@/context/LoadingContext";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -18,15 +18,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // const pathname = usePathname();
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={cn(
@@ -39,7 +30,9 @@ export default function RootLayout({
               <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
               <main className="dark:bg-boxdark-2 dark:text-bodydark">
                 <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10"> */}
-                {loading ? <Loader /> : children}
+                <LoadingProvider>
+                {children}
+                </LoadingProvider>
                 {/* </div>
               </main>
             </div>
