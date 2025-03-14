@@ -2,7 +2,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BsTrash, BsPencil } from "react-icons/bs";
+import { BsTrash, BsPencil, BsArrowRepeat  } from "react-icons/bs";
 
 import {
     DropdownMenu,
@@ -20,12 +20,16 @@ export type OutLet = {
     cidNumber: string;
     fullName: string;
     mobileNumber: string;
+    active: string;
 };
 
 export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id: OutLet) => void): ColumnDef<OutLet>[] => [
     {
         accessorKey: "id",
-        header: "Id"
+        header: "Id",
+        cell: ({ row }) => {        
+            return (<p>{row.index+1}</p>)
+        },
     },
     {
         accessorKey: "userName",
@@ -84,6 +88,22 @@ export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id:
         }
     },
     {
+        accessorKey: "active",
+        header: () => "Status",
+        cell: ({ row }) => {
+        const status = row.original.active;
+        console.log(status)
+        return (<p
+            className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
+            ? "bg-success text-success"
+            : "bg-danger text-danger"
+            }`}
+        >
+            {status === "Y" ? "Active" : "Inactive"}
+        </p>)
+        },
+    },
+    {
         id: "actions",
         cell: ({ row }) => {
 
@@ -103,8 +123,12 @@ export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id:
                             Delete
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-                            <BsPencil className="fill-current" size={20} />
+                            <BsPencil className="fill-current" color="blue" size={20} />
                             Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(row.original)}>
+                            <BsArrowRepeat className="fill-current" color="red" size={20} />
+                            {row.original.active == "Y" ? "Deactivate" : "Activate"}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

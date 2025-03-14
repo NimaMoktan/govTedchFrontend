@@ -11,8 +11,6 @@ import * as Yup from "yup";
 import { BiQrScan, BiPlayCircle } from "react-icons/bi";
 import Input from "@/components/Inputs/Input";
 import Link from "next/link";
-import { CiUnlock, CiLock } from "react-icons/ci";
-import { IoReloadSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import applestore from "/public/images/logo/appstore.png";
 import googleplay from "/public/images/logo/googleplay.png";
@@ -25,7 +23,6 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const [authenticated, setAuthenticated] = useState(false)
   const [os, setOs] = useState('');
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
   const router = useRouter();
 

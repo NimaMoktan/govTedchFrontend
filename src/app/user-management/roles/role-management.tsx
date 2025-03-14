@@ -25,13 +25,6 @@ import {
 } from '@/components/ui/card';
 import SelectDropDown from "@/components/Inputs/Select";
 
-interface SampleType {
-    id: number;
-    code: string;
-    role_name: string;
-    privileges: string[]; // Add this line
-    active: string;
-}
 interface FormValues {
     id?: number; // Add this line
     code: string;
@@ -40,7 +33,7 @@ interface FormValues {
     active: string; // Assuming this is a string like "Y" or "N"
 }
 const RoleManager: React.FC = () => {
-    const [sampleType, setSampleType] = useState<SampleType[]>([]);
+    const [sampleType, setSampleType] = useState<FormValues[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
@@ -105,12 +98,12 @@ const RoleManager: React.FC = () => {
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    // const handleEdit = (role : FormValues) => {
-    //     setIsEditing(true)
-    //     setSelectedRole(role);
-    //     setShowModal(prev => (prev === "hidden" ? "block" : "hidden"));
-    // }
-
+    const handleEdit = (role: FormValues) => {
+        setSelectedRole(role);
+        // setEditingRole(role);
+        setIsEditing(true);
+        setShowModal("block");
+    };
 
     const handleSubmit = async (values: FormValues, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
@@ -257,13 +250,6 @@ const RoleManager: React.FC = () => {
                 }
             }
         });
-    };
-
-    const handleEdit = (role: FormValues) => {
-        setSelectedRole(role);
-        // setEditingRole(role);
-        setIsEditing(true);
-        setShowModal("block");
     };
 
     useEffect(() => {

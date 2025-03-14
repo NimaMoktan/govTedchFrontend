@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, ReactNode } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { useLoading } from "@/context/LoadingContext";
+import { Spinner } from "@/components/ui/spinner"
 
 export default function DefaultLayout({
   children,
@@ -9,8 +11,23 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isLoading, setIsLoading } = useLoading();
+
+  useEffect(() => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsLoading(false)
+    },
+    1500)
+  }, [])
+
   return (
     <>
+    {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+          <Spinner size="large" />
+        </div>
+      )}
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex">
         {/* <!-- ===== Sidebar Start ===== --> */}

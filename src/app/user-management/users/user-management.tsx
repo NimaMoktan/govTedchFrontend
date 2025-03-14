@@ -38,7 +38,6 @@ const UserManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [token] = useState<string | null>(localStorage.getItem("token"));
   const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([])
   const handleCreateUser = () => {
     setSelectedUser(null);
@@ -60,7 +59,7 @@ const UserManagement = () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
@@ -86,7 +85,7 @@ const UserManagement = () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
           },
         });
 
@@ -115,7 +114,7 @@ const UserManagement = () => {
 
     fetchUsers();
     fetchRoles();
-  }, [token, selectedUser]);
+  }, [selectedUser]);
 
   const handleSubmit = async (
     values: {
@@ -168,7 +167,7 @@ const UserManagement = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${localStorage.getItem("token")}`,
             "userId": parsedUser.id,
             "userName": parsedUser.userName,
           },
@@ -212,7 +211,7 @@ const UserManagement = () => {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/user/${user.id}/delete`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${localStorage.getItem("token")}`,
             },
           });
           setUsersList(updatedData)
