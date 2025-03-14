@@ -5,6 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { toast, ToastContainer } from "react-toastify";
 import { DataTable } from "./table";
 import { columns } from "./columns";
+import { useCallback } from "react";
 
 interface Application {
     id: number;
@@ -21,38 +22,34 @@ const ApplicationList: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
-    const loadItem = async () => {
+    const loadItem = useCallback(async () => {
         setIsLoading(true);
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
+    
         try {
-        const list = await axios.get(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/populateWorkflowDtls`, {
-            headers: {
-            Authorization: `Bearer ${token}`,
-            "userId": parsedUser.id,
-            "userName": parsedUser.userName,
-            },
-        });
-        const { data } = list.data;
-        console.log(data);
-        if(!data){
-          setApplicatoinList([]);
-        }else{
-          setApplicatoinList(data);
-        }
+            const list = await axios.get(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/populateWorkflowDtls`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "userId": parsedUser.id,
+                    "userName": parsedUser.userName,
+                },
+            });
+            const { data } = list.data;
+            console.log(data);
+            setApplicatoinList(data || []);
         } catch (error) {
-        console.error("Error fetching application list", error);
+            console.error("Error fetching application list", error);
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
-    };
-
+    }, [token]); // ✅ Now it's stable and will only change when `token` changes.
+    
     useEffect(() => {
         if (token) {
-        loadItem();
+            loadItem();
         }
-    }, [token]);
+    }, [token, loadItem]); // ✅ Add `loadItem` to dependencies
 
     if (isLoading) {
         return <Loader />;
