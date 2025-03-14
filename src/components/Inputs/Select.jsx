@@ -24,10 +24,11 @@ const SelectDropDown = ({ label, options, onValueChange, ...props }) => {
             {label}
         </Label>
         <Select
+        
             id={props.id || props.name}
-            value={field.value || ""}
+            // name={props.name}
+            {...props}
             onValueChange={(value) => {
-            console.log("SelectDropDown onValueChange triggered with:", value);
             helpers.setValue(value);
             if (onValueChange) {
                 onValueChange(value); // Handle value change callback if provided

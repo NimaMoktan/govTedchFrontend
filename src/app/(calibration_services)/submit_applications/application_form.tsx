@@ -40,7 +40,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const ApplicationSubmitForm = () => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [equipmentList, setEquipmentList] = useState([{}]);
   const [selectedEquipment, setSelectedEquipment] = useState<{ [key: number]: any }>({});
@@ -82,7 +82,6 @@ const ApplicationSubmitForm = () => {
       }
 
       const data = await response.json();
-      console.log("Full API Response:", data); // Debugging log
 
       // Check if response contains the expected data structure
       if (!data || !Array.isArray(data.data)) {
@@ -96,7 +95,6 @@ const ApplicationSubmitForm = () => {
           text: item.description, // Assuming you want 'description' as the dropdown label
         }))
       );
-    console.log("Fetched Equipment Data:", data.data);
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
@@ -105,6 +103,7 @@ const ApplicationSubmitForm = () => {
   useEffect(() => {
     // Fetch the stored user details from localStorage
     const storedUser = localStorage.getItem("userDetails");
+    setToken(localStorage.getItem("token"))
 
     fetchEquipment();
 
@@ -168,10 +167,10 @@ const ApplicationSubmitForm = () => {
   };
 
   const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
-      setSelectedEquipment((prev) => ({
-        ...prev,
-        [index]: selectedEquipmentId, // Directly use the value from onValueChange
-      }));
+      // setSelectedEquipment((prev) => ({
+      //   ...prev,
+      //   [index]: selectedEquipmentId, // Directly use the value from onValueChange
+      // }));
 
       try {
         const response = await fetch(
@@ -195,6 +194,7 @@ const ApplicationSubmitForm = () => {
 
           // Update Formik values dynamically
           setFieldValue(`manufacturer[${index}]`, manufacturer);
+          setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
           setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
           setFieldValue(`amount[${index}]`, rate);
         } else {
@@ -307,6 +307,7 @@ const ApplicationSubmitForm = () => {
       >
         {({ handleSubmit, values, isValid, setFieldValue }) => (
           <Form onSubmit={handleSubmit}>
+            
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <div className="w-full xl:w-1/2">
                 <Input
@@ -356,7 +357,7 @@ const ApplicationSubmitForm = () => {
                 label="Client List"
                 name="organizationId"
                 options={organizationOptions}
-                onValueChange={console.log("Reaching Here!")}
+                onValueChange={() => { }}
               />
               </div>
             </div>
@@ -370,12 +371,8 @@ const ApplicationSubmitForm = () => {
                   label="Equipment/Instrument"
                   name={`equipment[${index}]`}
                   options={equipmentOptions}
-                  value={values.equipment[index]}
-                  onValueChange={(value: string) => {
-                    console.log("Selected Equipment:", value);
-                    handleEquipmentChange(index, value, setFieldValue);
-                    setFieldValue(`equipment[${index}]`, value); // Update Formik state
-                  }}
+                  // value={values.equipment[index]}
+                  onValueChange={(value: string) => handleEquipmentChange(index, value, setFieldValue) }
                 />
 
                 </div>
