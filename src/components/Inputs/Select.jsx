@@ -8,46 +8,53 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    SelectGroup
-} from "@/components/ui/select"
+    SelectGroup,
+    } from "@/components/ui/select";
 
-const SelectDropDown = ({ label, ...props }) => {
+const SelectDropDown = ({ label, options, onValueChange, ...props }) => {
     if (!props.name) {
-        throw new Error("The 'name' prop is required for the SelectMultiple component.");
+        throw new Error("The 'name' prop is required for the SelectDropDown component.");
     }
 
-    const [field, meta] = useField(props);
+    const [field, meta, helpers] = useField(props);
 
     return (
-        <>
-            <Label
-                className="mb-3 block text-sm font-medium"
-                htmlFor={props.id || props.name}
-            >
-                {label}
-            </Label>
-            <Select
-                id={props.id || props.name}
-                {...field}
-                {...props}
-            >
-                <SelectTrigger>
-                    <SelectValue placeholder="" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectGroup>
-                        {props.options?.map((option, index) => (
-                            <SelectItem key={index} value={option.value}>
-                                {option.text}
-                            </SelectItem>
-                        ))}
-                    </SelectGroup>
-                </SelectContent>
-            </Select>
-            {meta.touched && meta.error ? (
-                <div className="error text-red-500">{meta.error}</div>
-            ) : null}
-        </>
+        <div>
+        <Label className="mb-3 block text-sm font-medium" htmlFor={props.id || props.name}>
+            {label}
+        </Label>
+        <Select
+            id={props.id || props.name}
+            value={field.value || ""}
+            onValueChange={(value) => {
+            console.log("SelectDropDown onValueChange triggered with:", value);
+            helpers.setValue(value);
+            if (onValueChange) {
+                onValueChange(value); // Handle value change callback if provided
+            }
+            }}
+            aria-invalid={meta.touched && meta.error ? "true" : "false"}
+            aria-labelledby={props.id || props.name}
+        >
+            <SelectTrigger>
+            <SelectValue placeholder="Select an option">
+                {options.find((option) => option.value === field.value)?.text || "Select an option"}
+            </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+            <SelectGroup>
+                {options.map((option, index) => (
+                <SelectItem key={index} value={option.value}>
+                    {option.text}
+                </SelectItem>
+                ))}
+            </SelectGroup>
+            </SelectContent>
+        </Select>
+        {meta.touched && meta.error ? (
+            <div className="mt-1 text-sm text-red-500">{meta.error}</div>
+        ) : null}
+        </div>
     );
 };
 
