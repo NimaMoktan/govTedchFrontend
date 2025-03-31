@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -94,48 +94,55 @@ const DetailForm: React.FC = () => {
         if(response.status === 200){
             toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
             setTimeout(() => {
-                router.push("/application-details");
+                router.push("/applications_list");
 
             }, 1000);
         }else{
             toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
-            
         }
-
     }
 
-    const fetchApplicationDetails = async () => {
+    const fetchApplicationDetails = useCallback(async () => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/calibration/calibrationForm/fetchByApplicationNo?applicationNumber=${applicationNumber}`,
-            {
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                    "userId": parsedUser.id || "999",
-                    "userName": parsedUser.userName,
+        
+        try {
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/calibration/calibrationForm/fetchByApplicationNo?applicationNumber=${applicationNumber}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        "userId": parsedUser?.id || "999",
+                        "userName": parsedUser?.userName,
+                    }
                 }
-            }
-        ).then((res) => res.data);
-        const { data } = response.body;
-        setApplicationDetails(data);
-        fetchEquipment(data.deviceRegistry[0].testItemId);
-    }
-
+            );
+            
+            const data = response.data.body.data;
+            console.log("This is the details: ", data);
+            setApplicationDetails(data);
+            fetchEquipment(data.deviceRegistry[0].testItemId);
+    
+        } catch (error) {
+            console.error("Error fetching application details:", error);
+        }
+    }, [applicationNumber, token]); // ✅ Dependencies included
+    
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
             const hasCHF = roleList.some((role: { code: string }) => role.code === "CHF");
-            const hasDIT = roleList.some((role: { code: string }) => role.code === "DIT");
+            const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "DIR"]; // adding all the lab head role codes
+            const hasDIT = roleList.some((role: { code: string }) => requiredRoles.includes(role.code));
             setIsChief(hasCHF);
             setIsDit(hasDIT);
-
         }
         fetchApplicationDetails();
-
-    }, [applicationNumber]);
+    
+    }, [applicationNumber, fetchApplicationDetails]); // ✅ Now safe to include fetchApplicationDetails
 
     return (
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
@@ -239,7 +246,7 @@ const DetailForm: React.FC = () => {
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "Verified", text: "Verify" }, { value: "reject", text: "Reject" }]} />
+                        <Select label="Select Status" name="status" options={[{ value: "Verified", text: "Verify" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")}  />
                     </div>
                     <div className="w-full xl:w-1/2">
 
@@ -248,7 +255,7 @@ const DetailForm: React.FC = () => {
                     </div>
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                  Update
+                    Update
                 </button>
                 </Form>
             </Formik>
@@ -258,7 +265,11 @@ const DetailForm: React.FC = () => {
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }]} />
+                        <Select 
+                        label="Select Status" 
+                        name="status" 
+                        options={[{ value: "approve", text: "Approve"}, {value: "reject", text: "Reject"}]} 
+                        onValueChange={() => console.log("Selection changed!")} />
                     </div>
                     <div className="w-full xl:w-1/2">
 
@@ -267,7 +278,7 @@ const DetailForm: React.FC = () => {
                     </div>
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                  Approve
+                    Approve
                 </button>
                 </Form>
             </Formik>

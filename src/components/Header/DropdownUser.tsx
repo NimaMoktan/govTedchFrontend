@@ -47,7 +47,7 @@ const DropdownUser = () => {
         method: 'post'
       });
       localStorage.removeItem("userDetails");  
-      router.push("/");
+      router.push("signin/");
     } catch (error) {
       console.error("Logout failed:", error);
     }

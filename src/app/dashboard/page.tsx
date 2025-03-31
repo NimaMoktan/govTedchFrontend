@@ -6,7 +6,7 @@ type UserDetails = {
   fullName: string;
   email: string;
   imageUrl: string;
-  roles: string[];  // Add roles here
+  roles: string[];  
 };
 
 export default function Home () {
@@ -14,48 +14,48 @@ export default function Home () {
       fullName: "Loading...",
       email: "Loading...",
       imageUrl: "/images/user/default.jpg",
-      roles: [],  // Ensure roles is included in initial state
+      roles: [],  
     });
+
   useEffect(() => {
-      // Fetch stored user details from localStorage
       const storedUser = localStorage.getItem("userDetails");
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        
-        // Extract roles from userRole array
         const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
         console.log("This is the user details: ", userRoles, storedUser);
         setUserDetails({
           fullName: parsedUser.fullName,
           email: parsedUser.email,
           imageUrl: "/images/user/jigme.jpg",
-          roles: userRoles,  // Now this is valid
+          roles: userRoles,  
         });
       }
     }, []);
+
   return (
-    <>
     <DefaultLayout>
-        {/* <ECommerce /> */}
-          {userDetails.roles.includes("ADM") && (
-            <h3>Welcome To Superadmin Dashboard</h3>
-          )}
-          {userDetails.roles.includes("TNT") && (
-            <h3>Welcome To Client Dashboard</h3>
-          )}
-          {userDetails.roles.includes("CHF") && (
-            <h3>Welcome To Chief Dashboard</h3>
-          )}
-          {userDetails.roles.includes("CLO") && (
-            <h3>Welcome To Calibration Officer Dashboard</h3>
-          )}
-          {userDetails.roles.includes("LHD") && (
-            <h3>Welcome To Lab Head/Engineer Dashboard</h3>
-          )}
-          {userDetails.roles.includes("DIT") && (
-            <h3>Welcome To Director Dashboard</h3>
-          )}
+      <h3>
+        Welcome To {userDetails.roles.slice(0, 3)
+          .map((role) => {
+            const roleMap: Record<string, string> = {
+              ADM: "Superadmin",
+              DIR: "Director",
+              TNT: "Client",
+              CHF: "Chief",
+              CLO: "Calibration Officer",
+              MLD: "Mass Lab Head",
+              VLD: "Volume Lab Head",
+              TID: "Temperature Lab Head",
+              FID: "Force Lab Head",
+              LID: "Length Lab Head",
+              PID: "Force Pressure Head",
+            };
+
+            return roleMap[role] || "Unknown";
+          })
+          .join(" & ")} Dashboard
+      </h3>
     </DefaultLayout>
-    </>
+
   );
 }

@@ -114,11 +114,11 @@ const menuGroups = [
         children: [
           { label: "Application List", route: "/applications_list" },
           { label: "Submit Application", route: "/submit_applications" },
-          { label: "Approval", route: "/ui/buttons" },
           { label: "Verify", route: "/ui/buttons" },
           { label: "Submitted List", route: "applications_list" },
-          { label: "Generate Report", route: "/ui/buttons" },
+          { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
+          { label: "Approved Application", route: "/approved-application-list" },
         ],
       },
       {
@@ -147,7 +147,6 @@ const menuGroups = [
           { label: "Buttons", route: "/ui/buttons" },
         ],
       },
-      
     ],
   }
 ];
@@ -227,19 +226,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     
                       if (menuItem.children) {
                         filteredChildren = menuItem.children.filter((child, index) => {
+                          const requiredRoles = ["TNT", "MLD"];
                           if (index === 1) {
                             // "Submit Application" (second child) is only for TNT users
                             return userDetails.roles.includes("TNT")|| userDetails.roles.includes("ADM");
                           }
                           if (index === 4) {
-                            // "Submit Application" (second child) is only for TNT users
-                            return userDetails.roles.includes("TNT");
+                            return userDetails.roles.some(role => requiredRoles.includes(role));
+                          }
+                          if (index === 3) {
+                            return userDetails.roles.some(role => requiredRoles.includes(role));
                           }
                           if (index === 5) {
                             return userDetails.roles.includes("LHD") || userDetails.roles.includes("ADM");
                           }
                           if (index === 6) {
-                            return userDetails.roles.includes("CLO") || userDetails.roles.includes("ADM");
+                            return userDetails.roles.includes("ADM")||userDetails.roles.includes("CLO");
                           }
                           if (index === 0) {
                             return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIT");
