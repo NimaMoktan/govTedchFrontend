@@ -229,7 +229,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           const requiredRoles = ["TNT", "MLD", "ADM"];
                           if (index === 1) {
                             // "Submit Application" (second child) is only for TNT users
-                            return userDetails.roles.includes("TNT")|| userDetails.roles.includes("ADM");
+                            return userDetails.roles.includes("THT")|| userDetails.roles.includes("ADM");
                           }
                           if (index === 4) {
                             return userDetails.roles.some(role => requiredRoles.includes(role));
