@@ -97,11 +97,10 @@ const DetailForm: React.FC = () => {
         const formData = new FormData();
         formData.append("File", file);
         formData.append("applicationNumber", applicationNumber);
-        formData.append("parameter", applicationDetails?.deviceRegistry[0]?.parameter);
         formData.append("itemName", equipment?.[0]?.description);
     
         try {
-            const url = `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/uploadDocFile/${applicationDetails?.deviceRegistry[0]?.parameter}`;
+            const url = `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/uploadDocFile`;
             const response = await axios.post(url, formData, {
                 headers: { "Authorization": `Bearer ${token}` },
             });

@@ -54,7 +54,7 @@ const DetailForm: React.FC = () => {
             const storedUser = localStorage.getItem("userDetails");
             const parsedUser = storedUser ? JSON.parse(storedUser) : null;
             const testedDetails = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/calibration/api/read-file/NML/WM/03-2025/0456`,
+                `${process.env.NEXT_PUBLIC_API_URL}/calibration/api/read-file/NML/F/03-2025/0454`,
                 {
                     method: "GET",
                     headers: {
@@ -211,7 +211,7 @@ const DetailForm: React.FC = () => {
                                     "Content-Type": "application/json",
                                 },
                                 body: JSON.stringify({
-                                    applicationNumber: "NML/F/03-2025/0460",
+                                    applicationNumber: "NML/F/03-2025/0454",
                                     parameter: "Force",
                                 }),
                             });
@@ -221,20 +221,24 @@ const DetailForm: React.FC = () => {
                             }
 
                             const blob = await response.blob();
-                            const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+                            const blobUrl = URL.createObjectURL(blob);
 
-                            // Open in a new tab
-                            window.open(blobUrl, "_blank");
+                            // Open the file in a new tab
+                            const newTab = window.open(blobUrl, "_blank");
+                            if (!newTab) {
+                                toast.error("Popup blocked! Allow popups for this site.");
+                            }
 
                         } catch (error) {
-                            console.error("Error downloading certificate:", error);
-                            toast.error("Failed to download/view certificate.");
+                            console.error("Error viewing certificate:", error);
+                            toast.error("Failed to view certificate.");
                         }
                     }}
                     className="w-1/6 rounded bg-primary p-3 text-white font-medium hover:bg-opacity-90"
                 >
-                    Download/View Certificate
+                    View Certificate
                 </button>
+
 
 
             </div>

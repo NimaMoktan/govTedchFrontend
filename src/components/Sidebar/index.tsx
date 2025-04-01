@@ -226,7 +226,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     
                       if (menuItem.children) {
                         filteredChildren = menuItem.children.filter((child, index) => {
-                          const requiredRoles = ["TNT", "MLD"];
+                          const requiredRoles = ["TNT", "MLD", "ADM"];
                           if (index === 1) {
                             // "Submit Application" (second child) is only for TNT users
                             return userDetails.roles.includes("TNT")|| userDetails.roles.includes("ADM");
