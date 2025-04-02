@@ -115,7 +115,7 @@ const menuGroups = [
           { label: "Application List", route: "/applications_list" },
           { label: "Submit Application", route: "/submit_applications" },
           { label: "Verify", route: "/ui/buttons" },
-          { label: "Submitted List", route: "applications_list" },
+          { label: "List", route: "/ui/buttons" },
           { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
           { label: "Approved Application", route: "/approved-application-list" },
@@ -234,17 +234,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           if (index === 4) {
                             return userDetails.roles.some(role => requiredRoles.includes(role));
                           }
-                          if (index === 3) {
-                            return userDetails.roles.some(role => requiredRoles.includes(role));
-                          }
                           if (index === 5) {
                             return userDetails.roles.includes("LHD") || userDetails.roles.includes("ADM");
                           }
                           if (index === 6) {
-                            return userDetails.roles.includes("ADM")||userDetails.roles.includes("CLO")|| userDetails.roles.includes("DIR");
+                            return userDetails.roles.includes("ADM")||userDetails.roles.includes("CLO")|| userDetails.roles.includes("DIR") || userDetails.roles.includes("MLD");
                           }
                           if (index === 0) {
-                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM");
+                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") ;
                           }
                           // Other children (0, 2, 3) are for ADM & CHF
                           return userDetails.roles.includes("ADM");
