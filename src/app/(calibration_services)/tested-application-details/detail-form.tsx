@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import Input from '@/components/Inputs/Input';
 import { Form, Formik, Field } from 'formik';
 import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { Eye, Download } from "lucide-react";
 
 interface ApplicationDetails {
     id: string;
@@ -29,6 +31,67 @@ const DetailForm: React.FC = () => {
             setToken(localStorage.getItem("token"));
         }
     }, []);
+    const viewCertificate = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("Authentication token is missing.");
+            return;
+        }
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/print/print`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    applicationNumber: "NML/F/03-2025/0454",
+                    parameter: "Force",
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+            }
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const newTab = window.open(blobUrl, "_blank");
+            if (!newTab) {
+                toast.error("Popup blocked! Allow popups for this site.");
+            }
+        } catch (error) {
+            console.error("Error viewing certificate:", error);
+            toast.error("Failed to view certificate.");
+        }
+    };
+
+    const downloadExcel = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("Authentication token is missing.");
+            return;
+        }
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/downloadDocument/{uuid}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to download the file: ${response.statusText}`);
+            }
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const newTab = window.open(blobUrl, "_blank");
+            if (!newTab) {
+                toast.error("Popup blocked! Allow popups for this site.");
+            }
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            toast.error("Failed to download file.");
+        }
+    };
     const fetchEquipment = async (id: any) => {
         const token = localStorage.getItem("token");
 
@@ -54,7 +117,7 @@ const DetailForm: React.FC = () => {
             const storedUser = localStorage.getItem("userDetails");
             const parsedUser = storedUser ? JSON.parse(storedUser) : null;
             const testedDetails = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/calibration/api/read-file/NML/WM/03-2025/0456`,
+                `${process.env.NEXT_PUBLIC_API_URL}/calibration/api/read-file/NML/F/03-2025/0454`,
                 {
                     method: "GET",
                     headers: {
@@ -194,49 +257,22 @@ const DetailForm: React.FC = () => {
             {/* Header Section */}
             <div className="mb-4.5 flex flex-col xl:flex-row items-center justify-between">
                 <h1 className="text-lg font-bold">Tested Data Details</h1>
-                <button
-                    onClick={async () => {
-                        const token = localStorage.getItem("token"); // Get token from localStorage
-
-                        if (!token) {
-                            toast.error("Authentication token is missing.");
-                            return;
-                        }
-
-                        try {
-                            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/print/print`, {
-                                method: "POST",
-                                headers: {
-                                    "Authorization": `Bearer ${token}`,
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    applicationNumber: "NML/F/03-2025/0460",
-                                    parameter: "Force",
-                                }),
-                            });
-
-                            if (!response.ok) {
-                                throw new Error(`Failed to fetch certificate: ${response.statusText}`);
-                            }
-
-                            const blob = await response.blob();
-                            const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-
-                            // Open in a new tab
-                            window.open(blobUrl, "_blank");
-
-                        } catch (error) {
-                            console.error("Error downloading certificate:", error);
-                            toast.error("Failed to download/view certificate.");
-                        }
-                    }}
-                    className="w-1/6 rounded bg-primary p-3 text-white font-medium hover:bg-opacity-90"
+                <div className="flex justify-end gap-4 p-4 bg-gray-100 rounded-lg shadow-md mb-4">
+                <Button
+                    variant="default"
+                    onClick={viewCertificate}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                 >
-                    Download/View Certificate
-                </button>
-
-
+                    <Eye size={18} /> View Certificate
+                </Button>
+                <Button
+                    variant="default"
+                    onClick={downloadExcel}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                    <Download size={18} /> Download Excel
+                </Button>
+            </div>
             </div>
             {testedData ? (
                 <div className="overflow-x-auto space-y-6">
