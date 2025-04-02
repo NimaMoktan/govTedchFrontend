@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AiFillCheckCircle } from "react-icons/ai";
+import { HasPermission } from "@/context/PermissionContext";
 
 const SidebarDropdown = ({ item }: any) => {
   const pathname = usePathname();
@@ -11,16 +12,16 @@ const SidebarDropdown = ({ item }: any) => {
       <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-3">
         {item.map((item: any, index: number) => (
           <li key={index}>
-            
-            <Link
-              href={item.route}
-              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                pathname === item.route ? "text-white" : ""
-              }`}
-            >
-              <AiFillCheckCircle className="text-white" size={16}/>  {item.label}
-            </Link>
-          </li>
+          {/* // <HasPermission permission={item.privilege}> */}
+              <Link
+                href={item.route}
+                className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${pathname === item.route ? "text-white" : ""
+                  }`}
+              >
+                <AiFillCheckCircle className="text-white" size={16} />  {item.label}
+              </Link>
+          {/* // </HasPermission> */}
+            </li>
         ))}
       </ul>
     </>

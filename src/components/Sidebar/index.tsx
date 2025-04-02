@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
@@ -38,10 +38,10 @@ const menuGroups = [
         ),
         label: "User Management",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Users", route: "/user-management/users" },
-          { label: "Roles", route: "/user-management/roles" },
+          { label: "Users", route: "/user-management/users", privilege: "can view users" },
+          { label: "Roles", route: "/user-management/roles", privilege: "can view roles" },
+          { label: "Privileges", route: "/user-management/privileges", privilege: "can view privileges" },
         ],
       }
       
@@ -56,11 +56,10 @@ const menuGroups = [
         ),
         label: "Calibration Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Calibration Parameters", route: "/master-management/parameters" },
-          { label: "Calibration Item Group", route: "/master-management/calibration" },
-          { label: "Calibration Item", route: "/master-management/calibration-item" },
+          { label: "Calibration Parameters", route: "/master-management/parameters", privilege: "can view parameters" },
+          { label: "Calibration Item Group", route: "/master-management/calibration", privilege: "can view calibration group" },
+          { label: "Calibration Item", route: "/master-management/calibration-item", privilege: "can view calibration item" },
         ],
       },
       {
@@ -69,10 +68,9 @@ const menuGroups = [
         ),
         label: "Product/Material Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Type of Sample", route: "/master-management/sample-test-type" },
-          { label: "Test Type", route: "/master-management/test-type" },
+          { label: "Type of Sample", route: "/master-management/sample-test-type", privilege: "can view sample test type" },
+          { label: "Test Type", route: "/master-management/test-type", privilege: "can view test type" },
         ],
       },
       {
@@ -81,9 +79,8 @@ const menuGroups = [
         ),
         label: "Verification Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Fuel Outlet", route: "/master-management/fuel-outlet" },
+          { label: "Fuel Outlet", route: "/master-management/fuel-outlet", privilege: "can view fuel outlet" },
         ],
       },
       {
@@ -92,11 +89,10 @@ const menuGroups = [
         ),
         label: "Common Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Laboratory Testing Site", route: "/master-management/laboratory-testing-site" },
-          { label: "Dzongkhag", route: "/master-management/dzongkhag" },
-          { label: "Client List", route: "/master-management/organization" },
+          { label: "Laboratory Testing Site", route: "/master-management/laboratory-testing-site", privilege: "can view laboratory testing site" },
+          { label: "Dzongkhag", route: "/master-management/dzongkhag", privilege: "can view dzongkhag" },
+          { label: "Client List", route: "/master-management/organization",   privilege: "can view client list" },
         ],
       },
       
@@ -112,6 +108,7 @@ const menuGroups = [
         label: "Calibration Services",
         route: "#",
         children: [
+<<<<<<< HEAD
           { label: "Application List", route: "/applications_list" },
           { label: "Submit Application", route: "/submit_applications" },
           { label: "Verify", route: "/ui/buttons" },
@@ -131,20 +128,39 @@ const menuGroups = [
         children: [
           { label: "Alerts", route: "/ui/alerts" },
           { label: "Buttons", route: "/ui/buttons" },
+=======
+          { label: "Application List", route: "/applications-list", privilege: "can view application list" },
+          { label: "Submit Application", route: "/submit-applications", privilege: "can submit application" },
+          { label: "Verify", route: "/ui/buttons", privilege: "can verify" },
+          { label: "Submitted List", route: "applications-list", privilege: "can view submitted list" },
+          { label: "Tested Report", route: "/tested-application-list", privilege: "can view tested report" },
+          // { label: "Submit Report", route: "/ui/buttons" },
+          { label: "Approved Application", route: "/approved-application-list", privilege: "can view approved application" },
+>>>>>>> fd47983ee4146ab2cb7dbab80f4640db385bc0b3
         ],
       },
+      // {
+      //   icon: (
+      //     <BiSolidBox className="fill-current" size={22} />
+      //   ),
+      //   label: "Material Testing Services",
+      //   route: "#",
+      //   children: [
+      //     { label: "Alerts", route: "/ui/alerts" },
+      //     { label: "Buttons", route: "/ui/buttons" },
+      //   ],
+      // },
       {
         icon: (
           <CiChat2 className="fill-current" size={22} />
         ),
         label: "Feedback Module",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Product/Material Feedbacks", route: "/material_feedback" },
-          { label: "Calibration Feedbacks", route: "/calibration_feedback" },
-          { label: "Submitted Feedbacks", route: "/ui/alerts" },
-          { label: "Buttons", route: "/ui/buttons" },
+          { label: "Product/Material Feedbacks", route: "/material-feedback", privilege: "can view material feedback" },
+          { label: "Calibration Feedbacks", route: "/calibration-feedback", privilege: "can view calibration feedback" },
+          { label: "Submitted Feedbacks", route: "/ui/alerts", privilege: "can view submitted feedback" },
+          // { label: "Buttons", route: "/ui/buttons" },
         ],
       },
     ],
@@ -152,7 +168,6 @@ const menuGroups = [
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const [userDetails, setUserDetails] = useState<UserDetails>({
       fullName: "Loading...",
@@ -204,28 +219,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           {/* <!-- Sidebar Menu --> */}
           <nav className="mt-2 px-2 py-2 lg:mt-1 lg:px-2">
           {menuGroups
-            .filter(group => 
-              group.menuItems.some(item => 
-                !item.rolesAllowed || 
-                item.rolesAllowed.some(role => userDetails.roles.includes(role))
-              )
-            ) // Filters out menu groups that have no visible items
             .map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}
                 </h3>
                 <ul className="mb-6 flex flex-col gap-1.5">
-                  {group.menuItems
-                    .filter(item => 
-                      !item.rolesAllowed || 
-                      item.rolesAllowed.some(role => userDetails.roles.includes(role))
-                    )
-                    .map((menuItem, menuIndex) => {
+                  {group.menuItems.map((menuItem, menuIndex) => {
                       let filteredChildren: { label: string; route: string }[] = [];
                     
                       if (menuItem.children) {
                         filteredChildren = menuItem.children.filter((child, index) => {
+<<<<<<< HEAD
                           const requiredRoles = ["TNT", "MLD", "ADM"];
                           if (index === 1) {
                             // "Submit Application" (second child) is only for TNT users
@@ -245,6 +250,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           }
                           // Other children (0, 2, 3) are for ADM & CHF
                           return userDetails.roles.includes("ADM");
+=======
+                          
+                          return true;
+>>>>>>> fd47983ee4146ab2cb7dbab80f4640db385bc0b3
                         });
                       }
                       return (

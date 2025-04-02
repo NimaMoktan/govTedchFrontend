@@ -201,7 +201,7 @@ export default function Login() {
     setIsLoading(true);
     setErrorMessage('');
 
-    axios.post(`http://172.31.180:8080/api/ndi/authentication`, { headers: { Accept: "*/*" } })
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/ndi/authentication`, { headers: { Accept: "*/*" } })
       .then(response => {
         const { proofRequestURL, proofRequestThreadId } = response.data.data;
         setProofRequestURL(proofRequestURL);
