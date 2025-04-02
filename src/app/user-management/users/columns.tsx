@@ -92,7 +92,6 @@ export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id:
         header: () => "Status",
         cell: ({ row }) => {
         const status = row.original.active;
-        console.log(status)
         return (<p
             className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
             ? "bg-success text-success"
