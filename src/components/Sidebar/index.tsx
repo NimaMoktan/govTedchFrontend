@@ -241,10 +241,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             return userDetails.roles.includes("LHD") || userDetails.roles.includes("ADM");
                           }
                           if (index === 6) {
-                            return userDetails.roles.includes("ADM")||userDetails.roles.includes("CLO");
+                            return userDetails.roles.includes("ADM")||userDetails.roles.includes("CLO")|| userDetails.roles.includes("DIR");
                           }
                           if (index === 0) {
-                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIR");
+                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM");
                           }
                           // Other children (0, 2, 3) are for ADM & CHF
                           return userDetails.roles.includes("ADM");

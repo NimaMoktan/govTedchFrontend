@@ -166,7 +166,9 @@ const DetailForm: React.FC = () => {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
             const hasCLO = roleList.some((role: { code: string }) => role.code === "CLO");
+            const hasDIR = roleList.some((role: { code: string }) => role.code === "DIR");
             setIsOfficer(hasCLO);
+            setIsOfficer(hasDIR);
         }
         fetchApplicationDetails();
 
