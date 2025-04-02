@@ -272,13 +272,12 @@ const DetailForm: React.FC = () => {
                         onValueChange={() => console.log("Selection changed!")} />
                     </div>
                     <div className="w-full xl:w-1/2">
-
                         <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
                         <Input label="Remarks" name="remarks" />
                     </div>
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                    Approve
+                    Update
                 </button>
                 </Form>
             </Formik>
