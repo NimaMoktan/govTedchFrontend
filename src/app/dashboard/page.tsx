@@ -40,7 +40,7 @@ export default function Home () {
             const roleMap: Record<string, string> = {
               ADM: "Superadmin",
               DIR: "Director",
-              TNT: "Client",
+              THT: "Client",
               CHF: "Chief",
               CLO: "Calibration Officer",
               MLD: "Mass Lab Head",

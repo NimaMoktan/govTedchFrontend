@@ -113,7 +113,7 @@ const menuGroups = [
         route: "#",
         children: [
           { label: "Application List", route: "/applications-list" },
-          { label: "Submit Application", route: "/submit_applications" },
+          { label: "Submit Application", route: "/submit-applications" },
           { label: "Verify", route: "/ui/buttons" },
           { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
@@ -233,10 +233,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             return userDetails.roles.includes("MLD")|| userDetails.roles.includes("ADM");
                           }
                           if (index === 5) {
-                            return userDetails.roles.includes("CLO") || userDetails.roles.includes("MLD");
+                            return userDetails.roles.includes("CLO") ;
                           }
                           if (index === 0) {
-                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIR");
+                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIR") || userDetails.roles.includes("MLD");
                           }
                           // Other children (0, 2, 3) are for ADM & CHF
                           return userDetails.roles.includes("ADM");

@@ -119,22 +119,38 @@ const DetailForm: React.FC = () => {
         }
     };   
     // Prevent update if no file has been uploaded
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async () => {
         if (!fileUploaded) {
             toast.error("Please upload a file before updating!", { position: "top-right" });
             return;
         }
-
+    
+        if (!applicationDetails) {
+            toast.error("Application details not loaded!", { position: "top-right" });
+            return;
+        }
+    
+        if (!id) {
+            toast.error("Invalid application ID!", { position: "top-right" });
+            return;
+        }
+    
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    
         const data = {
-            id: applicationDetails?.id,
-            applicationNumber: values.applicationNumber,
-            userId: parsedUser.id,
-            userName: parsedUser.userName,
-            status: values.status
+            id: applicationDetails?.id || id, // Ensure ID is passed
+            applicationNumber: applicationDetails?.applicationNumber || "string", // Avoid undefined values
+            userId: parsedUser?.id || 999,
+            userName: parsedUser?.userName || "Unknown",
+            status: applicationDetails?.status || "Pending", // Default status if missing
+            assignedUser: "string",
+            parameter: "string",
+            createdDate: new Date().toISOString(), // Ensure valid timestamp
         };
-
+    
+        console.log("Submitting Data:", data); // Debugging
+    
         try {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
@@ -143,15 +159,15 @@ const DetailForm: React.FC = () => {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json",
-                        "userId": parsedUser.id,
-                        "userName": parsedUser.userName,
-                    }
+                        "userId": parsedUser?.id || "999",
+                        "userName": parsedUser?.userName || "Unknown",
+                    },
                 }
             );
-
+    
             if (response.status === 200) {
                 toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
-                setTimeout(() => router.push("/applications_list"), 1000);
+                setTimeout(() => router.push("/approved-application-list"), 1000);
             } else {
                 toast.error("Failed to update application status", { position: "top-right", autoClose: 1000 });
             }
@@ -166,11 +182,7 @@ const DetailForm: React.FC = () => {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
             const hasCLO = roleList.some((role: { code: string }) => role.code === "CLO");
-            const hasDIR = roleList.some((role: { code: string }) => role.code === "DIR");
-            const hasMLD = roleList.some((role: { code: string }) => role.code === "MLD");
             setIsOfficer(hasCLO);
-            setIsOfficer(hasDIR);
-            setIsOfficer(hasMLD);
         }
         fetchApplicationDetails();
 
@@ -286,7 +298,7 @@ const DetailForm: React.FC = () => {
             </Formik>
             )}
             {isOfficer && (
-                <button onClick={() => handleSubmit(applicationDetails)} className="w-1/3 bg-primary p-3 text-white rounded mt-4">
+                <button onClick={() => handleSubmit()} className="w-1/3 bg-primary p-3 text-white rounded mt-4">
                     Update
                 </button>
             )}
