@@ -14,7 +14,10 @@ export type Application = {
 export const columns: ColumnDef<Application>[] = [
   {
     accessorKey: "id",
-    header: "Id"
+    header: "SL No.",
+    cell: ({ row }) => {
+      return <p>{row.index + 1}</p>;
+    }
   },
   {
     accessorKey: "applicationNumber",

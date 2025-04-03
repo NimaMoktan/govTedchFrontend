@@ -280,7 +280,7 @@ export default function Login() {
                   </span>
                 </div>
 
-                {/* <div className="flex border-2 border-green-500 p-2.5 rounded-2xl"> */}
+                <div className="flex border-2 border-green-500 p-2.5 rounded-2xl">
                   <QRCodeCanvas
                     value={proofRequestURL}
                     size={200}
@@ -291,7 +291,7 @@ export default function Login() {
                     //   width: 50,
                     // }}
                   />
-                {/* </div> */}
+                </div>
 
                 <div className="form-group mt-8">
                   <div className="flex justify-center">

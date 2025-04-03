@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 
-export const columns = (handleEdit: (permissions: Permission) => void, handleDelete: (id: Permission) => void): ColumnDef<Permission>[] => [
+export const columns = (handleEdit: (privileges: Privilege) => void, handleDelete: (id: Privilege) => void): ColumnDef<Privilege>[] => [
     {
         accessorKey: "id",
         header: "Sl No.",
