@@ -167,8 +167,10 @@ const DetailForm: React.FC = () => {
             const roleList = [userRole[0].roles];
             const hasCLO = roleList.some((role: { code: string }) => role.code === "CLO");
             const hasDIR = roleList.some((role: { code: string }) => role.code === "DIR");
+            const hasMLD = roleList.some((role: { code: string }) => role.code === "MLD");
             setIsOfficer(hasCLO);
             setIsOfficer(hasDIR);
+            setIsOfficer(hasMLD);
         }
         fetchApplicationDetails();
 
