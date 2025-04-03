@@ -61,7 +61,7 @@ const ApplicationList: React.FC = () => {
         <div className="flex flex-col gap-2">
             <ToastContainer />
             <div className="rounded-sm border bg-white p-5 shadow-sm">
-            <DataTable columns={columns} data={applicationList.filter(app => app.status === "Submitted")} />
+            <DataTable columns={columns} data={applicationList} />
             </div>
         </div>
         </DefaultLayout>

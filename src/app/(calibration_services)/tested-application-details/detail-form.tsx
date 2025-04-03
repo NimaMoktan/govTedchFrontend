@@ -45,7 +45,7 @@ const DetailForm: React.FC = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    applicationNumber: "NML/F/03-2025/0454",
+                    applicationNumber: "NML/F/04-2025/0486",
                     parameter: "Force",
                 }),
             });
@@ -70,22 +70,32 @@ const DetailForm: React.FC = () => {
             toast.error("Authentication token is missing.");
             return;
         }
+        // Fetch UUID from the tested data state
+        const uuid = testedData?.uuid;  // Ensure `testedData` contains the uuid
+    
+        if (!uuid) {
+            toast.error("UUID is missing.");
+            return;
+        }
+    
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/downloadDocument/{uuid}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/workflow/downloadDocument/${uuid}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
-            if (!response.ok) {
+            if (response.ok) {
+                toast.success("File downloaded successfully!"); // Success message when status is 200
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const newTab = window.open(blobUrl, "_blank");
+                if (!newTab) {
+                    toast.error("Popup blocked! Allow popups for this site.");
+                }
+            } else {
                 throw new Error(`Failed to download the file: ${response.statusText}`);
-            }
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const newTab = window.open(blobUrl, "_blank");
-            if (!newTab) {
-                toast.error("Popup blocked! Allow popups for this site.");
             }
         } catch (error) {
             console.error("Error downloading file:", error);
@@ -117,7 +127,7 @@ const DetailForm: React.FC = () => {
             const storedUser = localStorage.getItem("userDetails");
             const parsedUser = storedUser ? JSON.parse(storedUser) : null;
             const testedDetails = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/calibration/api/read-file/NML/F/03-2025/0454`,
+                `${process.env.NEXT_PUBLIC_API_URL}/flask/calibration/api/read-file/NML/F/04-2025/0486`,
                 {
                     method: "GET",
                     headers: {
@@ -276,72 +286,72 @@ const DetailForm: React.FC = () => {
             </div>
             {testedData ? (
                 <div className="overflow-x-auto space-y-6">
-                    <hr></hr>
-                    {/* Repeatability Table */}
+                    <hr />
+                    {/* Repeatability Data */}
                     <div>
                         <h2 className="text-md font-semibold mb-2">Repeatability Data</h2>
                         <table className="min-w-full border border-gray-300">
                             <thead>
                                 <tr className="bg-gray-200">
                                     <th className="border px-4 py-2">Observation</th>
-                                    <th className="border px-4 py-2">Load (g)</th>
-                                    <th className="border px-4 py-2">Indication (g)</th>
+                                    <th className="border px-4 py-2">Indicated Force (KN)</th>
+                                    <th className="border px-4 py-2">Average Relative Indication Error (%)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {testedData.calibration_data.repeatability.load_g.map((load: number, index: number) => (
+                                {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="border px-4 py-2">{testedData.calibration_data.repeatability.no_of_observations[index]}</td>
-                                        <td className="border px-4 py-2">{load}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.repeatability.indication_g[index]}</td>
+                                        <td className="border px-4 py-2">{index + 1}</td>
+                                        <td className="border px-4 py-2">{force}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Average Relative Indication Error q (%)'][index]}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <hr></hr>
-                    {/* Linearity Table */}
+                    <hr />
+                    {/* Linearity Data */}
                     <div>
                         <h2 className="text-md font-semibold mb-2">Linearity Data</h2>
                         <table className="min-w-full border border-gray-300">
                             <thead>
                                 <tr className="bg-gray-200">
-                                    <th className="border px-4 py-2">Nominal Mass (g)</th>
-                                    <th className="border px-4 py-2">Certified Mass (g)</th>
-                                    <th className="border px-4 py-2">Correction (g)</th>
-                                    <th className="border px-4 py-2">Difference (g)</th>
+                                    <th className="border px-4 py-2">Indicated Force (KN)</th>
+                                    <th className="border px-4 py-2">Standard FPI Readings (Fi)</th>
+                                    <th className="border px-4 py-2">Temp Corrected Readings (Fit)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {testedData.calibration_data.linearity.nominal_mass_g.map((mass: number, index: number) => (
+                                {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="border px-4 py-2">{mass}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.linearity.certified_mass_g[index]}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.linearity.correction_g[index]}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.linearity.difference_g[index]}</td>
+                                        <td className="border px-4 py-2">{force}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Standard FPI readings in division Fi'][index]}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Temp corrected reading in division Fit'][index]}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <hr></hr>
-                    {/* Eccentricity Table */}
+                    <hr />
+                    {/* Eccentricity Data */}
                     <div>
                         <h2 className="text-md font-semibold mb-2">Eccentricity Data</h2>
                         <table className="min-w-full border border-gray-300">
                             <thead>
                                 <tr className="bg-gray-200">
-                                    <th className="border px-4 py-2">Load (g)</th>
-                                    <th className="border px-4 py-2">Indication (g)</th>
-                                    <th className="border px-4 py-2">Location</th>
+                                    <th className="border px-4 py-2">Test Position</th>
+                                    <th className="border px-4 py-2">Test 1 Position 0° (F1)</th>
+                                    <th className="border px-4 py-2">Test 2 Position 180° (F2)</th>
+                                    <th className="border px-4 py-2">Test 3 Position 360° (F3)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {testedData.calibration_data.eccentricity.load_g.map((load: number, index: number) => (
+                                {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="border px-4 py-2">{load}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.eccentricity.indication_g[index]}</td>
-                                        <td className="border px-4 py-2">{testedData.calibration_data.eccentricity.location[index]}</td>
+                                        <td className="border px-4 py-2">{index + 1}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Test 1 position 0° F1'][index]}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Test 2 position 180° F2'][index]}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Test 3 position 360° F3'][index]}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -351,6 +361,7 @@ const DetailForm: React.FC = () => {
             ) : (
                 <p className="text-gray-500">No tested data available.</p>
             )}
+
         </div>
 
         </>
