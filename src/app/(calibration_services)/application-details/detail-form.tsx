@@ -24,7 +24,7 @@ const DetailForm: React.FC = () => {
         range: string; description: string
     }[]>([]);
     const [isChief, setIsChief] = useState<boolean | null>();
-    const [isDit, setIsDit] = useState<boolean | null>();
+    const [isLabHead, setIsLabHead] = useState<boolean | null>();
 
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -80,7 +80,7 @@ const DetailForm: React.FC = () => {
             userName: parsedUser.userName,
             status: values.status
         }
-
+        console.log("These is the sent data: ", data);
         const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
             {
                 headers: {
@@ -94,7 +94,7 @@ const DetailForm: React.FC = () => {
         if(response.status === 200){
             toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
             setTimeout(() => {
-                router.push("/applications_list");
+                router.push("/applications-list");
 
             }, 1000);
         }else{
@@ -138,7 +138,7 @@ const DetailForm: React.FC = () => {
             const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "DIR"]; // adding all the lab head role codes
             const hasDIT = roleList.some((role: { code: string }) => requiredRoles.includes(role.code));
             setIsChief(hasCHF);
-            setIsDit(hasDIT);
+            setIsLabHead(hasDIT);
         }
         fetchApplicationDetails();
     
@@ -260,7 +260,7 @@ const DetailForm: React.FC = () => {
                 </Form>
             </Formik>
             }
-            {isDit &&
+            {isLabHead &&
             <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
@@ -268,7 +268,14 @@ const DetailForm: React.FC = () => {
                         <Select 
                         label="Select Status" 
                         name="status" 
-                        options={[{ value: "approve", text: "Approve"}, {value: "reject", text: "Reject"}]} 
+                        options={[{ value: "approve", text: "Approve"}, {value: "reject", text: "Reject"}, {value: "retest", text: "Retest"}]} 
+                        onValueChange={() => console.log("Selection changed!")} />
+                    </div>
+                    <div className="w-full xl:w-1/2">
+                        <Select 
+                        label="Select Calibration Officer" 
+                        name="calibration_officer" 
+                        options={[{ value: "Dorji Wangchuk", text: "Dorji Wangchuk"}, {value: "Pema Dorji", text: "Pema Dorji"}]} 
                         onValueChange={() => console.log("Selection changed!")} />
                     </div>
                     <div className="w-full xl:w-1/2">

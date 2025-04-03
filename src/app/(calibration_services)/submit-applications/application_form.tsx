@@ -18,7 +18,7 @@ interface FormValues {
   equipment: string[];
   manufacturer: string[];
   model: string[];
-  quantity: number[];
+  // quantity: number[];
   amount: number[];
   total_quantity: number[];
   serialNumberOrModel: string[];
@@ -34,7 +34,7 @@ const validationSchema = Yup.object().shape({
   equipment: Yup.array().of(Yup.string().required("Equipment is required")),
   manufacturer: Yup.array().of(Yup.string().required("Manufacturer is required")),
   model: Yup.array().of(Yup.string().required("Model is required")),
-  quantity: Yup.array().of(Yup.number().min(1, "Quantity must be at least 1").required("Quantity is required")),
+  // quantity: Yup.array().of(Yup.number().min(1, "Quantity must be at least 1").required("Quantity is required")),
   amount: Yup.array().of(Yup.number().required("Amount is required")),
   total_quantity: Yup.array().of(Yup.number().required("Total quantity is required")),
 });
@@ -155,7 +155,7 @@ const ApplicationSubmitForm = () => {
         equipment: "",
         manufacturer: "",
         model: "",
-        quantity: 0,
+        // quantity: 0,
         amount: 0,
         total_quantity: 0,
       },
@@ -185,7 +185,6 @@ const ApplicationSubmitForm = () => {
         );
 
         const data = await response.json();
-
         if (data && data.status === "OK") {
           const equipmentData = data.data;
           const manufacturer = equipmentData?.manufacturer || "";
@@ -206,16 +205,16 @@ const ApplicationSubmitForm = () => {
   };
 
 
-  const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
-    // Ensure that the amount is correctly fetched as a number
-    const amount = Number(values.amount[index]) || 0;
-    const totalAmount = amount * quantity; // Calculate total amount
-    // console.log("This is the data: ", totalAmount, amount, quantity);
+  // const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
+  //   // Ensure that the amount is correctly fetched as a number
+  //   const amount = Number(values.amount[index]) || 0;
+  //   const totalAmount = amount * quantity; // Calculate total amount
+  //   // console.log("This is the data: ", totalAmount, amount, quantity);
 
-    // Set the total amount and quantity values
-    setFieldValue(`total_quantity[${index}]`, totalAmount); // Update total_quantity
-    setFieldValue(`quantity[${index}]`, quantity); // Update quantity
-  };
+  //   // Set the total amount and quantity values
+  //   setFieldValue(`total_quantity[${index}]`, totalAmount); // Update total_quantity
+  //   setFieldValue(`quantity[${index}]`, quantity); // Update quantity
+  // };
 
   const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
     setSubmitting(true);
@@ -227,7 +226,7 @@ const ApplicationSubmitForm = () => {
       emailAddress: values.email,
       organizationId: values.organizationId,
       deviceRegistry: values.equipment.map((_, index) => ({
-        quantity: values.quantity[index],
+        // quantity: values.quantity[index],
         testItemId: Number(values.equipment[index]),
         manufacturerOrTypeOrBrand: values.manufacturer[index],
         serialNumberOrModel: values.serialNumberOrModel[index],
@@ -262,7 +261,7 @@ const ApplicationSubmitForm = () => {
           text: `These are your client codes: ${clientCodes}`,
           icon: "success",
           confirmButtonText: "Ok",
-        }).then(() => router.push("/applications_list"));
+        }).then(() => router.push("/submit-applications"));
       } else {
         Swal.fire({
           title: "Error",
@@ -298,7 +297,7 @@ const ApplicationSubmitForm = () => {
           manufacturer: equipmentList.map(() => ""),
           model: equipmentList.map(() => ""),
           serialNumberOrModel: equipmentList.map(() => ""),
-          quantity: equipmentList.map(() => 0),
+          // quantity: equipmentList.map(() => 0),
           amount: equipmentList.map(() => 0),
           total_quantity: equipmentList.map(() => 0),
         }}
@@ -412,7 +411,7 @@ const ApplicationSubmitForm = () => {
               </div>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
-                  <Input
+                  {/* <Input
                     label={`Quantity Of Equipment`}
                     name={`quantity[${index}]`}
                     type="number"
@@ -421,9 +420,7 @@ const ApplicationSubmitForm = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       handleQuantityChange(index, Number(e.target.value), setFieldValue, values)
                     }
-                  />
-                </div>
-                <div className="w-full xl:w-1/2">
+                  /> */}
                   <Input
                     name={`amount[${index}]`}
                     type="number"
@@ -433,15 +430,13 @@ const ApplicationSubmitForm = () => {
                     readOnly={true}
                   />
                 </div>
-              </div>
-              <div className="mb-4.5">
                 <div className="w-full xl:w-1/2">
-                  <Input
+                <Input
                     name={`total_quantity[${index}]`}
                     type="number"
                     placeholder="Enter The Total Amount"
                     label={"Total Amount"}
-                    value={values.total_quantity[index]} // Bind to Formik's value for total amount
+                    value={values.amount[index]} // Bind to Formik's value for total amount
                     readOnly={true}
                   />
                 </div>
