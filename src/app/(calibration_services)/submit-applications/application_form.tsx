@@ -8,6 +8,12 @@ import Input from "@/components/Inputs/Input";
 import Select from "@/components/Inputs/Select";
 import { useRouter } from "next/navigation";
 
+interface EquipmentItem {
+  id: number;
+  description: string;
+  // Include other properties here as needed
+}
+
 interface FormValues {
   cid: string;
   fullName: string;
@@ -89,13 +95,13 @@ const ApplicationSubmitForm = () => {
       }
   
       // Filter out specific equipment based on their IDs
-      const filteredEquipment = data.data.filter(item => 
-        ![12, 15, 6].includes(item.id)  // Exclude items with id 12, 15, and 6
+      const filteredEquipment = data.data.filter((item: EquipmentItem) =>
+        ![12, 15].includes(item.id)  // Exclude items with id 12, 15, and 6
       );
   
       // Map the filtered data to options
       setEquipmentOptions(
-        filteredEquipment.map((item) => ({
+        filteredEquipment.map((item: EquipmentItem) => ({
           value: item.id,
           text: item.description,
         }))
@@ -104,7 +110,7 @@ const ApplicationSubmitForm = () => {
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
-  };  
+  };
 
   useEffect(() => {
     // Fetch the stored user details from localStorage
@@ -312,7 +318,6 @@ const ApplicationSubmitForm = () => {
       >
         {({ handleSubmit, values, isValid, setFieldValue }) => (
           <Form onSubmit={handleSubmit}>
-            
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <div className="w-full xl:w-1/2">
                 <Input
@@ -322,17 +327,31 @@ const ApplicationSubmitForm = () => {
                   placeholder="Enter Your CID Number"
                 />
               </div>
-
-              <div className="w-full xl:w-1/2">
-
-                <Input
-                  label={`Full Name`}
-                  name="fullName"
-                  type="text"
-                  placeholder="Enter Your Full Name" />
-              </div>
             </div>
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/2">
+                  <Input
+                    label="Village"
+                    name="village"
+                    type="text"
+                  />
+              </div>
+              <div className="w-full xl:w-1/2">
+                <Input
+                  label={`Gewog`}
+                  name="gewog"
+                  type="text" />
+              </div>
+              
+            </div>
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+            <div className="w-full xl:w-1/2">
+              <Input
+                label={`Full Name`}
+                name="fullName"
+                type="text"
+                placeholder="Enter Your Full Name" />
+              </div>
               <div className="w-full xl:w-1/2">
                 <Input
                   label={`Address`}
