@@ -230,7 +230,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             return userDetails.roles.includes("THT")|| userDetails.roles.includes("ADM");
                           }
                           if (index === 3) {
-                            return userDetails.roles.includes("MLD")|| userDetails.roles.includes("ADM")|| userDetails.roles.includes("CHF");
+                            return userDetails.roles.includes("MLD")|| userDetails.roles.includes("ADM")|| userDetails.roles.includes("CHF") || userDetails.roles.includes("DIR");
                           }
                           if (index === 5) {
                             return userDetails.roles.includes("CLO") ;
