@@ -332,6 +332,7 @@ const DetailForm: React.FC = () => {
                                         options={[
                                             { value: "approve", text: "Approve" },
                                             { value: "reject", text: "Reject" },
+                                            { value: "retest", text: "Retest" },
                                         ]}
                                         onValueChange={() => console.log("Selection changed!")} 
                                     />

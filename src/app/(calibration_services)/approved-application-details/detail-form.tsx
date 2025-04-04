@@ -23,6 +23,7 @@ const DetailForm: React.FC = () => {
     const [token, setToken] = useState<string | null>(null);
     const router = useRouter(); 
     const [fileUploaded, setFileUploaded] = useState(false); // Track if a file is uploaded
+    const [fileName, setFileName] = useState<string | null>(null); // State to hold the file name
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -264,52 +265,57 @@ const DetailForm: React.FC = () => {
             {/* Render Form to Upload File */}
             {isOfficer && (
                 <Formik
-                    initialValues={{ report_file: null, remarks: "" }}
-                    onSubmit={handleFileUpload}
-                >
-                    {({ setFieldValue, values }) => (
-                        <Form>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full xl:w-1/2">
-                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                        Upload Report File
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            name="report_file"
-                                            type="file"
-                                            accept=".xls, .xlsx"
-                                            id="file-upload"
-                                            className="hidden"
-                                            onChange={(event) => {
-                                                const file = event.target.files?.[0];
-                                                setFieldValue("report_file", file);
-                                                console.log("File selected:", file);
-                                            }}
-                                        />
-                                        <label
-                                            htmlFor="file-upload"
-                                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-blue-700 transition-all duration-300"
-                                        >
-                                            Choose File
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="w-full xl:w-1/2">
-                                    <Input label="Remarks" name="remarks" />
-                                </div>
-                            </div>
-
-                            <div className="mb-4.5 flex justify-start">
-                                <button
-                                    type="submit"
-                                    className="w-1/4 rounded-lg bg-green-600 p-4 text-white font-bold hover:bg-green-900 transition-all duration-300"
+                initialValues={{ report_file: null, remarks: "" }}
+                onSubmit={handleFileUpload}
+            >
+                {({ setFieldValue, values }) => (
+                    <Form>
+                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                            <div className="w-full xl:w-1/2">
+                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                Upload Report File
+                            </label>
+                            <div className="relative">
+                                <input
+                                name="report_file"
+                                type="file"
+                                accept=".xls, .xlsx"
+                                id="file-upload"
+                                className="hidden"
+                                onChange={(event) => {
+                                    const file = event.target.files?.[0];
+                                    setFileName(file ? file.name : null); // Set the file name when a file is selected
+                                    setFieldValue("report_file", file);
+                                    console.log("File selected:", file);
+                                }}
+                                />
+                                <label
+                                htmlFor="file-upload"
+                                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-blue-700 transition-all duration-300"
                                 >
-                                    Upload File
-                                </button>
+                                Choose File
+                                </label>
                             </div>
-                        </Form>
+                            {/* Display the selected file name */}
+                            {fileName && (
+                                <p className="mt-2 text-sm text-gray-500">{fileName}</p>
+                            )}
+                            </div>
+                    
+                            <div className="w-full xl:w-1/2">
+                            <Input label="Remarks" name="remarks" />
+                            </div>
+                        </div>
+                    
+                        <div className="mb-4.5 flex justify-start">
+                            <button
+                            type="submit"
+                            className="w-1/4 rounded-lg bg-green-600 p-4 text-white font-bold hover:bg-green-900 transition-all duration-300"
+                            >
+                            Upload File
+                            </button>
+                        </div>
+                    </Form>
                     )}
                 </Formik>
             )}
