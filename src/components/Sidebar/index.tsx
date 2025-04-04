@@ -194,7 +194,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             aria-controls="sidebar"
             className="block"
           >
-            <BsCupHot className="text-white" size={26} />
+            {/* <BsCupHot className="text-white" size={26} /> */}
           </button>
         </div>
         {/* <!-- SIDEBAR HEADER --> */}

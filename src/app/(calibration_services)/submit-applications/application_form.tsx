@@ -226,7 +226,7 @@ const ApplicationSubmitForm = () => {
       emailAddress: values.email,
       organizationId: values.organizationId,
       deviceRegistry: values.equipment.map((_, index) => ({
-        // quantity: values.quantity[index],
+        quantity: 1,
         testItemId: Number(values.equipment[index]),
         manufacturerOrTypeOrBrand: values.manufacturer[index],
         serialNumberOrModel: values.serialNumberOrModel[index],

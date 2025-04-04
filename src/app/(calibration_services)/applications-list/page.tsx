@@ -59,7 +59,7 @@ const ApplicationList: React.FC = () => {
             <div className="rounded-sm border bg-white p-5 shadow-sm">
             <DataTable
                 columns={columns}
-                data={applicationList.filter(item => item.status === "Approved" || item.status === "Submitted")}
+                data={applicationList.filter(item => item.status === "Approved" || item.status === "Submitted" || item.status === "Rejected" || item.status === "Verified")}
                 />            
             </div>
         </div>

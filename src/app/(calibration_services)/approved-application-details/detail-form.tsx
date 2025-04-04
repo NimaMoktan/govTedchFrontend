@@ -190,115 +190,136 @@ const DetailForm: React.FC = () => {
 
     return (
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-
-            <div className="w-full xl:w-1/2">
-                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    <h1>Application Number : <strong>{applicationNumber?.toUpperCase()}</strong> </h1>
+            {/* Application Number */}
+            <div className='mb-3'>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Application Number
                 </label>
-            </div>
-
-            </div>
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 mt-3 block text-sm font-medium text-black dark:text-white">
-                        <h1><b>Device Details</b></h1>
-                    </label>
+                <div className="text-lg font-bold text-gray-800 dark:text-white">
+                    {applicationNumber?.toUpperCase() || "—"}
                 </div>
             </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Equipment/Instrument : <b>{equipment?.[0]?.description}</b>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-3">
+                {/* Equipment/Instrument */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Equipment/Instrument
                     </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {equipment?.[0]?.description || "—"}
+                    </div>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Manufacturer/Type/Brand : <b>{applicationDetails?.deviceRegistry[0].manufacturerOrTypeOrBrand}</b>
+                {/* Manufacturer/Type/Brand */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Manufacturer/Type/Brand
                     </label>
-                </div>
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Range : <b>{equipment?.[0]?.range}</b>
-                    </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.manufacturerOrTypeOrBrand || "—"}
+                    </div>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Serial Number/Model : <b>{applicationDetails?.deviceRegistry[0].serialNumberOrModel}</b>
+                {/* Range */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Range
                     </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {equipment?.[0]?.range || "—"}
+                    </div>
                 </div>
-            </div>
 
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Quantity : <b>{applicationDetails?.deviceRegistry[0].quantity}</b>
+                {/* Serial Number/Model */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Serial Number/Model
                     </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.serialNumberOrModel || "—"}
+                    </div>
                 </div>
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Rate : <b>{applicationDetails?.deviceRegistry[0].rate}</b>
+
+                {/* Rate */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Rate
                     </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.rate || "—"}
+                    </div>
                 </div>
-            </div>
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Amount : <b>{applicationDetails?.deviceRegistry[0].amount}</b>
+
+                {/* Amount */}
+                <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Amount
                     </label>
+                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.amount || "—"}
+                    </div>
                 </div>
             </div>
 
             {/* Render Form to Upload File */}
             {isOfficer && (
                 <Formik
-                initialValues={{ report_file: null, remarks: "" }}
-                onSubmit={handleFileUpload}
-            >
-                {({ setFieldValue, values }) => (
-                    <Form>
-                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                    Upload Report File
-                                </label>
-                                <input
-                                    name="report_file"
-                                    type="file"
-                                    accept=".xls, .xlsx"
-                                    className="form-control"
-                                    onChange={(event) => {
-                                        const file = event.target.files?.[0];
-                                        setFieldValue("report_file", file); // Set the file value in Formik
-                                        console.log("File selected:", file); // Check the file in the console
-                                    }}
-                                />
+                    initialValues={{ report_file: null, remarks: "" }}
+                    onSubmit={handleFileUpload}
+                >
+                    {({ setFieldValue, values }) => (
+                        <Form>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                        Upload Report File
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            name="report_file"
+                                            type="file"
+                                            accept=".xls, .xlsx"
+                                            id="file-upload"
+                                            className="hidden"
+                                            onChange={(event) => {
+                                                const file = event.target.files?.[0];
+                                                setFieldValue("report_file", file);
+                                                console.log("File selected:", file);
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor="file-upload"
+                                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-blue-700 transition-all duration-300"
+                                        >
+                                            Choose File
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Remarks" name="remarks" />
+                                </div>
                             </div>
-                            <div className="w-full xl:w-1/2">
-                                <Input label="Remarks" name="remarks" />
+
+                            <div className="mb-4.5 flex justify-start">
+                                <button
+                                    type="submit"
+                                    className="w-1/4 rounded-lg bg-green-600 p-4 text-white font-bold hover:bg-green-900 transition-all duration-300"
+                                >
+                                    Upload File
+                                </button>
                             </div>
-                        </div>
-            
-                        <div className="mb-4.5 flex justify-start">
-                            <button
-                                type="submit"
-                                className="w-1/6 rounded bg-primary p-3 text-white font-medium hover:bg-opacity-90"
-                            >
-                                Upload File
-                            </button>
-                        </div>
-                    </Form>
-                )}
-            </Formik>
+                        </Form>
+                    )}
+                </Formik>
             )}
+
+            {/* Button to Update */}
             {isOfficer && (
-                <button onClick={() => handleSubmit()} className="w-1/3 bg-primary p-3 text-white rounded mt-4">
+                <button
+                    onClick={() => handleSubmit()}
+                    className="w-1/3 bg-primary p-3 text-white rounded mt-4"
+                >
                     Update
                 </button>
             )}
