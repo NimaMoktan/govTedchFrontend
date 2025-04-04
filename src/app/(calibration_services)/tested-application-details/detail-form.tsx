@@ -47,6 +47,14 @@ const DetailForm: React.FC = () => {
             toast.error("Authentication token is missing.");
             return;
         }
+    
+        if (!applicationDetails || !applicationDetails.deviceRegistry || applicationDetails.deviceRegistry.length === 0) {
+            toast.error("Application details or device registry data is missing.");
+            return;
+        }
+    
+        const parameter = applicationDetails.deviceRegistry[0].parameter; // Fetching parameter dynamically
+    
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/print/print`, {
                 method: "POST",
@@ -55,13 +63,15 @@ const DetailForm: React.FC = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    applicationNumber: "NML/F/04-2025/0486",
-                    parameter: "Force",
+                    applicationNumber: applicationNumber, 
+                    parameter: parameter, // Passing the fetched parameter dynamically
                 }),
             });
+            console.log("This is the body being passed for certificate: ", applicationNumber, parameter);
             if (!response.ok) {
                 throw new Error(`Failed to fetch certificate: ${response.statusText}`);
             }
+    
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
             const newTab = window.open(blobUrl, "_blank");
@@ -72,8 +82,7 @@ const DetailForm: React.FC = () => {
             console.error("Error viewing certificate:", error);
             toast.error("Failed to view certificate.");
         }
-    };
-
+    };  
     const downloadExcel = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -156,7 +165,7 @@ const DetailForm: React.FC = () => {
             const data = await response.json();
             const filteredEquipment = data.data.filter((item: any) => item.id === id);
             setEquipment(filteredEquipment);
-            console.log("This is the tested data: ", testedData, filteredEquipment);
+            console.log("This is the tested data: ", testedData);
         } catch (error) {
             console.error("Error fetching equipment data:", error);
         }

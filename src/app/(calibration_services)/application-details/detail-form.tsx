@@ -317,35 +317,52 @@ const DetailForm: React.FC = () => {
                 </Form>
             </Formik>
             }
-            {isLabHead &&
-            <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
-                <Form>
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    <div className="w-full xl:w-1/2">
-                        <Select 
-                        label="Select Status" 
-                        name="status" 
-                        options={[{ value: "approve", text: "Approve"}, {value: "reject", text: "Reject"}, {value: "retest", text: "Retest"}]} 
-                        onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-                        <Select 
-                        label="Select Calibration Officer" 
-                        name="calibration_officer" 
-                        options={[{ value: "Dorji Wangchuk", text: "Dorji Wangchuk"}, {value: "Pema Dorji", text: "Pema Dorji"}]} 
-                        onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-                        <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" />
-                    </div>
-                </div>
-                <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                    Update
-                </button>
-                </Form>
-            </Formik>
-            }
+            {isLabHead && (
+                <Formik
+                    initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber }}
+                    onSubmit={(values) => handleSubmit(values)}
+                >
+                    {({ values }) => ( // Destructure values to track selected status
+                        <Form>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Select
+                                        label="Select Status"
+                                        name="status"
+                                        options={[
+                                            { value: "approve", text: "Approve" },
+                                            { value: "reject", text: "Reject" },
+                                        ]}
+                                        onValueChange={() => console.log("Selection changed!")} 
+                                    />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''} />
+                                    <Input label="Remarks" name="remarks" />
+                                </div>
+                                {/* Only show Calibration Officer if status is "approve" */}
+                                {values.status === "approve" && (
+                                    <div className="w-full xl:w-1/2">
+                                        <Select
+                                            label="Select Calibration Officer"
+                                            name="calibration_officer"
+                                            options={[
+                                                { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
+                                                { value: "Pema Dorji", text: "Pema Dorji" },
+                                            ]}
+                                            onValueChange={() => console.log("Selection changed!")} 
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
+                                Update
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            )}
+
 
         </div>
     );
