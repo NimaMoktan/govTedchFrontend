@@ -159,7 +159,7 @@ const TableThree = () => {
                         <Input label={"Phone Number"} type={"text"} placeholder="Enter phone number" name="phone_number" />
                       </div>
                       <div className="w-full xl:w-1/2">
-                        <Select label="Role" name="role" options={[{ value: "", text: "Select Role" }, { value: "Super Admin", text: "Super Admin" }, { value: "Director", text: "Director" }]} />
+                        <Select onValueChange={()=>{}} label="Role" name="role" options={[{ value: "", text: "Select Role" }, { value: "Super Admin", text: "Super Admin" }, { value: "Director", text: "Director" }]} />
                       </div>
                     </div>
                     <div className="mb-4.5">

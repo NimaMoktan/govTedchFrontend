@@ -183,6 +183,7 @@ const SampleTestType: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
+                                        onValueChange={()=>{}}
                                             label="Status"
                                             name="active"
                                             options={[{

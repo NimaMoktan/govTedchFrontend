@@ -286,6 +286,7 @@ const FuelOutLet: React.FC = () => {
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
                                     <Select
+                                    onValueChange={()=>{}}
                                             label="Dzongkhag"
                                             name="dzongkhagId"
                                             options={dzoList}
@@ -294,6 +295,7 @@ const FuelOutLet: React.FC = () => {
 
                                     <div className="w-full xl:w-1/2">
                                     <Select
+                                    onValueChange={()=>{}}
                                             label="Status"
                                             name="active"
                                             options={[{

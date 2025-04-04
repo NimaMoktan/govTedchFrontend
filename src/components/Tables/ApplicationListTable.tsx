@@ -167,7 +167,9 @@ function ApplicationListTable() {
                         <Input label={"Email Address"} type={"email"} name="email" value={currentEditingData?.email} />
                       </div>
                       <div className="w-full xl:w-1/2">
-                        <Select label="Select Type Equipment/Instrument" name="equipment" options={[{ value: "", text: "Select Type Equipment/Instrument" }, { value: "Machine", text: "Machine" }, { value: "Gadget", text: "Gadget" }]} />
+                        <Select
+                        onValueChange={()=>{}}
+                         label="Select Type Equipment/Instrument" name="equipment" options={[{ value: "", text: "Select Type Equipment/Instrument" }, { value: "Machine", text: "Machine" }, { value: "Gadget", text: "Gadget" }]} />
                       </div>
                     </div>
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">

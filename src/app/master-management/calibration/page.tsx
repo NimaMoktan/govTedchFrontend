@@ -238,6 +238,7 @@ const CalibrationItemGroup: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
+                                            onValueChange={() => {}}
                                             label="Calibration Parameters"
                                             name="calibration_service_id"
                                             options={parameter}
@@ -246,6 +247,7 @@ const CalibrationItemGroup: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
+                                        onValueChange={() => {}}
                                             label="Status"
                                             name="active"
                                             options={[{
