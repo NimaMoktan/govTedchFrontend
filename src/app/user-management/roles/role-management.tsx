@@ -1,14 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
-import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
+import { ToastContainer } from "react-toastify";
+import { toast } from "sonner"
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
 import {
     Dialog,
@@ -24,24 +23,19 @@ import {
     CardContent
 } from '@/components/ui/card';
 import SelectDropDown from "@/components/Inputs/Select";
+import { deleteRole, getRoles } from "@/services/RoleService";
+import { getPrivileges } from "@/services/PrivilegesService";
+import { Role } from "@/types/Role";
+import { Privilege } from "@/types/Privilege";
 
-interface FormValues {
-    id?: number; // Add this line
-    code: string;
-    role_name: string;
-    privileges: string[]; // Assuming privilege IDs are strings
-    active: string; // Assuming this is a string like "Y" or "N"
-}
 const RoleManager: React.FC = () => {
-    const [sampleType, setSampleType] = useState<FormValues[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
-    const [editingRole, setEditingRole] = useState<FormValues | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [selectedRole, setSelectedRole] = useState<FormValues | null>(null);
-    const [privileges, setPrivileges] = useState<{ id: string; name: string }[]>([]);
-    const [roles, setRoles] = useState<{ code: string; role_name: string }[]>([]);
+    const [editingRole, setEditingRole] = useState<Role | null>(null);
+    const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+    const [privileges, setPrivileges] = useState<Privilege[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
     const router = useRouter();
 
     const showModalHandler = () => {
@@ -56,56 +50,27 @@ const RoleManager: React.FC = () => {
     };
     const handleLoadPrivileges = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/privileges/`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) {
-                toast.error("Failed to fetch privileges.");
-                return;
-            }
-
-            const response = await res.json();
-            if (response?.data && Array.isArray(response.data)) {
-                setPrivileges(response.data);
-            } else {
-                toast.error("Invalid response data.");
-            }
+            const rs = await getPrivileges();
+            setPrivileges(rs.data);
         } catch (error) {
             toast.error("An error occurred while fetching privileges.");
         }
     };
 
-    const loadServices = () => {
-        setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.data != null) {
-                    setSampleType(data.data);
-                } else {
-                    setSampleType([])
-                }
-                setIsLoading(false)
-            })
-            .catch((err) => toast.error(err.message, { position: "top-right" }));
+    const loadRoles = async() => {
+        const rs = await getRoles();
+        console.log("Roles", rs.data);
+        setRoles(rs.data);
+        
     };
 
-    const handleEdit = (role: FormValues) => {
+    const handleEdit = (role: Role) => {
         setSelectedRole(role);
-        // setEditingRole(role);
         setIsEditing(true);
         setShowModal("block");
     };
 
-    const handleSubmit = async (values: FormValues, resetForm: () => void) => {
+    const handleSubmit = async (values: Role, resetForm: () => void) => {
         const privilegesFormatted = values.privileges.map((privilegeId) => ({
             id: Number(privilegeId),
         }));
@@ -125,9 +90,6 @@ const RoleManager: React.FC = () => {
         });
 
         try {
-            let response;
-            let privilegesResponse;
-
             if (isEditing) {
                 // If editing, prepare update Payload with existing privileges from selectedRole
                 const updatePrivilegesFormatted = selectedRole?.privileges.map((privilege) => ({
@@ -141,84 +103,70 @@ const RoleManager: React.FC = () => {
                 };
 
                 // Make both API requests in parallel
-                [response, privilegesResponse] = await Promise.all([
-                    fetch(url, {
-                        method,
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(updatePayload),
-                    }),
-                    fetch(url, {
-                        method,
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(updatePayload),
-                    }),
-                ]);
+                // [response, privilegesResponse] = await Promise.all([
+                //     fetch(url, {
+                //         method,
+                //         headers: {
+                //             Authorization: `Bearer ${token}`,
+                //             "Content-Type": "application/json",
+                //         },
+                //         body: JSON.stringify(updatePayload),
+                //     }),
+                //     fetch(url, {
+                //         method,
+                //         headers: {
+                //             Authorization: `Bearer ${token}`,
+                //             "Content-Type": "application/json",
+                //         },
+                //         body: JSON.stringify(updatePayload),
+                //     }),
+                // ]);
 
                 // Process responses
-                const responseData = await response.json();
-                const privilegesResponseData = await privilegesResponse.json();
+                // const responseData = await response.json();
+                // const privilegesResponseData = await privilegesResponse.json();
 
-                console.log("Response Data:", responseData);
-                console.log("Privileges Response Data:", privilegesResponseData);
+                // console.log("Response Data:", responseData);
+                // console.log("Privileges Response Data:", privilegesResponseData);
 
-                if (privilegesResponseData.statusCode !== 200) {
-                    throw new Error(privilegesResponseData.message);
-                }
+                // if (privilegesResponseData.statusCode !== 200) {
+                //     throw new Error(privilegesResponseData.message);
+                // }
             } else {
 
-                response = await fetch(url, {
-                    method,
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: Payload,
-                });
+                // response = await fetch(url, {
+                //     method,
+                //     headers: {
+                //         Authorization: `Bearer ${token}`,
+                //         "Content-Type": "application/json",
+                //     },
+                //     body: Payload,
+                // });
             }
-            if (response.ok) {
-                Swal.fire({
-                    title: isEditing ? "Role Updated!" : "Role Created!",
-                    text: isEditing
-                        ? "The role has been updated successfully."
-                        : "The role has been created successfully.",
-                    icon: "success",
-                    confirmButtonText: "Great, Thanks!",
-                    confirmButtonColor: "#4caf50", // Green color for success
-                    allowOutsideClick: false, // Prevent closing when clicking outside
-                }).then(() => {
-                    router.push("/user-management/roles");
-                });
-                resetForm();
-                showModalHandler();
-            } else {
-                const errorData = await response.json();
-                Swal.fire({
-                    title: "Oops! Something went wrong",
-                    text: errorData?.message || "Please try again later.",
-                    icon: "error",
-                    confirmButtonText: "Retry",
-                    confirmButtonColor: "#f44336", // Red color for error
-                    allowOutsideClick: false, // Prevent closing when clicking outside
-                });
-            }
+            // toast.success(isEditing ? "Role Updated!" : "Role Created!",{
+            //     delay: 1000,
+            //     description: 
+            //     confirmButtonText: "Great, Thanks!",
+            //     confirmButtonColor: "#4caf50", // Green color for success
+            //     allowOutsideClick: false, // Prevent closing when clicking outside
+            //     isEditing
+            //         ? "The role has been updated successfully."
+            //         : "The role has been created successfully.",
+            // }).then(() => {
+            //     router.push("/user-management/roles");
+            // });
+            resetForm();
+            showModalHandler();
         } catch (error) {
-            console.error("Unexpected Error:", error);
             toast.error("An unexpected error occurred. Please try again.", {
                 position: "top-right",
-                autoClose: 1000,
             });
         } finally {
             setIsLoading(false); // Stop loading indicator
         }
     };
 
-    const handleDelete = (role: FormValues) => {
+    const handleDelete = (role: Role) => {
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -229,45 +177,28 @@ const RoleManager: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/roles/${role.id}/delete`,
-                    {},
-                    {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    }
-                );
-                console.log("This is the role ID: ", role.id);
-                const { data } = response;
-                if (data.statusCode == 200) {
-                    Swal.fire("Deleted!", "The role has been deleted.", "success").then(() => {
-                        router.push("/user-management/roles");
-                    });
+                if (role?.id !== undefined) {
+                    await deleteRole(role.id);
                 } else {
-                    toast.error(data.message,
-                        { position: "top-right", autoClose: 1000 }
-                    );
+                    toast.error("Role ID is undefined. Cannot delete the role.");
                 }
+                Swal.fire("Deleted!", "The role has been deleted.", "success").then(() => {
+                    router.push("/user-management/roles");
+                });
             }
         });
     };
 
     useEffect(() => {
-        if (token) {
-            loadServices();
-            handleLoadPrivileges();
-        }
+        loadRoles();
+        handleLoadPrivileges();
     }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
 
     return (
         <Card className="flex flex-col gap-2">
             <ToastContainer />
             <Dialog open={showModal === "block"} onOpenChange={showModalHandler}>
-                <Formik<FormValues>
+                <Formik<Role>
                     initialValues={{
                         code: selectedRole?.code || "",
                         role_name: selectedRole?.role_name || "",
@@ -298,7 +229,7 @@ const RoleManager: React.FC = () => {
                                         <Input label="Role Name" type="text" placeholder="Enter role name" name="role_name" />
                                     </div>
                                     <div className="w-full xl:w-1/3">
-                                        <SelectDropDown label="Status" options={[{ value: "Y", text: "Active" }, { value: "N", text: "Inactive" }]} name="active" />
+                                        <SelectDropDown onValueChange={()=>{}} label="Status" options={[{ value: "Y", text: "Active" }, { value: "N", text: "Inactive" }]} name="active" />
                                     </div>
                                 </div>
 
@@ -312,7 +243,7 @@ const RoleManager: React.FC = () => {
                 </Formik>
             </Dialog>
             <CardContent>
-                <DataTable columns={columns(handleEdit, handleDelete)} data={sampleType} handleAdd={toggleModal} />
+                <DataTable columns={columns(handleEdit, handleDelete)} data={roles} handleAdd={toggleModal} />
             </CardContent>
         </Card>
     );

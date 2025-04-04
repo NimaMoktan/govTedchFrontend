@@ -1,4 +1,3 @@
-"use client";
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
@@ -8,11 +7,18 @@ import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { PermissionProvider } from "@/context/PermissionContext";
+import { Metadata } from "next";
 
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
+
+export const metadata: Metadata = {
+  title:
+    "Bhutan Standard Bureau",
+  description: "Login page for Bhutan Standard Bureau",
+};
 
 export default function RootLayout({
   children,

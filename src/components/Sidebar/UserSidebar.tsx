@@ -7,7 +7,7 @@ import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { GrDashboard, GrTable } from "react-icons/gr";
-import { BiSolidBox, BiSolidBadgeCheck , BiUserPlus, BiLogoProductHunt, BiLogoCreativeCommons, BiSolidGasPump  } from "react-icons/bi";
+import { BsCardList } from "react-icons/bs";
 import { CiCalculator1, CiChat2 } from "react-icons/ci";
 import { BsCupHot } from "react-icons/bs";
 
@@ -72,7 +72,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
-        <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 bg-graydark">
+        <div className="flex items-center justify-between gap-2 px-6 py-2 lg:py-6.5 bg-graydark">
           <Link href="/">
             <p className="text-white font-bold">Bhutan Standard Bureau</p>
           </Link>
@@ -82,7 +82,7 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             aria-controls="sidebar"
             className="block"
           >
-            <BsCupHot className="text-white" size={26} />
+            <GrTable className="text-white" size={26} />
           </button>
         </div>
         {/* <!-- SIDEBAR HEADER --> */}
