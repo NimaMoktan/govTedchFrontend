@@ -119,6 +119,7 @@ const menuGroups = [
           { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
           { label: "Approved Application", route: "/approved-application-list" },
+          { label: "Tested Certificate", route: "/tested-certificate" },
         ],
       },
       {
@@ -229,14 +230,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           if (index === 1) {
                             return userDetails.roles.includes("THT")|| userDetails.roles.includes("ADM");
                           }
+                          const labHead = ["LLD", "MLD", "VLD", "TLD", "FLD", "PLD", "ADM"]
                           if (index === 3) {
-                            return userDetails.roles.includes("MLD")|| userDetails.roles.includes("ADM")|| userDetails.roles.includes("CHF") || userDetails.roles.includes("DIR");
+                            return labHead.some(role => userDetails.roles.includes(role)); 
                           }
                           if (index === 5) {
                             return userDetails.roles.includes("CLO") ;
                           }
+                          const certificateView = ["CHF", "DIR", "ADM"];
+                          if (index === 6) {
+                            return certificateView.some(role => userDetails.roles.includes(role)); 
+                          }
+                          const constApplicationList = ["LLD", "MLD", "VLD", "TLD", "FLD", "PLD", "ADM", "CHF", "DIR"]
                           if (index === 0) {
-                            return userDetails.roles.includes("CHF") || userDetails.roles.includes("ADM") || userDetails.roles.includes("DIR") || userDetails.roles.includes("MLD");
+                            return constApplicationList.some(role => userDetails.roles.includes(role)); 
                           }
                           // Other children (0, 2, 3) are for ADM & CHF
                           return userDetails.roles.includes("ADM");

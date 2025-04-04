@@ -59,12 +59,12 @@ const ApplicationSubmitForm = () => {
   // Fetch equipment data from API
   const fetchEquipment = async () => {
     const token = localStorage.getItem("token");
-
+  
     if (!token) {
       console.error("No authentication token found!");
       return;
     }
-
+  
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
@@ -76,29 +76,35 @@ const ApplicationSubmitForm = () => {
           },
         }
       );
-
+  
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
-
+  
       const data = await response.json();
-
+  
       // Check if response contains the expected data structure
       if (!data || !Array.isArray(data.data)) {
         throw new Error("Invalid response format: Expected 'data' to be an array.");
       }
-
-      // Map the data to equipment options
+  
+      // Filter out specific equipment based on their IDs
+      const filteredEquipment = data.data.filter(item => 
+        ![12, 15, 6].includes(item.id)  // Exclude items with id 12, 15, and 6
+      );
+  
+      // Map the filtered data to options
       setEquipmentOptions(
-        data.data.map((item: any) => ({
+        filteredEquipment.map((item) => ({
           value: item.id,
-          text: item.description, // Assuming you want 'description' as the dropdown label
+          text: item.description,
         }))
       );
+      console.log("Filtered Equipment Data: ", filteredEquipment);
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
-  };
+  };  
 
   useEffect(() => {
     // Fetch the stored user details from localStorage
@@ -261,7 +267,7 @@ const ApplicationSubmitForm = () => {
           text: `These are your client codes: ${clientCodes}`,
           icon: "success",
           confirmButtonText: "Ok",
-        }).then(() => router.push("/submit-applications"));
+        }).then(() => router.push("/dashboard"));
       } else {
         Swal.fire({
           title: "Error",
@@ -448,13 +454,10 @@ const ApplicationSubmitForm = () => {
               </div>
             </div>
           ))}
-
-
             <div className="flex w-full items-center justify-center">
-
               <button
                 type="button"
-                className="mt-2 ml-5 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                 onClick={addEquipment}
               >
                 Add More

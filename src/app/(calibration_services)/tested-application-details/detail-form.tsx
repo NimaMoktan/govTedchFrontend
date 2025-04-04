@@ -146,7 +146,7 @@ const DetailForm: React.FC = () => {
             const storedUser = localStorage.getItem("userDetails");
             const parsedUser = storedUser ? JSON.parse(storedUser) : null;
             const testedDetails = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/flask/calibration/api/read-file/NML/F/04-2025/0486`,
+                `${process.env.NEXT_PUBLIC_API_URL}/flask/calibration/api/read-file/${applicationNumber}`,
                 {
                     method: "GET",
                     headers: {

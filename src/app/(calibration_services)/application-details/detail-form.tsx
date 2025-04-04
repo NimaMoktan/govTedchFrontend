@@ -60,7 +60,7 @@ const DetailForm: React.FC = () => {
             }
 
             const data = await response.json();
-
+            console.log("This is the data equipment: ", data);
             const filteredEquipment = data.data.filter((item: any) => item.id === id);
             setEquipment(filteredEquipment);
 

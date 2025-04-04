@@ -47,7 +47,7 @@ export default function Home () {
               VLD: "Volume Lab Head",
               TID: "Temperature Lab Head",
               FID: "Force Lab Head",
-              LID: "Length Lab Head",
+              LLD: "Length Lab Head",
               PID: "Force Pressure Head",
             };
 
