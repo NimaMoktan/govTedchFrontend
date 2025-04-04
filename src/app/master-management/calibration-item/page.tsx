@@ -311,6 +311,7 @@ const CalibrationItemGroup: React.FC = () => {
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
                                     <Select
+                                    onValueChange={()=>{}}
                                         label="Calibration"
                                         name="test"
                                         options={[
@@ -327,6 +328,7 @@ const CalibrationItemGroup: React.FC = () => {
 
                                     <div className="w-full xl:w-1/2">
                                     <Select
+                                    onValueChange={()=>{}}
                                         label="Group Item"
                                         name="calibration_group_id"
                                         options={parameter}
@@ -347,6 +349,7 @@ const CalibrationItemGroup: React.FC = () => {
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
                                         <Select
+                                            onValueChange={()=>{}}
                                             label="Status"
                                             name="active"
                                             value={values.active}  // Bind selected value

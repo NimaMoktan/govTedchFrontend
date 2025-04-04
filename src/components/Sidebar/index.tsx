@@ -6,10 +6,10 @@ import Link from "next/link";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { GrDashboard, GrTable } from "react-icons/gr";
-import { BiSolidBox, BiSolidBadgeCheck , BiUserPlus, BiLogoProductHunt, BiLogoCreativeCommons, BiSolidGasPump  } from "react-icons/bi";
+import { GrDashboard } from "react-icons/gr";
+import { BiSolidBox, BiSolidBadgeCheck , BiUserPlus, BiLogoCreativeCommons, BiSolidGasPump  } from "react-icons/bi";
 import { CiCalculator1, CiChat2 } from "react-icons/ci";
-import { BsCupHot } from "react-icons/bs";
+import { BsCardList } from "react-icons/bs";
 
 type UserDetails = {
   fullName: string;
@@ -42,6 +42,7 @@ const menuGroups = [
         children: [
           { label: "Users", route: "/user-management/users" },
           { label: "Roles", route: "/user-management/roles" },
+          { label: "Privileges", route: "/user-management/privileges" },
         ],
       }
       
@@ -151,7 +152,6 @@ const menuGroups = [
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
   const [userDetails, setUserDetails] = useState<UserDetails>({
       fullName: "Loading...",
@@ -184,7 +184,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
-        <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 bg-graydark">
+        <div className="flex items-center justify-between gap-2 px-6 py-3 lg:py-3 bg-graydark">
           <Link href="/">
             <p className="text-white font-bold">Bhutan Standard Bureau</p>
           </Link>
@@ -194,7 +194,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             aria-controls="sidebar"
             className="block"
           >
-            <BsCupHot className="text-white" size={26} />
+            <BsCardList className="text-white" size={26} onClick={() => setSidebarOpen(false)} />
           </button>
         </div>
         {/* <!-- SIDEBAR HEADER --> */}

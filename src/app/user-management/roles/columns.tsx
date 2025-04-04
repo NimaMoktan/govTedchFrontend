@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BsTrash, BsPencil } from "react-icons/bs";
+import { Role } from "@/types/Role";
 
 import {
     DropdownMenu,
@@ -13,14 +14,7 @@ import {
     } from "@/components/ui/dropdown-menu"
     import { ArrowUpDown } from "lucide-react"
 
-    export type TestType = {
-        // code: string;
-        role_name: string;
-        privileges: string[]; 
-        active: string; 
-    };
-
-    export const columns = (handleEdit: (testType: TestType) => void, handleDelete: (id: TestType) => void) : ColumnDef<TestType>[] => [
+    export const columns = (handleEdit: (testType: Role) => void, handleDelete: (id: Role) => void) : ColumnDef<Role>[] => [
     {
         accessorKey: "id",
         header: "Id",
@@ -28,20 +22,6 @@ import {
             return (<p>{row.index+1}</p>)
         },
     },
-    // {
-    //     accessorKey: "code",
-    //     header: ({ column }) => {
-    //     return (
-    //         <Button
-    //         variant="ghost"
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //         Code
-    //         <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     )
-    //     },
-    // },
     {
         accessorKey: "role_name",
         header: ({ column }) => {

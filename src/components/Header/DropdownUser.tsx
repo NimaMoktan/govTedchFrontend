@@ -69,13 +69,9 @@ const DropdownUser = () => {
 
         <span className="h-12 w-12 rounded-full">
           <Image 
-            width={112}
-            height={112}
+            width={70}
+            height={70}
             src={"/images/user/jigme.jpg"}
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
             alt="User"
             className="rounded-full"
           />
@@ -130,13 +126,7 @@ const DropdownUser = () => {
               </Link>
             </li>
             {/* Show only if the user has Admin role */}
-            {userDetails.roles.includes("ADM") && (
-              <li>
-                <Link href="/admin" className="flex items-center gap-3.5 text-sm font-medium hover:text-primary">
-                  Admin Panel
-                </Link>
-              </li>
-            )}
+            
             <li>
               <Link
                 href="/settings"
