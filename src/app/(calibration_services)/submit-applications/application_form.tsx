@@ -96,7 +96,7 @@ const ApplicationSubmitForm = () => {
   
       // Filter out specific equipment based on their IDs
       const filteredEquipment = data.data.filter((item: EquipmentItem) =>
-        ![12, 15].includes(item.id)  // Exclude items with id 12, 15, and 6
+        ![0].includes(item.id)  // Exclude items with id 12, 15, and 6
       );
   
       // Map the filtered data to options

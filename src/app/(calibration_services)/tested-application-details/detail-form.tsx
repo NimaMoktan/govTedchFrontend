@@ -491,7 +491,47 @@ const DetailForm: React.FC = () => {
                 </div>
                 )}
         </div>
-
+        {/* New Section: Select Status, Remarks, and Update Button */}
+        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6 mt-6">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                    Update Status & Remarks
+                </h2>
+                <div className="grid grid-cols-1 gap-4">
+                    {/* Status Dropdown */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            Select Status
+                        </label>
+                        <select
+                            className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring focus:border-blue-300"
+                        >
+                            <option value="">-- Select Status --</option>
+                            <option value="approve">Approve</option>
+                            <option value="reject">Rejecte</option>
+                            <option value="retest">Retest</option>
+                        </select>
+                    </div>
+                    {/* Remarks Textarea */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            Remarks
+                        </label>
+                        <textarea
+                            rows={4}
+                            className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring focus:border-blue-300"
+                            placeholder="Enter remarks..."
+                        ></textarea>
+                    </div>
+                    {/* Update Button */}
+                    <div>
+                        <Button
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Update
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

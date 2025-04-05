@@ -9,6 +9,7 @@ import { Form, Formik } from 'formik';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import Swal from 'sweetalert2';
 
 interface ApplicationDetails {
     id: string;
@@ -97,11 +98,17 @@ const DetailForm: React.FC = () => {
             }
         );
         if(response.status === 200){
-            // toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
-            setTimeout(() => {
-                router.push("/dashboard");
-
-            }, 1000);
+            // SweetAlert to notify the user of success
+            Swal.fire({
+                title: 'Success!',
+                text: 'Application status updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.push("/applications-list");
+                }
+            });
         }else{
             // toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
         }
@@ -139,8 +146,9 @@ const DetailForm: React.FC = () => {
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
-            const hasCHF = roleList.some((role: { code: string }) => role.code === "CHF");
-            const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "DIR"]; // adding all the lab head role codes
+            const chfDir = ["CHF", "DIR"]; // adding all the lab head role codes
+            const hasCHF = roleList.some((role: { code: string }) => chfDir.includes(role.code));
+            const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD"]; // adding all the lab head role codes
             const hasDIT = roleList.some((role: { code: string }) => requiredRoles.includes(role.code));
             setIsChief(hasCHF);
             setIsLabHead(hasDIT);
@@ -303,12 +311,12 @@ const DetailForm: React.FC = () => {
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")}  />
+                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} required />
                     </div>
                     <div className="w-full xl:w-1/2">
 
                         <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" />
+                        <Input label="Remarks" name="remarks" required />
                     </div>
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
@@ -332,14 +340,14 @@ const DetailForm: React.FC = () => {
                                         options={[
                                             { value: "approve", text: "Approve" },
                                             { value: "reject", text: "Reject" },
-                                            { value: "retest", text: "Retest" },
-                                        ]}
+s                                        ]}
                                         onValueChange={() => console.log("Selection changed!")} 
+                                        required
                                     />
                                 </div>
                                 <div className="w-full xl:w-1/2">
                                     <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''} />
-                                    <Input label="Remarks" name="remarks" />
+                                    <Input label="Remarks" name="remarks" required />
                                 </div>
                                 {/* Only show Calibration Officer if status is "approve" */}
                                 {values.status === "approve" && (
@@ -352,6 +360,7 @@ const DetailForm: React.FC = () => {
                                                 { value: "Pema Dorji", text: "Pema Dorji" },
                                             ]}
                                             onValueChange={() => console.log("Selection changed!")} 
+                                            required
                                         />
                                     </div>
                                 )}
@@ -363,8 +372,6 @@ const DetailForm: React.FC = () => {
                     )}
                 </Formik>
             )}
-
-
         </div>
     );
 };
