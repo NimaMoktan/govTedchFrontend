@@ -507,7 +507,7 @@ const DetailForm: React.FC = () => {
                         >
                             <option value="">-- Select Status --</option>
                             <option value="approve">Approve</option>
-                            <option value="reject">Rejecte</option>
+                            <option value="reject">Reject</option>
                             <option value="retest">Retest</option>
                         </select>
                     </div>

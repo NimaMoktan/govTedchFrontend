@@ -89,33 +89,28 @@ const DetailForm: React.FC = () => {
 
     const handleFileUpload = async (values: any, { setSubmitting }: any) => {
         const file = values.report_file;
-        
-        // Extract the application number from applicationDetails or clientCode
-        const testItemId = applicationDetails?.deviceRegistry?.[0]?.testItemId; // Extracting testItemId
-        console.log("These are the applicationNumber and testItemId: ", applicationNumber, testItemId);
-        
+        // Check if file is valid
+        console.log("Selected file:", file);    
         // If file or required data is missing, show error
         if (!file || !(file instanceof File)) {
             toast.error("Please select a valid file!", { position: "top-right" });
             return;
         }
-        if (!applicationNumber || !testItemId) {
+        if (!applicationNumber) {
             toast.error("Required data is missing (Application Number or Test Item ID)!", { position: "top-right" });
             return;
         }
-        
-        const itemName = equipment?.[0]?.description; // This should be the item description you want to send
-        
-        if (!itemName) {
-            toast.error("Item description is missing!", { position: "top-right" });
-            return;
-        }
-        
+
+
         // Prepare FormData for the API request
         const formData = new FormData();
         formData.append("File", file);
         formData.append("applicationNumber", applicationNumber);
-        formData.append("itemName", itemName);
+    
+        // Debugging FormData contents before sending
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
     
         try {
             const url = `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/uploadDocFile`;
@@ -123,11 +118,9 @@ const DetailForm: React.FC = () => {
                 headers: { "Authorization": `Bearer ${token}` },
             });
     
-            console.log("FormData contents:", formData); // Debugging formData content
-    
             if (response.status === 200) {
                 toast.success("File uploaded successfully!", { position: "top-right" });
-                setFileUploaded(true); 
+                setFileUploaded(true);
             } else {
                 toast.error("File upload failed!", { position: "top-right" });
             }
@@ -137,7 +130,8 @@ const DetailForm: React.FC = () => {
         } finally {
             setSubmitting(false);
         }
-    };    
+    };
+
     // Prevent update if no file has been uploaded
     const handleSubmit = async () => {
         if (!fileUploaded) {
@@ -296,17 +290,17 @@ const DetailForm: React.FC = () => {
                             </label>
                             <div className="relative">
                                 <input
-                                name="report_file"
-                                type="file"
-                                accept=".xls, .xlsx"
-                                id="file-upload"
-                                className="hidden"
-                                onChange={(event) => {
-                                    const file = event.target.files?.[0];
-                                    setFileName(file ? file.name : null); // Set the file name when a file is selected
-                                    setFieldValue("report_file", file);
-                                    console.log("File selected:", file);
-                                }}
+                                    name="report_file"
+                                    type="file"
+                                    accept=".xls, .xlsx"
+                                    id="file-upload"
+                                    className="hidden"
+                                    onChange={(event) => {
+                                        const file = event.target.files?.[0];
+                                        setFileName(file ? file.name : null); // Set the file name when a file is selected
+                                        setFieldValue("report_file", file); // Update Formik state with the file
+                                        console.log("File selected:", file); // Log the file for debugging
+                                    }}
                                 />
                                 <label
                                 htmlFor="file-upload"
@@ -329,7 +323,7 @@ const DetailForm: React.FC = () => {
                         <div className="mb-4.5 flex justify-start">
                             <button
                             type="submit"
-                            className="w-1/4 rounded-lg bg-green-600 p-4 text-white font-bold hover:bg-green-900 transition-all duration-300"
+                            className="w-1/4 rounded-lg bg-green-600 p-2 text-white font-bold hover:bg-green-900 transition-all duration-300"
                             >
                             Upload File
                             </button>
