@@ -78,7 +78,7 @@ const DetailForm: React.FC = () => {
                 confirmButtonText: 'OK'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    router.push("/tested-applications-list");
+                    router.push("/dashboard");
                 }
             });
         }else{
@@ -693,8 +693,49 @@ const DetailForm: React.FC = () => {
                                 </tbody>
                             </table>
                         </div>
+                    ) : applicationDetails?.deviceRegistry?.[0]?.clientCode.split("/")[1] === "V" ?(
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Calibration Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="border px-4 py-2">Sl No.</th>
+                                    <th className="border px-4 py-2">Volumetric Measures</th>
+                                    <th className="border px-4 py-2">Technical Specification</th>
+                                    <th className="border px-4 py-2">Nominal Value (ml/µl)</th>
+                                    <th className="border px-4 py-2">Obtained Volume (ml/µl)</th>
+                                    <th className="border px-4 py-2">Error (ml/µl)</th>
+                                    <th className="border px-4 py-2">Uncertainty (±ml)/ml at K=2</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {testedData.calibration_data["sl no."].map((slNo:string, index:number) => (
+                                    <tr key={index} className="hover:bg-gray-100">
+                                    <td className="border px-4 py-2">{slNo}</td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Volumetric Measures"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Technical Specification"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Nominal Value (ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Obtained Volume (ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Error(ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Uncertainty (±ml)/ml at K=2"][index]}
+                                    </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            </div>
                     ) : (
-                    // Default Case: No Matching Parameter
                     <div>
                         <p className="text-red-500">No matching parameter type found in the data.</p>
                     </div>
