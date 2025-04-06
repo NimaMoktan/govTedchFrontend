@@ -1,7 +1,14 @@
-export type Role = {
+// export type Role = {
+//     id?: number; // Add this line
+//     role_name: string;
+//     privileges: object[]; // Assuming privilege IDs are strings
+//     active: string; // Assuming this is a string like "Y" or "N"
+// }
+
+export interface Role {
     id?: number; // Add this line
-    code: string;
     role_name: string;
-    privileges: string[]; // Assuming privilege IDs are strings
-    active: string; // Assuming this is a string like "Y" or "N"
+    privileges: { id: number }[];
+    active: string;
+    code: string;
 }

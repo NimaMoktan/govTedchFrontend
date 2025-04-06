@@ -1,22 +1,32 @@
 import { useState } from "react";
 // import { Checkbox } from "@/components/ui/checkbox";
 
-const CheckBox = () => {
+import { InputHTMLAttributes } from "react";
+
+interface CheckBoxProps extends InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  name: string;
+  handleChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CheckBox = ({ label, name, handleChange, ...props }: CheckBoxProps) => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
 
   return (
     <div>
       <label
-        htmlFor="checkboxLabelTwo"
+        htmlFor={label}
         className="flex cursor-pointer select-none items-center"
       >
         <div className="relative">
           <input
+          {...props}
             type="checkbox"
-            id="checkboxLabelTwo"
+            id={label}
             className="sr-only"
-            onChange={() => {
+            onChange={(e) => {
               setIsChecked(!isChecked);
+              handleChange && handleChange(e)
             }}
           />
           <div
@@ -42,7 +52,7 @@ const CheckBox = () => {
             </span>
           </div>
         </div>
-        Checkbox Text
+        {label}
       </label>
     </div>
   );
