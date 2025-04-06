@@ -1,22 +1,73 @@
 "use client"
-import { useEffect } from 'react'
-import { useLoading } from '@/context/LoadingContext'
-// import Records from './records'
+import { useEffect, useState } from 'react'
 import DefaultLayout from '@/components/Layouts/DefaultLayout'
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb'
+import { Card, CardContent } from '@/components/ui/card'
+import { DataTable } from './table'
+import { Privilege } from '@/types/Privilege'
+import { getPrivileges, deletePrivilege } from '@/services/PrivilegesService'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { columns } from './columns'
+import Swal from 'sweetalert2'
 
 export default function Page() {
 
-  const { setIsLoading } = useLoading()
+    const [privileges, setPrivileges] = useState<Privilege[]>([]);
+    const router = useRouter();
 
-  useEffect(() => {
-    setIsLoading(true)
-  }, [setIsLoading])
+    const loadPrivileges = async () => {
+        try {
+            const rs = await getPrivileges();
+            setPrivileges(rs.data);
+        } catch (error) {
+            toast.error("An error occurred while fetching privileges.");
+        }
+    };
+
+    const handleEdit = (privilege: Privilege) => {
+        
+    };
+
+    const handleDelete = (privilege: Privilege) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                if (privilege?.id !== undefined) {
+                    await deletePrivilege(privilege.id);
+                } else {
+                    toast.error("Privilege ID is undefined. Cannot delete the role.");
+                }
+                Swal.fire("Deleted!", "The Privilege has been deleted.", "success").then(() => {
+                    // router.push("/user-management/privileges");
+                    loadPrivileges();
+                });
+            }
+        });
+    };
+
+    useEffect(() => {
+        // handleLoadPrivileges();
+        loadPrivileges();
+    }, []);
+    
 
   return (
-      <DefaultLayout>
-        <Breadcrumb pageName="Privileges" parentPage='User Management'/>
-        
-      </DefaultLayout>
+    <DefaultLayout>
+      <Breadcrumb pageName="Privileges" parentPage='User Management' />
+      <Card className="flex flex-col gap-2">
+        <CardContent>
+          <DataTable columns={columns(handleEdit, handleDelete)} data={privileges} />
+          
+        </CardContent>
+      </Card>
+    </DefaultLayout>
   )
 }

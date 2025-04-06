@@ -9,5 +9,5 @@ export const getPrivileges = async (): Promise<ApiResponse> => {
     return response.data;
   };
 export const createPrivilege = async (data: Privilege) => api.post('/core/privileges/', data);
-export const updatePrivilege = async (id: number, data: Privilege) => api.put(`/core/privileges/${id}`, data);
-export const deletePrivilege = async (id: number) => api.delete(`/core/privileges/${id}`);
+export const updatePrivilege = async (id: number, data: Privilege) => api.post(`/core/privileges/${id}/update`, data);
+export const deletePrivilege = async (id: number) => api.post(`/core/privileges/${id}/delete`);

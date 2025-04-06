@@ -66,18 +66,13 @@ const ApplicationSubmitForm = () => {
   const fetchEquipment = async () => {
     const token = localStorage.getItem("token");
   
-    if (!token) {
-      console.error("No authentication token found!");
-      return;
-    }
-  
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            // Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -115,22 +110,20 @@ const ApplicationSubmitForm = () => {
   useEffect(() => {
     // Fetch the stored user details from localStorage
     const storedUser = localStorage.getItem("userDetails");
+
     setToken(localStorage.getItem("token"))
 
     fetchEquipment();
+    console.log("This is the token: ", token);
 
     const fetchOrganizations = async () => {
       try {
         const token = localStorage.getItem("token"); // Ensure the token is included for authentication
-        if (!token) {
-          console.error("No authentication token found!");
-          return;
-        }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            // Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
