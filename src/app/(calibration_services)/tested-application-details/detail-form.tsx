@@ -8,6 +8,8 @@ import { Form, Formik, Field } from 'formik';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Eye, Download, ChevronDown, ChevronUp } from "lucide-react";
+import Swal from 'sweetalert2';
+import Select from '@/components/Inputs/Select';
 
 interface ApplicationDetails {
     id: string;
@@ -41,6 +43,44 @@ const DetailForm: React.FC = () => {
             setToken(localStorage.getItem("token"));
         }
     }, []);
+    const handleSubmit = async(values: any) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+        const data = {
+            id: applicationDetails?.id,
+            applicationNumber: values.applicationNumber,
+            userId: parsedUser.id,
+            userName: parsedUser.userName,
+            status: values.status
+        }
+        console.log("These is the sent data: ", data);
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    "userId": parsedUser.id,
+                    "userName": parsedUser.userName,
+                }
+            }
+        );
+        if(response.status === 200){
+            // SweetAlert to notify the user of success
+            Swal.fire({
+                title: 'Success!',
+                text: 'Application status updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.push("/tested-applications-list");
+                }
+            });
+        }else{
+            // toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
+        }
+    }
     const viewCertificate = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -391,146 +431,239 @@ const DetailForm: React.FC = () => {
             <br></br>
             {/* Header */}
             <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
                 Tested Data
-                </h2>
-                <Button
-                    onClick={() => setIsTestedDataOpen(!isTestedDataOpen)}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition"
-                    variant="ghost"
-                    >
+            </h2>
+            <Button
+                onClick={() => setIsTestedDataOpen(!isTestedDataOpen)}
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition"
+                variant="ghost"
+            >
                 {isTestedDataOpen ? (
                     <>
-                    Hide <ChevronUp size={18} />
+                        Hide <ChevronUp size={18} />
                     </>
                 ) : (
                     <>
-                    Show <ChevronDown size={18} />
+                        Show <ChevronDown size={18} />
                     </>
                 )}
-                </Button>
-            </div>
-            {isTestedDataOpen && testedData && (
-                <div className="overflow-x-auto space-y-6">
-                    {/* Repeatability Data */}
+            </Button>
+        </div>
+
+        {isTestedDataOpen && testedData && (
+            <div className="overflow-x-auto space-y-6">
+                {/* Determine Parameter Type and Render Tables Dynamically */}
+                {applicationDetails?.deviceRegistry?.[0]?.parameter === "F" ? (
+                    // Force (F) Tables
+                    <>
+                        {/* Repeatability Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Repeatability Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Observation</th>
+                                        <th className="border px-4 py-2">Indicated Force (KN)</th>
+                                        <th className="border px-4 py-2">Average Relative Indication Error (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{index + 1}</td>
+                                            <td className="border px-4 py-2">{force}</td>
+                                            <td className="border px-4 py-2">
+                                                {testedData.calibration_data['Average Relative Indication Error q (%)'][index]}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <hr />
+
+                        {/* Linearity Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Linearity Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Indicated Force (KN)</th>
+                                        <th className="border px-4 py-2">Standard FPI Readings (Fi)</th>
+                                        <th className="border px-4 py-2">Temp Corrected Readings (Fit)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{force}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data['Standard FPI readings in division Fi'][index]}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data['Temp corrected reading in division Fit'][index]}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <hr />
+
+                        {/* Eccentricity Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Eccentricity Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Test Position</th>
+                                        <th className="border px-4 py-2">Test 1 Position 0° (F1)</th>
+                                        <th className="border px-4 py-2">Test 2 Position 180° (F2)</th>
+                                        <th className="border px-4 py-2">Test 3 Position 360° (F3)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{index + 1}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data['Test 1 position 0° F1'][index]}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data['Test 2 position 180° F2'][index]}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data['Test 3 position 360° F3'][index]}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "M" ? (
+                    // Mass (W) Table
                     <div>
-                    <h2 className="text-md font-semibold mb-2">Repeatability Data</h2>
-                    <table className="min-w-full border border-gray-300">
-                        <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border px-4 py-2">Observation</th>
-                            <th className="border px-4 py-2">Indicated Force (KN)</th>
-                            <th className="border px-4 py-2">Average Relative Indication Error (%)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
-                            <tr key={index} className="hover:bg-gray-100">
-                            <td className="border px-4 py-2">{index + 1}</td>
-                            <td className="border px-4 py-2">{force}</td>
-                            <td className="border px-4 py-2">
-                                {testedData.calibration_data['Average Relative Indication Error q (%)'][index]}
-                            </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                        <h2 className="text-md font-semibold mb-2">Mass Calibration Data</h2>
+                        <table className="min-w-full border border-gray-300">
+                            <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="border px-4 py-2">Denomination</th>
+                                    <th className="border px-4 py-2">Conventional Mass Value (g)</th>
+                                    <th className="border px-4 py-2">Uncertainty ( ±mg)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {testedData.calibration_data['Conventional Mass Value (g)'].map((mass: number, index: number) => (
+                                    <tr key={index} className="hover:bg-gray-100">
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Denomination'][index]}</td>
+                                        <td className="border px-4 py-2">{mass}</td>
+                                        <td className="border px-4 py-2">{testedData.calibration_data['Uncertainty ( ±mg)'][index]}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
+                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "WM" ? (
+                    // Weight Measurement (WM) Tables
+                    <>
+                        {/* Repeatability Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Repeatability Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Observation</th>
+                                        <th className="border px-4 py-2">Indication (g)</th>
+                                        <th className="border px-4 py-2">Load (g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data.repeatability.indication_g.map((indication: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{index + 1}</td>
+                                            <td className="border px-4 py-2">{indication}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data.repeatability.load_g[index]}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <hr />
+                        <hr />
 
-                    {/* Linearity Data */}
+                        {/* Linearity Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Linearity Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Nominal Mass (g)</th>
+                                        <th className="border px-4 py-2">Mean Balance Indication (g)</th>
+                                        <th className="border px-4 py-2">Correction (g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data.linearity.nominal_mass_g.map((nominal: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{nominal}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data.linearity.mean_balance_indication_g_for_r[index]}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data.linearity.correction_g[index]}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <hr />
+
+                        {/* Eccentricity Data */}
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Eccentricity Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">Location</th>
+                                        <th className="border px-4 py-2">Indication (g)</th>
+                                        <th className="border px-4 py-2">Load (g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testedData.calibration_data.eccentricity.location.map((location: number, index: number) => (
+                                        <tr key={index} className="hover:bg-gray-100">
+                                            <td className="border px-4 py-2">{location}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data.eccentricity.indication_g[index]}</td>
+                                            <td className="border px-4 py-2">{testedData.calibration_data.eccentricity.load_g[index]}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                ) : (
+                    // Default Case: No Matching Parameter
                     <div>
-                    <h2 className="text-md font-semibold mb-2">Linearity Data</h2>
-                    <table className="min-w-full border border-gray-300">
-                        <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border px-4 py-2">Indicated Force (KN)</th>
-                            <th className="border px-4 py-2">Standard FPI Readings (Fi)</th>
-                            <th className="border px-4 py-2">Temp Corrected Readings (Fit)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
-                            <tr key={index} className="hover:bg-gray-100">
-                            <td className="border px-4 py-2">{force}</td>
-                            <td className="border px-4 py-2">{testedData.calibration_data['Standard FPI readings in division Fi'][index]}</td>
-                            <td className="border px-4 py-2">{testedData.calibration_data['Temp corrected reading in division Fit'][index]}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                        <p className="text-red-500">No matching parameter type found in the data.</p>
                     </div>
-
-                    <hr />
-
-                    {/* Eccentricity Data */}
-                    <div>
-                    <h2 className="text-md font-semibold mb-2">Eccentricity Data</h2>
-                    <table className="min-w-full border border-gray-300">
-                        <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border px-4 py-2">Test Position</th>
-                            <th className="border px-4 py-2">Test 1 Position 0° (F1)</th>
-                            <th className="border px-4 py-2">Test 2 Position 180° (F2)</th>
-                            <th className="border px-4 py-2">Test 3 Position 360° (F3)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {testedData.calibration_data['Indicated Force F(KN)'].map((force: number, index: number) => (
-                            <tr key={index} className="hover:bg-gray-100">
-                            <td className="border px-4 py-2">{index + 1}</td>
-                            <td className="border px-4 py-2">{testedData.calibration_data['Test 1 position 0° F1'][index]}</td>
-                            <td className="border px-4 py-2">{testedData.calibration_data['Test 2 position 180° F2'][index]}</td>
-                            <td className="border px-4 py-2">{testedData.calibration_data['Test 3 position 360° F3'][index]}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
                 )}
+            </div>
+        )}
         </div>
         {/* New Section: Select Status, Remarks, and Update Button */}
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6 mt-6">
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                     Update Status & Remarks
                 </h2>
-                <div className="grid grid-cols-1 gap-4">
-                    {/* Status Dropdown */}
-                    <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                            Select Status
-                        </label>
-                        <select
-                            className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring focus:border-blue-300"
-                        >
-                            <option value="">-- Select Status --</option>
-                            <option value="approve">Approve</option>
-                            <option value="reject">Reject</option>
-                            <option value="retest">Retest</option>
-                        </select>
+                <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
+                    <Form>
+                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                            <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "retest", text: "Retest" }]} onValueChange={() => console.log("Selection changed!")} required />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+
+                            <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
+                            <Input label="Remarks" name="remarks" required />
+                        </div>
                     </div>
-                    {/* Remarks Textarea */}
-                    <div>
-                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                            Remarks
-                        </label>
-                        <textarea
-                            rows={4}
-                            className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring focus:border-blue-300"
-                            placeholder="Enter remarks..."
-                        ></textarea>
-                    </div>
-                    {/* Update Button */}
-                    <div>
-                        <Button
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            Update
-                        </Button>
-                    </div>
-                </div>
+                    <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
+                        Update
+                    </button>
+                    </Form>
+                </Formik>
             </div>
         </>
     );

@@ -119,7 +119,7 @@ const menuGroups = [
           { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
           { label: "Approved Application", route: "/approved-application-list" },
-          { label: "Tested Certificate", route: "/tested-certificate" },
+          { label: "Your Application", route: "/tested-certificate" },
         ],
       },
       {
@@ -237,7 +237,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           if (index === 5) {
                             return userDetails.roles.includes("CLO") ;
                           }
-                          const certificateView = ["CHF", "DIR", "ADM"];
+                          const certificateView = ["THT", "DIR", "ADM"];
                           if (index === 6) {
                             return certificateView.some(role => userDetails.roles.includes(role)); 
                           }
