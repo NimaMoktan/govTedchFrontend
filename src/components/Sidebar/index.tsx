@@ -227,7 +227,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             return labHead.some(role => userDetails.roles.includes(role)); 
                           }
                           if (index === 5) {
-                            return userDetails.roles.includes("CLO") ;
+                            return userDetails.roles.includes("CLO") || userDetails.roles.includes("ADM");
                           }
                           const certificateView = ["THT", "DIR", "ADM"];
                           if (index === 6) {

@@ -67,7 +67,7 @@ const ApplicationList: React.FC = () => {
         <div className="flex flex-col gap-2">
             <ToastContainer />
             <div className="rounded-sm border bg-white p-5 shadow-sm">
-            <DataTable columns={columns} data={applicationList} />
+            <DataTable columns={columns} data={applicationList.filter(item => item.status === "Approved" || item.status === "Submitted" || item.status === "Rejected" || item.status === "Assigned to Calibration Officer")} />
             </div>
         </div>
         </DefaultLayout>
