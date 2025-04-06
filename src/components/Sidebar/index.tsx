@@ -8,7 +8,6 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { GrDashboard } from "react-icons/gr";
 import { BiSolidBox, BiSolidBadgeCheck , BiUserPlus, BiLogoCreativeCommons, BiSolidGasPump  } from "react-icons/bi";
 import { CiCalculator1, CiChat2 } from "react-icons/ci";
-import { BsCardList } from "react-icons/bs";
 
 type UserDetails = {
   fullName: string;
@@ -37,11 +36,10 @@ const menuGroups = [
         ),
         label: "User Management",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Users", route: "/user-management/users" },
-          { label: "Roles", route: "/user-management/roles" },
-          { label: "Privileges", route: "/user-management/privileges" },
+          { label: "Users", privilege: "can view users", route: "/user-management/users" },
+          { label: "Roles", privilege: "can view roles", route: "/user-management/roles" },
+          { label: "Privileges", privilege: "can view privileges", route: "/user-management/privileges" },
         ],
       }
       
@@ -56,11 +54,10 @@ const menuGroups = [
         ),
         label: "Calibration Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Calibration Parameters", route: "/master-management/parameters" },
-          { label: "Calibration Item Group", route: "/master-management/calibration" },
-          { label: "Calibration Item", route: "/master-management/calibration-item" },
+          { label: "Calibration Parameters", privilege: "can view parameters", route: "/master-management/parameters" },
+          { label: "Calibration Item Group", privilege: "can view item group", route: "/master-management/calibration" },
+          { label: "Calibration Item", privilege: "can view item", route: "/master-management/calibration-item" },
         ],
       },
       {
@@ -69,10 +66,9 @@ const menuGroups = [
         ),
         label: "Product/Material Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Type of Sample", route: "/master-management/sample-test-type" },
-          { label: "Test Type", route: "/master-management/test-type" },
+          { label: "Type of Sample", privilege: "can view sample type", route: "/master-management/sample-test-type" },
+          { label: "Test Type", privilege: "can view test type", route: "/master-management/test-type" },
         ],
       },
       {
@@ -81,9 +77,8 @@ const menuGroups = [
         ),
         label: "Verification Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Fuel Outlet", route: "/master-management/fuel-outlet" },
+          { label: "Fuel Outlet", privilege: "can view fuel outlet",  route: "/master-management/fuel-outlet" },
         ],
       },
       {
@@ -92,11 +87,10 @@ const menuGroups = [
         ),
         label: "Common Master",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
-          { label: "Laboratory Testing Site", route: "/master-management/laboratory-testing-site" },
-          { label: "Dzongkhag", route: "/master-management/dzongkhag" },
-          { label: "Client List", route: "/master-management/organization" },
+          { label: "Laboratory Testing Site", privilege: "can view laboratory testing site",  route: "/master-management/laboratory-testing-site" },
+          { label: "Dzongkhag", privilege: "can view dzongkhag",  route: "/master-management/dzongkhag" },
+          { label: "Client List", privilege: "can view client list",  route: "/master-management/organization" },
         ],
       },
       
@@ -112,13 +106,13 @@ const menuGroups = [
         label: "Calibration Services",
         route: "#",
         children: [
-          { label: "Application List", route: "/applications-list" },
-          { label: "Submit Application", route: "/submit-applications" },
-          { label: "Verify", route: "/ui/buttons" },
-          { label: "Tested Report", route: "/tested-application-list" },
-          { label: "Submit Report", route: "/ui/buttons" },
-          { label: "Approved Application", route: "/approved-application-list" },
-          { label: "Tested Certificate", route: "/tested-certificate" },
+          { label: "Application List", privilege: "can view application list", route: "/applications-list" },
+          { label: "Submit Application", privilege: "can submit application", route: "/submit-applications" },
+          // { label: "Verify", privilege: "", route: "/ui/buttons" },
+          { label: "Tested Report", privilege: "can view test report", route: "/tested-application-list" },
+          { label: "Submit Report", privilege: "can submit report", route: "/ui/buttons" },
+          { label: "Approved Application", privilege: "can approved application", route: "/approved-application-list" },
+          { label: "Tested Certificate", privilege: "can view tested certificate", route: "/tested-certificate" },
         ],
       },
       {
@@ -127,7 +121,6 @@ const menuGroups = [
         ),
         label: "Material Testing Services",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
           { label: "Alerts", route: "/ui/alerts" },
           { label: "Buttons", route: "/ui/buttons" },
@@ -139,12 +132,11 @@ const menuGroups = [
         ),
         label: "Feedback Module",
         route: "#",
-        rolesAllowed: ["ADM"],
         children: [
           { label: "Product/Material Feedbacks", route: "/material_feedback" },
           { label: "Calibration Feedbacks", route: "/calibration_feedback" },
           { label: "Submitted Feedbacks", route: "/ui/alerts" },
-          { label: "Buttons", route: "/ui/buttons" },
+          // { label: "Buttons", route: "/ui/buttons" },
         ],
       },
     ],
@@ -233,4 +225,4 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   );
 };
 
-export default Sidebar;
+export default Sidebar;
