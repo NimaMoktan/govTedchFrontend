@@ -22,6 +22,7 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
 
   const isItemActive = isActive(item);
   const shouldRotate = item.children && pageName === item.label.toLowerCase();
+  // console.log("isItemActive", item);
 
   return (
     <>

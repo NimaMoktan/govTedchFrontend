@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from 'react';
 import Link from "next/link";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
@@ -203,14 +202,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           {/* <!-- Sidebar Menu --> */}
           <nav className="mt-2 px-2 py-2 lg:mt-1 lg:px-2">
-          {menuGroups
-            .filter(group => 
-              group.menuItems.some(item => 
-                !item.rolesAllowed || 
-                item.rolesAllowed.some(role => userDetails.roles.includes(role))
-              )
-            ) // Filters out menu groups that have no visible items
-            .map((group, groupIndex) => (
+          {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}
@@ -254,7 +246,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           key={menuIndex}
                           item={{
                             ...menuItem,
-                            children: filteredChildren.length > 0 ? filteredChildren : undefined,
+                            children: menuItem.children,
                           }}
                           pageName={pageName}
                           setPageName={setPageName}
