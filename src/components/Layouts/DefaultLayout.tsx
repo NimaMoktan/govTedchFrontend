@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { useLoading } from "@/context/LoadingContext";
 import { Spinner } from "@/components/ui/spinner"
+import { Toaster } from "sonner";
 
 export default function DefaultLayout({
   children,
@@ -14,22 +15,22 @@ export default function DefaultLayout({
   const { isLoading, setIsLoading } = useLoading();
 
   useEffect(() => {
-    setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
     },
     1500)
-  }, [])
+  }, [isLoading, setIsLoading])
 
   return (
     <>
     {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-70">
           <Spinner size="large" />
         </div>
-      )}
+    )}
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex">
+        <Toaster/>
         {/* <!-- ===== Sidebar Start ===== --> */}
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         {/* <!-- ===== Sidebar End ===== --> */}

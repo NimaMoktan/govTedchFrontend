@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { connect, jwtAuthenticator, StringCodec } from 'nats.ws';
-import { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import Image from 'next/image';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -54,7 +54,7 @@ export default function Login() {
         });
   
         const token = data.jwt;  // ✅ Store token from API response
-        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
+        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; samesite=Lax;`;
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", token);
   
@@ -281,15 +281,15 @@ export default function Login() {
                 </div>
 
                 <div className="flex border-2 border-green-500 p-2.5 rounded-2xl">
-                  <QRCodeCanvas
+                  <QRCodeSVG
                     value={proofRequestURL}
                     size={200}
-                    // imageSettings={{
-                    //   src: "/images/logo/NDIlogobg.png",
-                    //   excavate: true,
-                    //   height: 50,
-                    //   width: 50,
-                    // }}
+                    imageSettings={{
+                      src: "/images/logo/NDIlogobg.png",
+                      excavate: true,
+                      height: 30,
+                      width: 30,
+                    }}
                   />
                 </div>
 
@@ -315,19 +315,6 @@ export default function Login() {
                   </div>
                 </div>
 
-                {os !== "Other" && (
-                  <>
-                    
-                    <div className="form-group text-center mt-7.5">
-                      <span className="text-[#A1A0A0]">
-                        Open <span className="text-[#5AC994]">Bhutan NDI</span> Wallet{" "}
-                        <a href={proofRequestURL} className="text-[#5AC994] underline">
-                          here
-                        </a>
-                      </span>
-                    </div>
-                  </>
-                )}
                 <div className="flex justify-center mt-7.5">
                   <a
                     href="https://www.youtube.com/@BhutanNDI"

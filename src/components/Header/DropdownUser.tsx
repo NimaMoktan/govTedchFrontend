@@ -44,10 +44,10 @@ const DropdownUser = () => {
   const handleLogout = async () => {
     try {
       await fetch('/api/logout', {
-        method: 'post'
+        method: 'POST'
       });
       localStorage.removeItem("userDetails");  
-      router.push("signin/");
+      router.push("/signin");
     } catch (error) {
       console.error("Logout failed:", error);
     }

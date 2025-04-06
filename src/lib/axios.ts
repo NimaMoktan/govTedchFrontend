@@ -13,8 +13,12 @@ api.interceptors.request.use(
   (config) => {
     if (config.url !== '/api/login') {
       const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem("userDetails");
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers.userId = parsedUser.id;
+        config.headers.userName = parsedUser.userName;
       }
     }
     return config;
