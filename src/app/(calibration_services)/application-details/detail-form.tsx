@@ -2,11 +2,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import Input from '@/components/Inputs/Input';
 import Select from '@/components/Inputs/Select';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import Swal from 'sweetalert2';
 
 interface ApplicationDetails {
     id: string;
@@ -30,7 +33,10 @@ const DetailForm: React.FC = () => {
     const router = useRouter();
     const applicationNumber = searchParams.get("applicationNumber");
     const id = searchParams.get("id");
-
+    const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false);    
+    const toggleDeviceDetails = () => {
+        setIsDeviceDetailsOpen(prev => !prev);
+    };    
     const fetchEquipment = async (id: any) => {
         const token = localStorage.getItem("token");
 
@@ -55,7 +61,7 @@ const DetailForm: React.FC = () => {
             }
 
             const data = await response.json();
-
+            console.log("This is the data equipment: ", data);
             const filteredEquipment = data.data.filter((item: any) => item.id === id);
             setEquipment(filteredEquipment);
 
@@ -92,13 +98,19 @@ const DetailForm: React.FC = () => {
             }
         );
         if(response.status === 200){
-            toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
-            setTimeout(() => {
-                router.push("/applications-list");
-
-            }, 1000);
+            // SweetAlert to notify the user of success
+            Swal.fire({
+                title: 'Success!',
+                text: 'Application status updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.push("/applications-list");
+                }
+            });
         }else{
-            toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
+            // toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
         }
     }
 
@@ -134,8 +146,9 @@ const DetailForm: React.FC = () => {
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
-            const hasCHF = roleList.some((role: { code: string }) => role.code === "CHF");
-            const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "DIR"]; // adding all the lab head role codes
+            const chfDir = ["CHF", "DIR"]; // adding all the lab head role codes
+            const hasCHF = roleList.some((role: { code: string }) => chfDir.includes(role.code));
+            const requiredRoles = ["MLD", "VLD", "TLD", "FLD", "LLD", "PLD"]; // adding all the lab head role codes
             const hasDIT = roleList.some((role: { code: string }) => requiredRoles.includes(role.code));
             setIsChief(hasCHF);
             setIsLabHead(hasDIT);
@@ -146,112 +159,164 @@ const DetailForm: React.FC = () => {
 
     return (
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        <h1>Application Number : <strong>{applicationNumber?.toUpperCase()}</strong> </h1>
-                    </label>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* Application Number */}
+                <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Application Number
+                </label>
+                <div className="text-lg font-bold text-gray-800 dark:text-white">
+                    {applicationNumber?.toUpperCase() || "—"}
+                </div>
                 </div>
 
-            </div>
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        CID Number : <b>{applicationDetails?.cid}</b>
-                    </label>
+                {/* CID Number */}
+                <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    CID Number
+                </label>
+                <div className="text-base font-medium text-gray-800 dark:text-white">
+                    {applicationDetails?.cid || "—"}
+                </div>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Full Name : <b>{applicationDetails?.clientName}</b>
-                    </label>
+                {/* Full Name */}
+                <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Full Name
+                </label>
+                <div className="text-base font-medium text-gray-800 dark:text-white">
+                    {applicationDetails?.clientName || "—"}
                 </div>
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Contact Number : <b>{applicationDetails?.contactNumber}</b>
-                    </label>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Email Address : <b>{applicationDetails?.emailAddress}</b>
-                    </label>
+                {/* Contact Number */}
+                <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Contact Number
+                </label>
+                <div className="text-base font-medium text-gray-800 dark:text-white">
+                    {applicationDetails?.contactNumber || "—"}
                 </div>
-            </div>
-            <hr />
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 mt-3 block text-sm font-medium text-black dark:text-white">
-                        <h1>Device Details </h1>
-                    </label>
-                </div>
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Equipment/Instrument : <b>{equipment?.[0]?.description}</b>
-                    </label>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Manufacturer/Type/Brand : <b>{applicationDetails?.deviceRegistry[0].manufacturerOrTypeOrBrand}</b>
-                    </label>
+                {/* Email Address */}
+                <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Email Address
+                </label>
+                <div className="text-base font-medium text-gray-800 dark:text-white">
+                    {applicationDetails?.emailAddress || "—"}
+                </div>
                 </div>
             </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Range : <b>{equipment?.[0]?.range}</b>
-                    </label>
+            </div>
+            <br></br>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300">
+                {/* Header */}
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                    Device Details
+                    </h2>
+                    <Button
+                    onClick={toggleDeviceDetails}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition"
+                    variant="ghost"
+                    >
+                    {isDeviceDetailsOpen ? (
+                        <>
+                        Hide <ChevronUp size={18} />
+                        </>
+                    ) : (
+                        <>
+                        Show <ChevronDown size={18} />
+                        </>
+                    )}
+                    </Button>
                 </div>
 
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Serial Number/Model : <b>{applicationDetails?.deviceRegistry[0].serialNumberOrModel}</b>
-                    </label>
+                {/* Collapsible Content */}
+                <div
+                    className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                    isDeviceDetailsOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+                    }`}
+                >
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    {/* Equipment/Instrument */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Equipment/Instrument
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {equipment?.[0]?.description || "—"}
+                        </div>
+                    </div>
+
+                    {/* Manufacturer/Type/Brand */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Manufacturer/Type/Brand
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.manufacturerOrTypeOrBrand || "—"}
+                        </div>
+                    </div>
+
+                    {/* Range */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Range
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {equipment?.[0]?.range || "—"}
+                        </div>
+                    </div>
+
+                    {/* Serial Number/Model */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Serial Number/Model
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.serialNumberOrModel || "—"}
+                        </div>
+                    </div>
+
+                    {/* Rate */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Rate
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.rate || "—"}
+                        </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Amount
+                        </label>
+                        <div className="text-base font-medium text-gray-800 dark:text-white">
+                        {applicationDetails?.deviceRegistry?.[0]?.amount || "—"}
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Quantity : <b>{applicationDetails?.deviceRegistry[0].quantity}</b>
-                    </label>
-                </div>
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Rate : <b>{applicationDetails?.deviceRegistry[0].rate}</b>
-                    </label>
-                </div>
-
-            </div>
-
-            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                        Amount : <b>{applicationDetails?.deviceRegistry[0].amount}</b>
-                    </label>
-                </div>
-            </div>
+            <br></br>
             {isChief &&
             <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "Verified", text: "Verify" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")}  />
+                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} required />
                     </div>
                     <div className="w-full xl:w-1/2">
 
                         <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" />
+                        <Input label="Remarks" name="remarks" required />
                     </div>
                 </div>
                 <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
@@ -260,36 +325,53 @@ const DetailForm: React.FC = () => {
                 </Form>
             </Formik>
             }
-            {isLabHead &&
-            <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
-                <Form>
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    <div className="w-full xl:w-1/2">
-                        <Select 
-                        label="Select Status" 
-                        name="status" 
-                        options={[{ value: "approve", text: "Approve"}, {value: "reject", text: "Reject"}, {value: "retest", text: "Retest"}]} 
-                        onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-                        <Select 
-                        label="Select Calibration Officer" 
-                        name="calibration_officer" 
-                        options={[{ value: "Dorji Wangchuk", text: "Dorji Wangchuk"}, {value: "Pema Dorji", text: "Pema Dorji"}]} 
-                        onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-                        <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" />
-                    </div>
-                </div>
-                <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                    Update
-                </button>
-                </Form>
-            </Formik>
-            }
-
+            {isLabHead && (
+                <Formik
+                    initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber }}
+                    onSubmit={(values) => handleSubmit(values)}
+                >
+                    {({ values }) => ( // Destructure values to track selected status
+                        <Form>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Select
+                                        label="Select Status"
+                                        name="status"
+                                        options={[
+                                            { value: "approve", text: "Approve" },
+                                            { value: "reject", text: "Reject" },
+                                        ]}
+                                        onValueChange={() => console.log("Selection changed!")} 
+                                        required
+                                    />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''} />
+                                    <Input label="Remarks" name="remarks" required />
+                                </div>
+                                {/* Only show Calibration Officer if status is "approve" */}
+                                {values.status === "approve" && (
+                                    <div className="w-full xl:w-1/2">
+                                        <Select
+                                            label="Select Calibration Officer"
+                                            name="calibration_officer"
+                                            options={[
+                                                { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
+                                                { value: "Pema Dorji", text: "Pema Dorji" },
+                                            ]}
+                                            onValueChange={() => console.log("Selection changed!")} 
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
+                                Update
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            )}
         </div>
     );
 };

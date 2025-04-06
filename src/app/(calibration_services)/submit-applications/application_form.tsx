@@ -8,6 +8,12 @@ import Input from "@/components/Inputs/Input";
 import Select from "@/components/Inputs/Select";
 import { useRouter } from "next/navigation";
 
+interface EquipmentItem {
+  id: number;
+  description: string;
+  // Include other properties here as needed
+}
+
 interface FormValues {
   cid: string;
   fullName: string;
@@ -43,7 +49,7 @@ const ApplicationSubmitForm = () => {
   const [token, setToken] = useState<string | null>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [equipmentList, setEquipmentList] = useState([{}]);
-  const [selectedEquipment, setSelectedEquipment] = useState<{ [key: number]: any }>({});
+  const [selectedEquipment, setSelectedEquipment] = useState<{ [key: number]: { equipmentId: string, rate: number } }>({});
   const [organizationOptions, setOrganizationOptions] = useState<{ value: string; label: string }[]>([]);
   const [equipmentOptions, setEquipmentOptions] = useState<{ value: string; label: string }[]>([]);
   const [userDetails, setUserDetails] = useState({
@@ -59,12 +65,12 @@ const ApplicationSubmitForm = () => {
   // Fetch equipment data from API
   const fetchEquipment = async () => {
     const token = localStorage.getItem("token");
-
+  
     if (!token) {
       console.error("No authentication token found!");
       return;
     }
-
+  
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`,
@@ -76,25 +82,31 @@ const ApplicationSubmitForm = () => {
           },
         }
       );
-
+  
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
-
+  
       const data = await response.json();
-
+  
       // Check if response contains the expected data structure
       if (!data || !Array.isArray(data.data)) {
         throw new Error("Invalid response format: Expected 'data' to be an array.");
       }
-
-      // Map the data to equipment options
+  
+      // Filter out specific equipment based on their IDs
+      const filteredEquipment = data.data.filter((item: EquipmentItem) =>
+        ![0].includes(item.id)  // Exclude items with id 12, 15, and 6
+      );
+  
+      // Map the filtered data to options
       setEquipmentOptions(
-        data.data.map((item: any) => ({
+        filteredEquipment.map((item: EquipmentItem) => ({
           value: item.id,
-          text: item.description, // Assuming you want 'description' as the dropdown label
+          text: item.description,
         }))
       );
+      console.log("Filtered Equipment Data: ", filteredEquipment);
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
@@ -148,63 +160,87 @@ const ApplicationSubmitForm = () => {
     fetchOrganizations();
   }, []);
 
-  const addEquipment = () => {
+  const addEquipment = (values: FormValues, setFieldValue: Function) => {
+    const primaryEquipmentId = values.equipment[0]; // Get the primary equipment ID
+    const primaryManufacturer = values.manufacturer[0];
+    const primaryModel = values.model[0];
+    const primaryAmount = values.amount[0];
+  
+    // Add a new equipment entry
     setEquipmentList((prevList) => [
       ...prevList,
       {
-        equipment: "",
-        manufacturer: "",
-        model: "",
-        // quantity: 0,
-        amount: 0,
+        equipment: primaryEquipmentId || "",
+        manufacturer: primaryManufacturer || "",
+        model: primaryModel || "",
+        amount: selectedEquipment[equipmentList.length]?.rate || 0, // Use subsequentRate for new fields
         total_quantity: 0,
       },
     ]);
+  
+    // Update Formik values for the new field
+    setFieldValue(`equipment[${equipmentList.length}]`, primaryEquipmentId || "");
+    setFieldValue(`manufacturer[${equipmentList.length}]`, primaryManufacturer || "");
+    setFieldValue(`model[${equipmentList.length}]`, primaryModel || "");
+    setFieldValue(`amount[${equipmentList.length}]`, selectedEquipment[equipmentList.length]?.rate || 0); // Use subsequentRate
   };
 
   const removeEquipment = (index: number) => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
   };
 
-  const handleEquipmentChange = async (index: number, selectedEquipmentId: string, setFieldValue: Function) => {
-      // setSelectedEquipment((prev) => ({
-      //   ...prev,
-      //   [index]: selectedEquipmentId, // Directly use the value from onValueChange
-      // }));
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        if (data && data.status === "OK") {
-          const equipmentData = data.data;
-          const manufacturer = equipmentData?.manufacturer || "";
-          const range = equipmentData?.range || "";
-          const rate = equipmentData?.charges || 0;
-
-          // Update Formik values dynamically
-          setFieldValue(`manufacturer[${index}]`, manufacturer);
-          setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
-          setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
-          setFieldValue(`amount[${index}]`, rate);
-        } else {
-          console.error("API Error:", data.message);
+  const handleEquipmentChange = async (
+    index: number,
+    selectedEquipmentId: string,
+    setFieldValue: Function
+  ) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/id/${selectedEquipmentId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      );
+      const data = await response.json();
+      if (data && data.status === "OK") {
+        const equipmentData = data.data;
+        const manufacturer = equipmentData?.manufacturer || "";
+        const range = equipmentData?.range || "";
+        const rate = equipmentData?.charges || 0; // Primary rate
+        const subsequentRate = equipmentData?.subsequentRate || 0; // Subsequent rate
+  
+        if (index === 0) {
+          // Propagate changes to all child fields
+          equipmentList.forEach((_, i) => {
+            setFieldValue(`equipment[${i}]`, parseInt(selectedEquipmentId));
+            setFieldValue(`manufacturer[${i}]`, manufacturer);
+            setFieldValue(`model[${i}]`, range); // Assuming 'range' is the model
+            setFieldValue(`amount[${i}]`, i === 0 ? rate : subsequentRate); // Use `rate` for primary, `subsequentRate` for others
+          });
+        } else {
+          // Only update the current field
+          setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
+          setFieldValue(`manufacturer[${index}]`, manufacturer);
+          setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
+          setFieldValue(`amount[${index}]`, subsequentRate); // Use `subsequentRate` for child fields
+        }
+  
+        // Store equipment ID and rate in the state
+        setSelectedEquipment((prev) => ({
+          ...prev,
+          [index]: { equipmentId: selectedEquipmentId, rate: index === 0 ? rate : subsequentRate },
+        }));
+      } else {
+        console.error("API Error:", data.message);
       }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
-
-
   // const handleQuantityChange = (index: number, quantity: number, setFieldValue: Function, values: FormValues) => {
   //   // Ensure that the amount is correctly fetched as a number
   //   const amount = Number(values.amount[index]) || 0;
@@ -226,7 +262,7 @@ const ApplicationSubmitForm = () => {
       emailAddress: values.email,
       organizationId: values.organizationId,
       deviceRegistry: values.equipment.map((_, index) => ({
-        // quantity: values.quantity[index],
+        quantity: 1,
         testItemId: Number(values.equipment[index]),
         manufacturerOrTypeOrBrand: values.manufacturer[index],
         serialNumberOrModel: values.serialNumberOrModel[index],
@@ -261,7 +297,7 @@ const ApplicationSubmitForm = () => {
           text: `These are your client codes: ${clientCodes}`,
           icon: "success",
           confirmButtonText: "Ok",
-        }).then(() => router.push("/submit-applications"));
+        }).then(() => router.push("/dashboard"));
       } else {
         Swal.fire({
           title: "Error",
@@ -297,7 +333,6 @@ const ApplicationSubmitForm = () => {
           manufacturer: equipmentList.map(() => ""),
           model: equipmentList.map(() => ""),
           serialNumberOrModel: equipmentList.map(() => ""),
-          // quantity: equipmentList.map(() => 0),
           amount: equipmentList.map(() => 0),
           total_quantity: equipmentList.map(() => 0),
         }}
@@ -306,7 +341,6 @@ const ApplicationSubmitForm = () => {
       >
         {({ handleSubmit, values, isValid, setFieldValue }) => (
           <Form onSubmit={handleSubmit}>
-            
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
               <div className="w-full xl:w-1/2">
                 <Input
@@ -316,17 +350,37 @@ const ApplicationSubmitForm = () => {
                   placeholder="Enter Your CID Number"
                 />
               </div>
-
-              <div className="w-full xl:w-1/2">
-
-                <Input
-                  label={`Full Name`}
-                  name="fullName"
-                  type="text"
-                  placeholder="Enter Your Full Name" />
-              </div>
             </div>
             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/2">
+                  <Input
+                    label="Village"
+                    name="village"
+                    type="text"
+                  />
+              </div>
+              <div className="w-full xl:w-1/2">
+                <Input
+                  label={`Gewog`}
+                  name="gewog"
+                  type="text" />
+              </div>
+              <div className="w-full xl:w-1/2">
+                <Input
+                  label={`Dzongkhag`}
+                  name="dzongkhag"
+                  type="text" />
+              </div>
+              
+            </div>
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+            <div className="w-full xl:w-1/2">
+              <Input
+                label={`Full Name`}
+                name="fullName"
+                type="text"
+                placeholder="Enter Your Full Name" />
+              </div>
               <div className="w-full xl:w-1/2">
                 <Input
                   label={`Address`}
@@ -426,7 +480,7 @@ const ApplicationSubmitForm = () => {
                     type="number"
                     placeholder="Enter The Rate/Amount"
                     label={"Rate/Amount"}
-                    value={values.amount[index]} // Bind to Formik's value for rate/amount
+                    value={values.amount[index] || selectedEquipment[index]?.rate || 0} // Use the rate from state if available
                     readOnly={true}
                   />
                 </div>
@@ -448,15 +502,12 @@ const ApplicationSubmitForm = () => {
               </div>
             </div>
           ))}
-
-
             <div className="flex w-full items-center justify-center">
-
               <button
                 type="button"
-                className="mt-2 ml-5 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                onClick={addEquipment}
-              >
+                className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                onClick={() => addEquipment(values, setFieldValue)}
+                >
                 Add More
               </button>
             </div>

@@ -118,6 +118,7 @@ const menuGroups = [
           { label: "Tested Report", route: "/tested-application-list" },
           { label: "Submit Report", route: "/ui/buttons" },
           { label: "Approved Application", route: "/approved-application-list" },
+          { label: "Tested Certificate", route: "/tested-certificate" },
         ],
       },
       {
@@ -193,7 +194,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             aria-controls="sidebar"
             className="block"
           >
-            <BsCardList className="text-white" size={26} onClick={() => setSidebarOpen(false)} />
+            {/* <BsCardList className="text-white" size={26} onClick={() => setSidebarOpen(false)} /> */}
           </button>
         </div>
         {/* <!-- SIDEBAR HEADER --> */}
