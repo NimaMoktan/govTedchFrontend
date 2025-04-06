@@ -213,22 +213,12 @@ const ApplicationSubmitForm = () => {
         const rate = equipmentData?.charges || 0; // Primary rate
         const subsequentRate = equipmentData?.subsequentRate || 0; // Subsequent rate
   
-        if (index === 0) {
-          // Propagate changes to all child fields
-          equipmentList.forEach((_, i) => {
-            setFieldValue(`equipment[${i}]`, parseInt(selectedEquipmentId));
-            setFieldValue(`manufacturer[${i}]`, manufacturer);
-            setFieldValue(`model[${i}]`, range); // Assuming 'range' is the model
-            setFieldValue(`amount[${i}]`, i === 0 ? rate : subsequentRate); // Use `rate` for primary, `subsequentRate` for others
-          });
-        } else {
           // Only update the current field
           setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
           setFieldValue(`manufacturer[${index}]`, manufacturer);
           setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
           setFieldValue(`amount[${index}]`, subsequentRate); // Use `subsequentRate` for child fields
-        }
-  
+
         // Store equipment ID and rate in the state
         setSelectedEquipment((prev) => ({
           ...prev,
@@ -480,7 +470,7 @@ const ApplicationSubmitForm = () => {
                     type="number"
                     placeholder="Enter The Rate/Amount"
                     label={"Rate/Amount"}
-                    value={values.amount[index] || selectedEquipment[index]?.rate || 0} // Use the rate from state if available
+                    value={values.amount[index] || 0} // Use the rate from state if available
                     readOnly={true}
                   />
                 </div>

@@ -200,43 +200,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   {group.name}
                 </h3>
                 <ul className="mb-6 flex flex-col gap-1.5">
-<<<<<<< HEAD
-                  {group.menuItems
-                    .filter(item => 
-                      !item.rolesAllowed || 
-                      item.rolesAllowed.some(role => userDetails.roles.includes(role))
-                    )
-                    .map((menuItem, menuIndex) => {
-                      let filteredChildren: { label: string; route: string }[] = [];
-                    
-                      if (menuItem.children) {
-                        filteredChildren = menuItem.children.filter((child, index) => {
-                          const requiredRoles = ["THT", "MLD", "ADM"];
-                          if (index === 1) {
-                            return userDetails.roles.includes("THT")|| userDetails.roles.includes("ADM");
-                          }
-                          const labHead = ["LLD", "MLD", "VLD", "TLD", "FLD", "PLD", "ADM"]
-                          if (index === 3) {
-                            return labHead.some(role => userDetails.roles.includes(role)); 
-                          }
-                          if (index === 5) {
-                            return userDetails.roles.includes("CLO") || userDetails.roles.includes("ADM");
-                          }
-                          const certificateView = ["THT", "DIR", "ADM"];
-                          if (index === 6) {
-                            return certificateView.some(role => userDetails.roles.includes(role)); 
-                          }
-                          const constApplicationList = ["LLD", "MLD", "VLD", "TLD", "FLD", "PLD", "ADM", "CHF", "DIR"]
-                          if (index === 0) {
-                            return constApplicationList.some(role => userDetails.roles.includes(role)); 
-                          }
-                          // Other children (0, 2, 3) are for ADM & CHF
-                          return userDetails.roles.includes("ADM");
-                        });
-                      }
-=======
                   {group.menuItems.map((menuItem, menuIndex) => {
->>>>>>> 0512a4cf4f4ee27db5801a77f3cbbe74beb520a0
                       return (
                         <SidebarItem
                           key={menuIndex}
