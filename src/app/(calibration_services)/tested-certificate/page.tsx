@@ -1,25 +1,71 @@
-import React from 'react';
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import { Metadata } from 'next';
-import DefaultLayout from '@/components/Layouts/DefaultLayout';
-import UserManagement from './user-management';
+"use client";
+import React, { useState, useEffect } from "react";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { toast, ToastContainer } from "react-toastify";
+import { DataTable } from "./table";
+import { columns } from "./columns";
+import { useCallback } from "react";
 
-export const metadata: Metadata = {
-    title: "Users | User Management",
-    description:
-        "User management for users in the system",
-};
+interface Application {
+    id: number;
+    applicationNumber: string;
+    status: string;
+    createdDate: string;
+}
+import Loader from "@/components/common/Loader";
+import axios from "axios";
 
-const UsersPage: React.FC = () => {
+
+const ApplicationList: React.FC = () => {
+    const [applicationList, setApplicatoinList] = useState<Application[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+
+    const loadItem = useCallback(async () => {
+        setIsLoading(true);
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    
+        try {
+            const list = await axios.get(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/populateWorkflowDtls`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "userId": parsedUser.id,
+                    "userName": parsedUser.userName,
+                },
+            });
+            const { data } = list.data;
+            console.log("This are the datas ma broder: ", data);
+            setApplicatoinList(data || []);
+        } catch (error) {
+            console.error("Error fetching application list", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [token]); // ✅ Now it's stable and will only change when `token` changes.
+    
+    useEffect(() => {
+        if (token) {
+            loadItem();
+        }
+    }, [token, loadItem]); // ✅ Add `loadItem` to dependencies
+
+    if (isLoading) {
+        return <Loader />;
+    }
+
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Users" />
-            <div className="flex flex-col gap-2">
-                <UserManagement/>
+        <Breadcrumb pageName="Submitted Applications List" />
+        <div className="flex flex-col gap-2">
+            <ToastContainer />
+            <div className="rounded-sm border bg-white p-5 shadow-sm">
+            <DataTable columns={columns} data={applicationList} />
             </div>
+        </div>
         </DefaultLayout>
-
     );
 };
 
-export default UsersPage;
+export default ApplicationList;
