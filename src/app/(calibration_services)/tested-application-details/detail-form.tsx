@@ -534,7 +534,8 @@ const DetailForm: React.FC = () => {
                             </table>
                         </div>
                     </>
-                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "M" ? (
+                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "Mass" ||
+                applicationDetails?.deviceRegistry?.[0]?.parameter === "W" ? (
                     // Mass (W) Table
                     <div>
                         <h2 className="text-md font-semibold mb-2">Mass Calibration Data</h2>
@@ -543,7 +544,7 @@ const DetailForm: React.FC = () => {
                                 <tr className="bg-gray-200">
                                     <th className="border px-4 py-2">Denomination</th>
                                     <th className="border px-4 py-2">Conventional Mass Value (g)</th>
-                                    <th className="border px-4 py-2">Uncertainty ( ±mg)</th>
+                                    <th className="border px-4 py-2">Uncertainty (±mg)</th>
                                 </tr>
                             </thead>
                             <tbody>

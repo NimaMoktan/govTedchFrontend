@@ -34,6 +34,21 @@ export const columns = (handleEdit: (privileges: Privilege) => void, handleDelet
             )
         }
     },
+    {
+        accessorKey: "active",
+        header: () => "Status",
+        cell: ({ row }) => {
+        const status = row.original.active;
+        return (<p
+            className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
+            ? "bg-success text-success"
+            : "bg-danger text-danger"
+            }`}
+        >
+            {status === "Y" ? "Active" : "Inactive"}
+        </p>)
+        },
+    },
     
     {
         id: "actions",
@@ -48,21 +63,21 @@ export const columns = (handleEdit: (privileges: Privilege) => void, handleDelet
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <HasPermission permission="delete permissions">
+                        {/* <HasPermission permission="can delete privilege"> */}
                         <DropdownMenuItem
                             onClick={() => handleDelete(row.original)}
                         >
                             <BsTrash className="fill-current" color="red" fill="red" size={18} />
                             Delete
                         </DropdownMenuItem>
-                        </HasPermission>
-                        <HasPermission permission="edit permissions">
+                        {/* </HasPermission> */}
+                        {/* <HasPermission permission="can edit privilege"> */}
 
                         <DropdownMenuItem onClick={() => handleEdit(row.original)}>
                             <BsPencil className="fill-current" size={20} />
                             Edit
                         </DropdownMenuItem>
-                        </HasPermission>
+                        {/* </HasPermission> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )

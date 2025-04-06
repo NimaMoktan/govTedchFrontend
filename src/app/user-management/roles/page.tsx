@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const RolePage: React.FC = () => {
     return (
         <DefaultLayout>
-            <Breadcrumb pageName="Role Management" />
+            <Breadcrumb parentPage='User Management' pageName="Roles" />
             <div className="flex flex-col gap-2">
                 <RoleManager/>
             </div>
