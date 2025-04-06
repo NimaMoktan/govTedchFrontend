@@ -39,23 +39,10 @@ const menuGroups = [
         label: "Calibration Services",
         route: "#",
         children: [
-          { label: "Application List", route: "/applications_list" },
-          { label: "Submit Application", route: "/submit_applications" },
+          { label: "Application List", route: "/applications-list" },
+          { label: "Submit Application", route: "/submit-applications" },
         ],
       },
-     
-      {
-        icon: (
-          <CiChat2 className="fill-current" size={22} />
-        ),
-        label: "Feedback Module",
-        route: "#",
-        children: [
-          { label: "Product/Material Feedbacks", route: "/material_feedback" },
-          { label: "Calibration Feedbacks", route: "/calibration_feedback" }
-        ],
-      },
-      
     ],
   }
 ];

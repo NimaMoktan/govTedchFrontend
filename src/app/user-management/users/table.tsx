@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BiUserPlus } from "react-icons/bi";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -54,8 +55,8 @@ export function DataTable<TData, TValue>({
   })
 
   const totalPages = table.getCoreRowModel()?.rows?.length && table.getState()?.pagination?.pageSize
-  ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
-  : 0; // Default to 0 if data or pagination is not ready
+    ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
+    : 0; // Default to 0 if data or pagination is not ready
 
   return (
     <div>
@@ -92,12 +93,14 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-[250px] ml-6"
         />
-        <Button onClick={handleAdd}
-          className="ml-10 right-10 gap-2 px-4 py-2 btn-sm rounded-full"
-        >
-          <BiUserPlus size={20} />
-          Add New
-        </Button>
+        <Link href="/user-management/users/create">
+          <Button
+            className="ml-10 right-10 gap-2 px-4 py-2 btn-sm rounded-full"
+          >
+            <BiUserPlus size={20} />
+            Add New
+          </Button>
+        </Link>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -152,8 +155,8 @@ export function DataTable<TData, TValue>({
             Previous
           </Button>
           <span>
-          Page {table.getState().pagination.pageIndex + 1} of {totalPages}
-        </span>
+            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
+          </span>
           <Button
             variant="outline"
             size="sm"

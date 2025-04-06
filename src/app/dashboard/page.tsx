@@ -22,7 +22,6 @@ export default function Home () {
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
-        console.log("This is the user details: ", userRoles, storedUser);
         setUserDetails({
           fullName: parsedUser.fullName,
           email: parsedUser.email,

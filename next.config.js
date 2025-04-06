@@ -4,12 +4,8 @@ module.exports = {
       return [
         {
           source: '/:path*',
-          destination: 'http://172.31.1.80:9000/:path*', // Replace with backend URL
-        },
-        {
-          source: '/:path*',
-          destination: 'http://172.31.1.80:8080/:path*', // Replace with backend URL
-        },
+          destination: 'http://172.30.3.182:9000/:path*', // Replace with backend URL
+        }
       ];
     }
   };
