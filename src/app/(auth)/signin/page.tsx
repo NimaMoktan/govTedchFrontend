@@ -54,7 +54,7 @@ export default function Login() {
         });
   
         const token = data.jwt;  // ✅ Store token from API response
-        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; secure; samesite=strict;`;
+        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; samesite=Lax;`;
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", token);
   

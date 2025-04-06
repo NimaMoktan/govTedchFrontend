@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: any) {
+export function middleware(request: NextRequest) {
+    console.log("Incoming request:", request.nextUrl.href);
+
     const token = request.cookies.get("token")?.value;
 
     // If token exists and user is trying to access login page, redirect to dashboard
@@ -16,6 +18,8 @@ export function middleware(request: any) {
     return NextResponse.next();
 }
 
+// Ensure it matches all necessary paths
 export const config = {
-    matcher: ['/dashboard', '/master-management', '/user-management', '/((?!api/).*)']
-}
+    matcher: ['/', '/dashboard/:path*', '/master-management/:path*', '/user-management/:path*']
+};
+
