@@ -92,9 +92,6 @@ export function DataTable<TData extends { applicationNumber: string; id: number;
                 <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                    router.push(`tested-certificate-details?applicationNumber=${row.original.applicationNumber}&id=${row.original.id}`);
-                    }}
                 >
                     {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

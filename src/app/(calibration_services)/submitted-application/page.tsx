@@ -57,11 +57,11 @@ const ApplicationList: React.FC = () => {
 
     return (
         <DefaultLayout>
-        <Breadcrumb pageName="Submitted Applications List" />
+        <Breadcrumb pageName="Calibration Applications" />
         <div className="flex flex-col gap-2">
             <ToastContainer />
             <div className="rounded-sm border bg-white p-5 shadow-sm">
-            <DataTable columns={columns} data={applicationList.filter(item => item.status === "Analysis")} />
+            <DataTable columns={columns} data={applicationList.filter(app => app.status === "Tested")} />
             </div>
         </div>
         </DefaultLayout>
