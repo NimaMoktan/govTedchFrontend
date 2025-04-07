@@ -20,14 +20,8 @@ import axios from "axios";
 const ApplicationList: React.FC = () => {
     const [applicationList, setApplicatoinList] = useState<Application[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [token, setToken] = useState<string | null>(null);
+    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setToken(localStorage.getItem("token"));
-        }
-    }, []);
-    
     const loadItem = useCallback(async () => {
         setIsLoading(true);
         const storedUser = localStorage.getItem("userDetails");
@@ -67,7 +61,7 @@ const ApplicationList: React.FC = () => {
         <div className="flex flex-col gap-2">
             <ToastContainer />
             <div className="rounded-sm border bg-white p-5 shadow-sm">
-            <DataTable columns={columns} data={applicationList.filter(item => item.status === "Approved" || item.status === "Submitted" || item.status === "Send for Re-test" || item.status === "Assigned to Calibration Officer")} />
+            <DataTable columns={columns} data={applicationList.filter(app => app.status === "Tested")} />
             </div>
         </div>
         </DefaultLayout>
