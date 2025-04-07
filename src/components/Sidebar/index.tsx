@@ -36,10 +36,11 @@ const menuGroups = [
         ),
         label: "User Management",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Users", privilege: "can view users", route: "/user-management/users" },
-          { label: "Roles", privilege: "can view roles", route: "/user-management/roles" },
-          { label: "Privileges", privilege: "can view privileges", route: "/user-management/privileges" },
+          { label: "Users", role: ["ADM"], privilege: "can view users", route: "/user-management/users" },
+          { label: "Roles", role: ["ADM"], privilege: "can view roles", route: "/user-management/roles" },
+          { label: "Privileges", role: ["ADM"], privilege: "can view privileges", route: "/user-management/privileges" },
         ],
       }
       
@@ -54,10 +55,11 @@ const menuGroups = [
         ),
         label: "Calibration Master",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Calibration Parameters", privilege: "can view parameters", route: "/master-management/parameters" },
-          { label: "Calibration Item Group", privilege: "can view item group", route: "/master-management/calibration" },
-          { label: "Calibration Item", privilege: "can view item", route: "/master-management/calibration-item" },
+          { label: "Calibration Parameters", role: ["ADM"], privilege: "can view parameters", route: "/master-management/parameters" },
+          { label: "Calibration Item Group", role: ["ADM"], privilege: "can view item group", route: "/master-management/calibration" },
+          { label: "Calibration Item", role: ["ADM"], privilege: "can view item", route: "/master-management/calibration-item" },
         ],
       },
       {
@@ -66,9 +68,10 @@ const menuGroups = [
         ),
         label: "Product/Material Master",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Type of Sample", privilege: "can view sample type", route: "/master-management/sample-test-type" },
-          { label: "Test Type", privilege: "can view test type", route: "/master-management/test-type" },
+          { label: "Type of Sample", role: ["ADM"], privilege: "can view sample type", route: "/master-management/sample-test-type" },
+          { label: "Test Type", role: ["ADM"], privilege: "can view test type", route: "/master-management/test-type" },
         ],
       },
       {
@@ -77,8 +80,9 @@ const menuGroups = [
         ),
         label: "Verification Master",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Fuel Outlet", privilege: "can view fuel outlet",  route: "/master-management/fuel-outlet" },
+          { label: "Fuel Outlet", role: ["ADM"], privilege: "can view fuel outlet",  route: "/master-management/fuel-outlet" },
         ],
       },
       {
@@ -87,10 +91,11 @@ const menuGroups = [
         ),
         label: "Common Master",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Laboratory Testing Site", privilege: "can view laboratory testing site",  route: "/master-management/laboratory-testing-site" },
-          { label: "Dzongkhag", privilege: "can view dzongkhag",  route: "/master-management/dzongkhag" },
-          { label: "Client List", privilege: "can view client list",  route: "/master-management/organization" },
+          { label: "Laboratory Testing Site", role: ["ADM"], privilege: "can view laboratory testing site",  route: "/master-management/laboratory-testing-site" },
+          { label: "Dzongkhag", role: ["ADM"], privilege: "can view dzongkhag",  route: "/master-management/dzongkhag" },
+          { label: "Client List", role: ["ADM"], privilege: "can view client list",  route: "/master-management/organization" },
         ],
       },
       
@@ -105,14 +110,15 @@ const menuGroups = [
         ),
         label: "Calibration Services",
         route: "#",
+        role: ["CHF", "DIR", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "ADM", "CLO", "THT"],	
         children: [
-          { label: "Application List", privilege: "can view application list", route: "/applications-list" },
-          { label: "Submit Application", privilege: "can submit application", route: "/submit-applications" },
-          // { label: "Verify", privilege: "", route: "/ui/buttons" },
-          { label: "Tested Report", privilege: "can view test report", route: "/tested-application-list" },
-          { label: "Submit Report", privilege: "can submit report", route: "/ui/buttons" },
-          { label: "Approved Application", privilege: "can approved application", route: "/approved-application-list" },
-          { label: "Tested Certificate", privilege: "can view tested certificate", route: "/tested-certificate" },
+          { label: "Application List", role: ["CHF", "DIR", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD", "ADM"], privilege: "can view application list", route: "/applications-list" },
+          { label: "Submit Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submit-applications" },
+          { label: "Submitted Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submitted-application" },
+          // { label: "Verify", role: "", privilege: "", route: "/ui/buttons" },
+          { label: "Tested Report", role: ["ADM", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD",], privilege: "can view test report", route: "/tested-application-list" },
+          { label: "Approved Application", role: ["ADM", "CLO"], privilege: "can approved application", route: "/approved-application-list" },
+          { label: "Tested Certificate", role: ["ADM", "DIR", "CHF"], privilege: "can view tested certificate", route: "/tested-certificate" },
         ],
       },
       {
@@ -121,9 +127,10 @@ const menuGroups = [
         ),
         label: "Material Testing Services",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Alerts", route: "/ui/alerts" },
-          { label: "Buttons", route: "/ui/buttons" },
+          { label: "Alerts", role: [], route: "/ui/alerts" },
+          { label: "Buttons", role: [], route: "/ui/buttons" },
         ],
       },
       {
@@ -132,10 +139,11 @@ const menuGroups = [
         ),
         label: "Feedback Module",
         route: "#",
+        role: ["ADM"],
         children: [
-          { label: "Product/Material Feedbacks", route: "/material_feedback" },
-          { label: "Calibration Feedbacks", route: "/calibration_feedback" },
-          { label: "Submitted Feedbacks", route: "/ui/alerts" },
+          { label: "Product/Material Feedbacks", role: [], route: "/material_feedback" },
+          { label: "Calibration Feedbacks", role: [], route: "/calibration_feedback" },
+          { label: "Submitted Feedbacks", role: [], route: "/ui/alerts" },
           // { label: "Buttons", route: "/ui/buttons" },
         ],
       },
@@ -201,6 +209,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </h3>
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.menuItems.map((menuItem, menuIndex) => {
+                    console.log("This is the menu item: ", menuItem);
                       return (
                         <SidebarItem
                           key={menuIndex}
@@ -208,6 +217,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             ...menuItem,
                             children: menuItem.children,
                           }}
+                          roles={menuItem.role}
                           pageName={pageName}
                           setPageName={setPageName}
                         />
