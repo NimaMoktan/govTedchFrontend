@@ -24,6 +24,7 @@ const RoleManager: React.FC = () => {
     };
 
     const handleEdit = (role: Role) => {
+        router.push(`/user-management/roles/${role.id}`);
         // setSelectedRole(role);
     };
 

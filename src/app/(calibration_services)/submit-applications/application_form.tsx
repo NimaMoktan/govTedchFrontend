@@ -180,7 +180,6 @@ const ApplicationSubmitForm = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -246,7 +245,7 @@ const ApplicationSubmitForm = () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/calibrationForm/create`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
           "userId": "999",
           "userName": parsedUser.userName,

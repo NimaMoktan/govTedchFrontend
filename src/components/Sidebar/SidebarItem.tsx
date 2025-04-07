@@ -2,8 +2,9 @@ import React from "react";
 import Link from "next/link";
 import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
+import { HasRole } from "@/context/PermissionContext";
 
-const SidebarItem = ({ item, pageName, setPageName }: any) => {
+const SidebarItem = ({ item, pageName, setPageName, role }: any) => {
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
@@ -22,10 +23,10 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
 
   const isItemActive = isActive(item);
   const shouldRotate = item.children && pageName === item.label.toLowerCase();
-  // console.log("isItemActive", item);
+  console.log("role", item);
 
   return (
-    <>
+    <HasRole role={item.role}>
       <li>
         <Link
           href={item.route}
@@ -66,7 +67,7 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
           </div>
         )}
       </li>
-    </>
+    </HasRole>
   );
 };
 

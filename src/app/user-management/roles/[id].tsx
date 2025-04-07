@@ -9,20 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useLoading } from '@/context/LoadingContext';
 import { Privilege } from '@/types/Privilege';
 import { getPrivileges } from '@/services/PrivilegesService';
 import { Role } from '@/types/Role';
-import { createRole } from '@/services/RoleService';
+import { createRole, getRole } from '@/services/RoleService';
 import CheckBox from '@/components/Inputs/CheckBox';
 
-const CreateRole = () => {
+const EditRole = async ({params}:{
+    params: { id: string } // Define the type of params here
+}) => {
     const { setIsLoading, isLoading } = useLoading();
     const [allPrivileges, setAllPrivileges] = React.useState<Privilege[]>([]); // Renamed to allPrivileges
     const [selectedPrivilegeIds, setSelectedPrivilegeIds] = React.useState<number[]>([]); // Track selected IDs separately
 
     const router = useRouter();
+    const { id } = params;
 
     const handleSubmit = async (
         values: Role,
@@ -30,7 +33,6 @@ const CreateRole = () => {
     ) => {
         setIsLoading(true);
         try {
-            console.log("Submitting:", values);
             await createRole(values).then((response) => {
                 toast.success(response.data.message, {
                     duration: 1500,
@@ -62,6 +64,17 @@ const CreateRole = () => {
     }
 
     useEffect(() => {
+        const  getRoleById = async () => {
+            try {   
+                const rs = await getRole(Number(id));
+                console.log("Role Data:", rs.data);
+                const privileges = rs.data.privileges.map((privilege: Privilege) => privilege.id);
+                setSelectedPrivilegeIds(privileges);
+            } catch (error) {
+                toast.error("An error occurred while fetching role data.");
+            }   
+        }
+
         const fetchPrivileges = async () => {
             try {
                 const rs = await getPrivileges();
@@ -150,4 +163,4 @@ const CreateRole = () => {
     );
 };
 
-export default CreateRole;
+export default EditRole;
