@@ -458,7 +458,7 @@ const DetailForm: React.FC = () => {
         {isTestedDataOpen && testedData && (
             <div className="overflow-x-auto space-y-6">
                 {/* Determine Parameter Type and Render Tables Dynamically */}
-                {applicationDetails?.deviceRegistry?.[0]?.parameter === "F" ? (
+                {applicationDetails?.deviceRegistry?.[0]?.parameter === "Force" ? (
                     // Force (F) Tables
                     <>
                         {/* Repeatability Data */}
@@ -752,7 +752,7 @@ const DetailForm: React.FC = () => {
                     <Form>
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
-                            <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "retest", text: "Retest" }]} onValueChange={() => console.log("Selection changed!")} required />
+                            <Select label="Select Status" name="status" options={[{ value: "tested", text: "Test Approved" }, { value: "retest", text: "Retest" }]} onValueChange={() => console.log("Selection changed!")} required />
                         </div>
                         <div className="w-full xl:w-1/2">
 
