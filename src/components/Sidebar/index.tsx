@@ -116,7 +116,7 @@ const menuGroups = [
           { label: "Submit Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submit-applications" },
           { label: "Submitted Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submitted-application" },
           // { label: "Verify", role: "", privilege: "", route: "/ui/buttons" },
-          { label: "Tested Report", role: ["ADM", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD",], privilege: "can view test report", route: "/tested-application-list" },
+          { label: "Tested Report", role: ["ADM", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD"], privilege: "can view test report", route: "/tested-application-list" },
           { label: "Approved Application", role: ["ADM", "CLO"], privilege: "can approved application", route: "/approved-application-list" },
           { label: "Tested Certificate", role: ["ADM", "DIR", "CHF"], privilege: "can view tested certificate", route: "/tested-certificate" },
         ],

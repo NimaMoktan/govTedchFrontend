@@ -23,7 +23,7 @@ const SidebarItem = ({ item, pageName, setPageName, role }: any) => {
 
   const isItemActive = isActive(item);
   const shouldRotate = item.children && pageName === item.label.toLowerCase();
-  console.log("role", item);
+  // console.log("role", item);
 
   return (
     <HasRole role={item.role}>

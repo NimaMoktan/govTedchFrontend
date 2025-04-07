@@ -109,45 +109,11 @@ export default function Login() {
             active: string;
             userRole: UserRole[];
           };
-          
-          const user: User = {
-            id: 1,
-            cidNumber: 11111111111,
-            fullName: "Deepak Ghalley",
-            userName: "Deepak",
-            email: "12200043.gcit@rub.edu.bt",
-            mobileNumber: "77381998",
-            created_date: null,
-            created_by: null,
-            last_updated_date: "2025-02-11 05:44:39",
-            last_updated_by: "Deepak",
-            active: "Y",
-            userRole: [
-              {
-                id: 17,
-                userRoleId: 1,
-                roles: {
-                  id: 1,
-                  code: "ADM",
-                  role_name: "Admin",
-                  created_date: null,
-                  created_by: null,
-                  last_updated_date: "2025-02-03 04:54:15",
-                  last_updated_by: null,
-                  active: "Y",
-                  privileges: []
-                },
-                created_date: "2025-02-11 05:45:03",
-                created_by: null,
-                last_updated_date: "2025-02-11 05:45:03",
-                last_updated_by: null
-              }
-            ]
-          };
+          const user: User = userDetails.data;
           
           // Extract role codes
           const roleCodes: string[] = user.userRole.map((ur) => ur.roles.code);
-
+          console.log("Role Codes:", roleCodes);
           localStorage.setItem("roles", JSON.stringify(roleCodes));
           localStorage.setItem("userDetails", JSON.stringify(userDetails.data));
 
