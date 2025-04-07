@@ -91,7 +91,7 @@ const ApplicationSubmitForm = () => {
   
       // Filter out specific equipment based on their IDs
       const filteredEquipment = data.data.filter((item: EquipmentItem) =>
-        ![0].includes(item.id)  // Exclude items with id 12, 15, and 6
+        ![6,12,15].includes(item.id)  // Exclude items with id 12, 15, and 6
       );
   
       // Map the filtered data to options
@@ -106,7 +106,6 @@ const ApplicationSubmitForm = () => {
       console.error("Error fetching equipment data:", error);
     }
   };
-
   useEffect(() => {
     // Fetch the stored user details from localStorage
     const storedUser = localStorage.getItem("userDetails");
@@ -153,30 +152,18 @@ const ApplicationSubmitForm = () => {
     fetchOrganizations();
   }, []);
 
-  const addEquipment = (values: FormValues, setFieldValue: Function) => {
-    const primaryEquipmentId = values.equipment[0]; // Get the primary equipment ID
-    const primaryManufacturer = values.manufacturer[0];
-    const primaryModel = values.model[0];
-    const primaryAmount = values.amount[0];
-  
-    // Add a new equipment entry
+  const addEquipment = () => {
     setEquipmentList((prevList) => [
       ...prevList,
       {
-        equipment: primaryEquipmentId || "",
-        manufacturer: primaryManufacturer || "",
-        model: primaryModel || "",
-        amount: selectedEquipment[equipmentList.length]?.rate || 0, // Use subsequentRate for new fields
+        equipment: "",
+        manufacturer: "",
+        model: "",
+        amount: selectedEquipment[0]?.rate || 0, // Set rate for new equipment
         total_quantity: 0,
       },
     ]);
-  
-    // Update Formik values for the new field
-    setFieldValue(`equipment[${equipmentList.length}]`, primaryEquipmentId || "");
-    setFieldValue(`manufacturer[${equipmentList.length}]`, primaryManufacturer || "");
-    setFieldValue(`model[${equipmentList.length}]`, primaryModel || "");
-    setFieldValue(`amount[${equipmentList.length}]`, selectedEquipment[equipmentList.length]?.rate || 0); // Use subsequentRate
-  };
+  }; 
 
   const removeEquipment = (index: number) => {
     setEquipmentList(equipmentList.filter((_, i) => i !== index));
@@ -206,22 +193,12 @@ const ApplicationSubmitForm = () => {
         const rate = equipmentData?.charges || 0; // Primary rate
         const subsequentRate = equipmentData?.subsequentRate || 0; // Subsequent rate
   
-        if (index === 0) {
-          // Propagate changes to all child fields
-          equipmentList.forEach((_, i) => {
-            setFieldValue(`equipment[${i}]`, parseInt(selectedEquipmentId));
-            setFieldValue(`manufacturer[${i}]`, manufacturer);
-            setFieldValue(`model[${i}]`, range); // Assuming 'range' is the model
-            setFieldValue(`amount[${i}]`, i === 0 ? rate : subsequentRate); // Use `rate` for primary, `subsequentRate` for others
-          });
-        } else {
           // Only update the current field
           setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
           setFieldValue(`manufacturer[${index}]`, manufacturer);
           setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
-          setFieldValue(`amount[${index}]`, subsequentRate); // Use `subsequentRate` for child fields
-        }
-  
+          setFieldValue(`amount[${index}]`, rate); 
+
         // Store equipment ID and rate in the state
         setSelectedEquipment((prev) => ({
           ...prev,
@@ -473,7 +450,7 @@ const ApplicationSubmitForm = () => {
                     type="number"
                     placeholder="Enter The Rate/Amount"
                     label={"Rate/Amount"}
-                    value={values.amount[index] || selectedEquipment[index]?.rate || 0} // Use the rate from state if available
+                    value={values.amount[index] || 0} // Use the rate from state if available
                     readOnly={true}
                   />
                 </div>

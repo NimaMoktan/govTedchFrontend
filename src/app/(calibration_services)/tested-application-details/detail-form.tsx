@@ -37,7 +37,11 @@ const DetailForm: React.FC = () => {
         setIsDeviceDetailsOpen(prev => !prev);
     };    
     const toggleTestedData = () => setIsTestedDataOpen(!isTestedDataOpen);
-
+    const extractAndFilterParameter = (applicationNumber: string) => {
+        // Step 1: Split the application number to extract the parameter
+        const parts = applicationNumber.split("/");
+        const parameter = parts[1]; // Extract the second part
+    };
     useEffect(() => {
         if (typeof window !== "undefined") {
             setToken(localStorage.getItem("token"));
@@ -74,7 +78,7 @@ const DetailForm: React.FC = () => {
                 confirmButtonText: 'OK'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    router.push("/tested-applications-list");
+                    router.push("/dashboard");
                 }
             });
         }else{
@@ -534,8 +538,7 @@ const DetailForm: React.FC = () => {
                             </table>
                         </div>
                     </>
-                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "Mass" ||
-                applicationDetails?.deviceRegistry?.[0]?.parameter === "W" ? (
+                ) : applicationDetails?.deviceRegistry?.[0]?.clientCode.split("/")[1] === "W" ? (
                     // Mass (W) Table
                     <div>
                         <h2 className="text-md font-semibold mb-2">Mass Calibration Data</h2>
@@ -558,7 +561,7 @@ const DetailForm: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
-                ) : applicationDetails?.deviceRegistry?.[0]?.parameter === "WM" ? (
+                ) : applicationDetails?.deviceRegistry?.[0]?.clientCode.split("/")[1] === "WM" ? (
                     // Weight Measurement (WM) Tables
                     <>
                         {/* Repeatability Data */}
@@ -634,8 +637,105 @@ const DetailForm: React.FC = () => {
                             </table>
                         </div>
                     </>
-                ) : (
-                    // Default Case: No Matching Parameter
+                ) : applicationDetails?.deviceRegistry?.[0]?.testItemId === 9 ? (
+                    <div>
+                        <h2 className="text-md font-semibold mb-2">Measuring Tape Calibration Data</h2>
+                        <table className="min-w-full border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-200">
+                            <th className="border px-4 py-2">Nominal Value</th>
+                            <th className="border px-4 py-2">Cumulative Error</th>
+                            <th className="border px-4 py-2">Uncertainty at K2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {testedData.calibration_data.measuring_tape.nominal_value.map(
+                            (nominalValue: number, index: number) => (
+                                <tr key={index} className="hover:bg-gray-100">
+                                <td className="border px-4 py-2">{nominalValue}</td>
+                                <td className="border px-4 py-2">
+                                    {testedData.calibration_data.measuring_tape.cumulative_error[index]}
+                                </td>
+                                <td className="border px-4 py-2">
+                                    {testedData.calibration_data.measuring_tape.uncertainty_at_k2[index]}
+                                </td>
+                                </tr>
+                            )
+                            )}
+                        </tbody>
+                        </table>
+                    </div>
+                    ) : applicationDetails?.deviceRegistry?.[0]?.testItemId === 7 ? (
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Measuring Scale Calibration Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="border px-4 py-2">Nominal Value</th>
+                                    <th className="border px-4 py-2">Cumulative Error</th>
+                                    <th className="border px-4 py-2">Uncertainty at K2</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {testedData.calibration_data.measuring_scale.nominal_value.map(
+                                    (nominalValue: number, index: number) => (
+                                    <tr key={index} className="hover:bg-gray-100">
+                                        <td className="border px-4 py-2">{nominalValue}</td>
+                                        <td className="border px-4 py-2">
+                                        {testedData.calibration_data.measuring_scale.cumulative_error[index]}
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                        {testedData.calibration_data.measuring_scale.uncertainty_at_k2[index]}
+                                        </td>
+                                    </tr>
+                                    )
+                                )}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : applicationDetails?.deviceRegistry?.[0]?.clientCode.split("/")[1] === "V" ?(
+                        <div>
+                            <h2 className="text-md font-semibold mb-2">Calibration Data</h2>
+                            <table className="min-w-full border border-gray-300">
+                                <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="border px-4 py-2">Sl No.</th>
+                                    <th className="border px-4 py-2">Volumetric Measures</th>
+                                    <th className="border px-4 py-2">Technical Specification</th>
+                                    <th className="border px-4 py-2">Nominal Value (ml/µl)</th>
+                                    <th className="border px-4 py-2">Obtained Volume (ml/µl)</th>
+                                    <th className="border px-4 py-2">Error (ml/µl)</th>
+                                    <th className="border px-4 py-2">Uncertainty (±ml)/ml at K=2</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {testedData.calibration_data["sl no."].map((slNo:string, index:number) => (
+                                    <tr key={index} className="hover:bg-gray-100">
+                                    <td className="border px-4 py-2">{slNo}</td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Volumetric Measures"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Technical Specification"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Nominal Value (ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Obtained Volume (ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Error(ml/µl)"][index]}
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        {testedData.calibration_data["Uncertainty (±ml)/ml at K=2"][index]}
+                                    </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            </div>
+                    ) : (
                     <div>
                         <p className="text-red-500">No matching parameter type found in the data.</p>
                     </div>
