@@ -94,7 +94,7 @@ export const HasRole = ({
     // console.log("Roles from state:", roles);
 
     if (typeof window !== "undefined") {
-      console.log("Roles from localStorage:", localStorage.getItem("roles"));
+      // console.log("Roles from localStorage:", localStorage.getItem("roles"));
     }
   }, [roles]);
 
