@@ -22,11 +22,10 @@ interface SampleType {
 
 const SampleTestType: React.FC = () => {
     const [sampleType, setSampleType] = useState<SampleType[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false)
     const [editingService, setEditingService] = useState<SampleType | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -35,10 +34,13 @@ const SampleTestType: React.FC = () => {
     };
 
     const loadServices = () => {
-        setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`, {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
+                "userId": "999",
+                "userName": parsedUser.userName,
             },
         })
             .then((res) => res.json())
@@ -48,18 +50,15 @@ const SampleTestType: React.FC = () => {
                 } else {
                     setSampleType([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
 
-        setIsLoading(true);
-
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -103,7 +102,7 @@ const SampleTestType: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${sample.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/${sample.id}/delete`,
                     {},
                     {
                         headers: {
@@ -134,14 +133,12 @@ const SampleTestType: React.FC = () => {
     };
 
     useEffect(() => {
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (token) {
             loadServices();
         }
-    }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
+    }, [token, isEditing]);
 
     return (
         <DefaultLayout>
@@ -183,7 +180,7 @@ const SampleTestType: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
-                                        onValueChange={()=>{}}
+                                            onValueChange={() => { }}
                                             label="Status"
                                             name="active"
                                             options={[{

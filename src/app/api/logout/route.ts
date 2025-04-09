@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     try {
         // Use nextUrl.origin to get the absolute URL
         const url = new URL(request.url);
-        const response = NextResponse.redirect(`/`);
+        const response = NextResponse.redirect(`${url.origin}/`);
 
         // Clear the token by setting an expired Set-Cookie header
         response.cookies.set('token', '', {

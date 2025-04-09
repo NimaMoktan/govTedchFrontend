@@ -35,7 +35,7 @@ const FuelOutLet: React.FC = () => {
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<OutLetItem | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
     const [dzoList, setDzoList] = useState<Dzongkhag[]>([])
 
     const toggleModal = () => {
@@ -48,6 +48,7 @@ const FuelOutLet: React.FC = () => {
     const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     const loadItem = () => {
         setIsLoading(true);
+        
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/outlet/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -162,6 +163,8 @@ const FuelOutLet: React.FC = () => {
     };
 
     useEffect(() => {
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (token) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
                 headers: {
@@ -178,7 +181,7 @@ const FuelOutLet: React.FC = () => {
                             text: param.description,
                         }));
 
-                        setDzoList([{ value: '', text: 'Select Dzongkhag' }, ...paramOptions]);
+                        setDzoList([paramOptions]);
 
                     } else {
                         setDzoList([])
@@ -188,7 +191,7 @@ const FuelOutLet: React.FC = () => {
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
             loadItem();
         }
-    }, [isEditing]);
+    }, [token, isEditing]);
 
     if (isLoading) {
         return <Loader />

@@ -11,7 +11,6 @@ import axios from "axios";
 import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 
 interface CalibrationItem {
     id: number;
@@ -33,11 +32,10 @@ interface Parameters {
 
 const CalibrationItemGroup: React.FC = () => {
     const [itemGroup, setItemGroup] = useState<CalibrationItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<CalibrationItem | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
     const [parameter, setParameter] = useState<Parameters[]>([])
 
     const toggleModal = () => {
@@ -47,7 +45,6 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     const loadItem = () => {
-        setIsLoading(true);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationItems/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -61,7 +58,6 @@ const CalibrationItemGroup: React.FC = () => {
                     setItemGroup([])
                     toast.error(data.message, { position: "top-right", autoClose: 1000 })
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
@@ -113,7 +109,6 @@ const CalibrationItemGroup: React.FC = () => {
                 calibration_group_id: calibrationGroupId, 
             };
     
-        console.log("This is the payload being sent: ", payload, editingGroup?.id);
     
         fetch(url, {
             method,
@@ -151,7 +146,6 @@ const CalibrationItemGroup: React.FC = () => {
         .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
     };      
     const handleDelete = (itemGroup: CalibrationItem) => {
-        console.log("Deleting item:", itemGroup.id);
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -194,6 +188,8 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     useEffect(() => {
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken);
         if (token) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`, {
                 headers: {
@@ -212,21 +208,16 @@ const CalibrationItemGroup: React.FC = () => {
                             description: param.description,
                         }));                        
     
-                        setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);    
+                        setParameter(paramOptions);    
                     } else {
                         setParameter([]);
                     }
-                    setIsLoading(false);
                 })
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
             loadItem();
         }
-    }, [isEditing]);
-    
+    }, [token, isEditing]);
 
-    if (isLoading) {
-        return <Loader />
-    }
 
     return (
         <DefaultLayout>
@@ -236,7 +227,7 @@ const CalibrationItemGroup: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-5xl max-h-full">
@@ -315,7 +306,7 @@ const CalibrationItemGroup: React.FC = () => {
                                         label="Calibration"
                                         name="test"
                                         options={[
-                                            { value: "", text: "Select Calibration" },
+                                            { value: null, text: "Select Calibration" },
                                             { value: "ON", text: "On Site Testing" },
                                             { value: "ILT", text: "In Lab Testing" },
                                             ...(editingGroup?.test && !["ON", "ILT"].includes(editingGroup.test)
@@ -328,20 +319,11 @@ const CalibrationItemGroup: React.FC = () => {
 
                                     <div className="w-full xl:w-1/2">
                                     <Select
-                                    onValueChange={()=>{}}
+                                        onValueChange={()=>{}}
                                         label="Group Item"
                                         name="calibration_group_id"
                                         options={parameter}
-                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                            const selectedGroup = parameter.find(p => p.value === Number(e.target.value));
-                                            console.log('Selected Group:', selectedGroup);  // Check if the group is being selected correctly
-
-                                            if (selectedGroup) {
-                                                setFieldValue("calibration_group_id", selectedGroup.value); // Update the calibration_group_id
-                                                setFieldValue("calibration_group_code", selectedGroup.code || "");
-                                                setFieldValue("calibration_group_description", selectedGroup.description || "");
-                                            }
-                                        }}                                                                                                                 
+                                        id="calibration_group_id"                                                                                                                
                                     />
                                     </div>
                                 </div>
@@ -349,17 +331,15 @@ const CalibrationItemGroup: React.FC = () => {
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
                                         <Select
-                                            onValueChange={()=>{}}
                                             label="Status"
                                             name="active"
-                                            value={values.active}  // Bind selected value
                                             options={[
                                                 { value: "Y", text: "YES" },
                                                 { value: "N", text: "NO" }
                                             ]}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                                setFieldValue("active", e.target.value);  // Update form field value
-                                            }}
+                                            // onValueChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                            //     setFieldValue("active", e.target.value);  // Update form field value
+                                            // }}
                                         />
                                     </div>
 

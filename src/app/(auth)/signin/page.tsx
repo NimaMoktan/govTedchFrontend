@@ -31,7 +31,6 @@ export default function Login() {
     resetForm: { (nextState?: Partial<FormikState<{ username: string; password: string }>> | undefined): void }
   ) => {
     setIsLoading(true);
-    console.log("This is the username & password: ", values.username, values.password);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authenticate`, {
         method: "POST",
@@ -113,7 +112,6 @@ export default function Login() {
           
           // Extract role codes
           const roleCodes: string[] = user.userRole.map((ur) => ur.roles.code);
-          console.log("Role Codes:", roleCodes);
           localStorage.setItem("roles", JSON.stringify(roleCodes));
           localStorage.setItem("userDetails", JSON.stringify(userDetails.data));
 

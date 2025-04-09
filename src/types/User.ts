@@ -1,4 +1,5 @@
 export type User = {
+    id?: any; // Made optional
     userName: string;
     cidNumber: string;
     fullName: string;

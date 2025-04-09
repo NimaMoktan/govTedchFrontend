@@ -125,6 +125,7 @@ const UsersCreate = () => {
                     <div className="flex flex-col gap-2">
                         <Formik
                             initialValues={{
+                                id: null, // Add default id value
                                 userName: '',
                                 cidNumber: '',
                                 fullName: '',
