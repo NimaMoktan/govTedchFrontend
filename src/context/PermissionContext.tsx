@@ -81,46 +81,17 @@ export const HasPermission = ({
 
 // Component to check role
 export const HasRole = ({
-  role,
+  roles,
+  hasRoles,
   children,
 }: {
-  role: string | string[];
+  roles: string | string[];
+  hasRoles: string | string[];
   children: ReactNode;
 }) => {
-  const { roles } = usePermissions();
-  // const roles = ["ADM"];
-
-  useEffect(() => {
-    // console.log("Roles from state:", roles);
-
-    if (typeof window !== "undefined") {
-      // console.log("Roles from localStorage:", localStorage.getItem("roles"));
-    }
-  }, [roles]);
-
-  useEffect(() => {
-    const storedRoles = localStorage.getItem("roles");
-    if (storedRoles) {
-      try {
-        const parsedRoles = JSON.parse(storedRoles);
-        if (Array.isArray(parsedRoles)) {
-          // console.log("Roles from localStorage:", parsedRoles);
-        } else {
-          console.error("Stored roles are not in the expected array format.");
-        }
-      } catch (error) {
-        console.error("Error parsing roles from localStorage:", error);
-      }
-    }
-  }, []);
-
-  if (Array.isArray(role)) {
-    const storedRoles = JSON.parse(localStorage.getItem("roles") || "[]");
-    return role.some(r => storedRoles.includes(r)) ? <>{children}</> : null;
-  }
-
-  const storedRoles = JSON.parse(localStorage.getItem("roles") || "[]");
-  return storedRoles.includes(role) ? <>{children}</> : null;
+ 
+    // console.log(hasRoles, "========================", roles) 
+  return Array.isArray(hasRoles) && Array.isArray(roles) && roles.some(role => hasRoles.includes(role)) ? <>{children}</> : null;
 };
 
 // Combined component that checks either permission or role

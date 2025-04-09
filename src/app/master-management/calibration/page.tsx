@@ -33,7 +33,7 @@ const CalibrationItemGroup: React.FC = () => {
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>("");
     const [parameter, setParameter] = useState<Parameters[]>([])
     const router = useRouter();
 
@@ -153,17 +153,14 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     const handleEdit = (service: CalibrationGroupItem) => {
+        console.log(service)
         setEditingGroup(service);
         setIsEditing(true);
         setShowModal("block");
     };
 
     useEffect(() => {
-        console.log("Editing Group:", editingGroup); // Check what's in calibration_service_id
-        console.log("Parameter Options:", parameter); // Validate options are loaded
-    }, [editingGroup, parameter]);
-
-    useEffect(() => {
+        setToken(localStorage.getItem("token"));
         if (token) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
                 headers: {
@@ -176,12 +173,11 @@ const CalibrationItemGroup: React.FC = () => {
                         const list = data.data;
 
                         const paramOptions = list?.map((param: { id: number; description: string }) => ({
-                            value: param.id,  // Use string values for consistency
+                            value: param.id.toString(),  // Use string values for consistency
                             text: param.description,
                         }));
 
-                        setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);
-                        console.log(paramOptions)
+                        setParameter([{ value: "Select Parameter", text: 'Select Parameter' }, ...paramOptions]);
 
                     } else {
                         setParameter([])
@@ -191,11 +187,7 @@ const CalibrationItemGroup: React.FC = () => {
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
             loadItemGroup();
         }
-    }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
+    }, [token, isEditing]);
 
     return (
         <DefaultLayout>
@@ -205,7 +197,7 @@ const CalibrationItemGroup: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-5xl max-h-full">
@@ -223,6 +215,8 @@ const CalibrationItemGroup: React.FC = () => {
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
+                                {({ isSubmitting })=>(
+
                                 <Form>
                                     <div className="mb-4">
                                         <Input label="Code" name="code" type="text" placeholder="Enter code" />
@@ -237,10 +231,11 @@ const CalibrationItemGroup: React.FC = () => {
                                     </div>
 
                                     <div className="mb-4">
+                                        
                                         <Select
-                                            onValueChange={() => {}}
-                                            label="Calibration Parameters"
+                                            label="Calibration Parameter"
                                             name="calibration_service_id"
+                                            onValueChange={() => { }}
                                             options={parameter}
                                         />
                                     </div>
@@ -264,9 +259,12 @@ const CalibrationItemGroup: React.FC = () => {
                                     <div className="flex justify-between">
                                         <button
                                             type="submit"
+
+                                            disabled={isSubmitting}
                                             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                                         >
-                                            Save
+                                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                                            
                                         </button>
                                         <button
                                             type="button"
@@ -277,6 +275,7 @@ const CalibrationItemGroup: React.FC = () => {
                                         </button>
                                     </div>
                                 </Form>
+                                )}
                             </Formik>
                         </div>
                     </div>

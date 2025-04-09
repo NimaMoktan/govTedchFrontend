@@ -11,7 +11,6 @@ import axios from "axios";
 import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
 
 interface CalibrationService {
@@ -23,11 +22,10 @@ interface CalibrationService {
 
 const CalibrationParameters: React.FC = () => {
     const [services, setServices] = useState<CalibrationService[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<CalibrationService | null>(null);
-    const [token] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>("");
 
     const router = useRouter();
 
@@ -38,7 +36,6 @@ const CalibrationParameters: React.FC = () => {
     };
 
     const loadServices = () => {
-        setIsLoading(true);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -51,14 +48,11 @@ const CalibrationParameters: React.FC = () => {
                 }else{
                     setServices([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
-
-        setIsLoading(true);
 
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${editingService?.id}/update`
@@ -150,14 +144,11 @@ const CalibrationParameters: React.FC = () => {
     };
 
     useEffect(() => {
+        setToken(localStorage.getItem("token"));
         if (token) {
             loadServices();
         }
     }, [isEditing]);
-
-    if(isLoading){
-        return <Loader/>
-    }
 
     return (
         <DefaultLayout>
@@ -167,7 +158,7 @@ const CalibrationParameters: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
                     
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">

@@ -32,11 +32,10 @@ interface SampleType {
 const ProductTestType: React.FC = () => {
     const [services, setServices] = useState<TestType[]>([]);
     const [sampleType, setSampleType] = useState<SampleType[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<TestType | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -45,10 +44,13 @@ const ProductTestType: React.FC = () => {
     };
 
     const loadServices = () => {
-        setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/productTestType/`, {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/ProductTestType/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
+                "userId": "999",
+                "userName": parsedUser.userName,
             },
         })
             .then((res) => res.json())
@@ -58,26 +60,25 @@ const ProductTestType: React.FC = () => {
                 } else {
                     setServices([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
-
-        setIsLoading(true);
-
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/productTestType/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/productTestType/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/ProductTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/ProductTestType/`;
 
         const method = isEditing ? "POST" : "POST";
-
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
         fetch(url, {
             method,
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
+                "userId": "999",
+                "userName": parsedUser.userName,
             },
             body: JSON.stringify(values),
         })
@@ -113,7 +114,7 @@ const ProductTestType: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/productTestType/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/ProductTestType/${service.id}/delete`,
                     {},
                     {
                         headers: {
@@ -144,12 +145,18 @@ const ProductTestType: React.FC = () => {
     };
 
     useEffect(() => {
+        const storeToken = localStorage.getItem('token')
+        setToken(storeToken)
         if (token) {
             loadServices();
 
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`, {
+            const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/SampleTestType/`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
+                            "userId": "999",
+                "userName": parsedUser.userName,
                         },
                     })
                         .then((res) => res.json())
@@ -166,15 +173,10 @@ const ProductTestType: React.FC = () => {
                             } else {
                                 setSampleType([])
                             }
-                            setIsLoading(false)
                         })
                         .catch((err) => toast.error(err.message, { position: "top-right" }));
         }
-    }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
+    }, [token, isEditing]);
 
     return (
         <DefaultLayout>
