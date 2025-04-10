@@ -22,7 +22,7 @@ const LabSite: React.FC = () => {
     }
 
     const [sites, setSites] = useState<Site[]>([])
-    const [token] = useState(localStorage.getItem('token'))
+    const [token, setToken] = useState("")
     const [isLoading, setIsLoading] = useState(true)
 
     const showModalHandler = () => {
@@ -93,12 +93,17 @@ const LabSite: React.FC = () => {
             console.log(sites, "LIST")
         })
     }
+    
 
     useEffect(() => {
+        
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken || "")
         if (token) {
             loadSites();
         }
-    }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token])
 
 
     return (

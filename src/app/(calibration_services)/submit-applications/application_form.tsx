@@ -154,7 +154,7 @@ const ApplicationSubmitForm = () => {
     };
 
     fetchOrganizations();
-  }, []);
+  }, [token]);
 
   const addEquipment = () => {
     setEquipmentList((prevList) => [

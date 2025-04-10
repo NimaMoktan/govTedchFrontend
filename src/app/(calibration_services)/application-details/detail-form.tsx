@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
@@ -21,7 +22,7 @@ interface ApplicationDetails {
 }
 
 const DetailForm: React.FC = () => {
-    const [token] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
     const [applicationDetails, setApplicationDetails] = useState<ApplicationDetails | null>(null);
     const [equipment, setEquipment] = useState<{
         range: string; description: string
@@ -30,15 +31,17 @@ const DetailForm: React.FC = () => {
     const [isLabHead, setIsLabHead] = useState<boolean | null>();
 
     const searchParams = useSearchParams();
+
     const router = useRouter();
     const applicationNumber = searchParams.get("applicationNumber");
     const id = searchParams.get("id");
-    const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false);    
+
+    const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false); 
+       
     const toggleDeviceDetails = () => {
         setIsDeviceDetailsOpen(prev => !prev);
     };    
     const fetchEquipment = async (id: any) => {
-        const token = localStorage.getItem("token");
 
         if (!token) {
             return;
@@ -86,7 +89,7 @@ const DetailForm: React.FC = () => {
             userName: parsedUser.userName,
             status: values.status
         }
-        console.log("These is the sent data: ", data);
+        
         const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
             {
                 headers: {
@@ -143,6 +146,8 @@ const DetailForm: React.FC = () => {
     
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
+        const  storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
@@ -155,7 +160,7 @@ const DetailForm: React.FC = () => {
         }
         fetchApplicationDetails();
     
-    }, [applicationNumber, fetchApplicationDetails]); // ✅ Now safe to include fetchApplicationDetails
+    }, [applicationNumber, fetchApplicationDetails]);
 
     return (
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
@@ -311,7 +316,7 @@ const DetailForm: React.FC = () => {
                 <Form>
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} required />
+                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} />
                     </div>
                     <div className="w-full xl:w-1/2">
 
@@ -342,7 +347,6 @@ const DetailForm: React.FC = () => {
                                             { value: "reject", text: "Reject" },
                                         ]}
                                         onValueChange={() => console.log("Selection changed!")} 
-                                        required
                                     />
                                 </div>
                                 <div className="w-full xl:w-1/2">
@@ -360,7 +364,6 @@ const DetailForm: React.FC = () => {
                                                 { value: "Pema Dorji", text: "Pema Dorji" },
                                             ]}
                                             onValueChange={() => console.log("Selection changed!")} 
-                                            required
                                         />
                                     </div>
                                 )}

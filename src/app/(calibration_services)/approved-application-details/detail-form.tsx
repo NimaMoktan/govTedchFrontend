@@ -25,11 +25,6 @@ const DetailForm: React.FC = () => {
     const [fileUploaded, setFileUploaded] = useState(false); // Track if a file is uploaded
     const [fileName, setFileName] = useState<string | null>(null); // State to hold the file name
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setToken(localStorage.getItem("token"));
-        }
-    }, []);
     const fetchEquipment = async (id: any) => {
         const token = localStorage.getItem("token");
 
@@ -192,6 +187,8 @@ const DetailForm: React.FC = () => {
     };
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];

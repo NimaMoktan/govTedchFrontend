@@ -25,7 +25,11 @@ export type CalibrationType = {
 export const columns = (handleEdit: (calibrationType: CalibrationType) => void, handleDelete: (id: CalibrationType) => void) : ColumnDef<CalibrationType>[] => [
   {
     accessorKey: "id",
-    header: "Id"
+    header: "Id",
+    cell: ({ row }) => {
+      const sl = row.index;
+      return (<p>{sl+1}</p>)
+    },
   },
   {
     accessorKey: "description",

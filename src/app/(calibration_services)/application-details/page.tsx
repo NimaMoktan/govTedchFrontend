@@ -1,15 +1,8 @@
-import React from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import DetailForm from './detail-form';
-import { Metadata } from 'next';
 import { ToastContainer } from 'react-toastify';
-
-export const metadata: Metadata = {
-    title: "BSB | Application Details",
-    description:
-        "Application Details Page",
-};
+import { Suspense } from 'react';
 
 const ApplicationDetailsPage: React.FC = () => {
 
@@ -17,9 +10,9 @@ const ApplicationDetailsPage: React.FC = () => {
         <DefaultLayout>
             <Breadcrumb pageName="Application Details" />
             <ToastContainer/>
-            <div className="flex flex-col gap-10">
+            <Suspense fallback={<div>Loading...</div>}>
                 <DetailForm/>
-            </div>
+            </Suspense>
             
         </DefaultLayout>
     );

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -31,7 +32,6 @@ interface Dzongkhag {
 
 const FuelOutLet: React.FC = () => {
     const [itemGroup, setItemGroup] = useState<OutLetItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<OutLetItem | null>(null);
@@ -44,10 +44,9 @@ const FuelOutLet: React.FC = () => {
         setEditingGroup(null);
     };
 
-    const storedUser = localStorage.getItem("userDetails");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    const loadItem = () => {
-        setIsLoading(true);
+    const loadItem = (token: string) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
         
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/outlet/`, {
             headers: {
@@ -64,7 +63,6 @@ const FuelOutLet: React.FC = () => {
                     setItemGroup([])
                     toast.error(data.message, { position: "top-right", autoClose: 1000 })
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
@@ -78,6 +76,8 @@ const FuelOutLet: React.FC = () => {
         rate: number;
         dzongkhagId: number;
     }, resetForm: () => void) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/core/outlet/${editingGroup?.id}/update`
@@ -111,7 +111,7 @@ const FuelOutLet: React.FC = () => {
                     { position: "top-right", autoClose: 1000 }
                 );
                 setTimeout(()=> {
-                    loadItem();
+                    loadItem(token || "");
                 }, 2000)
                 toggleModal();
                 resetForm();
@@ -120,6 +120,8 @@ const FuelOutLet: React.FC = () => {
     };
 
     const handleDelete = (itemGroup: OutLetItem) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -145,7 +147,7 @@ const FuelOutLet: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadItem();
+                        loadItem(token || "");
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -165,10 +167,9 @@ const FuelOutLet: React.FC = () => {
     useEffect(() => {
         const storeToken = localStorage.getItem("token")
         setToken(storeToken)
-        if (token) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${storeToken}`,
                 },
             })
                 .then((res) => res.json())
@@ -186,16 +187,11 @@ const FuelOutLet: React.FC = () => {
                     } else {
                         setDzoList([])
                     }
-                    setIsLoading(false)
                 })
                 .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItem();
-        }
-    }, [token, isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
+            loadItem(storeToken || "");
+        
+    }, [isEditing]);
 
     return (
         <DefaultLayout>
@@ -210,6 +206,7 @@ const FuelOutLet: React.FC = () => {
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                            enableReinitialize={true}
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
@@ -243,7 +240,7 @@ const FuelOutLet: React.FC = () => {
                                 <Form>
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                     <div className="w-full xl:w-1/2">
-                                    <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                    <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing}/>
                                     </div>
 
                                     <div className="w-full xl:w-1/2">
