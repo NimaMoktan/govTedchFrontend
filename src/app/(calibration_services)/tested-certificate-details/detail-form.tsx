@@ -1,15 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Input from '@/components/Inputs/Input';
-import { Form, Formik, Field } from 'formik';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
-import { Eye, Download, ChevronDown, ChevronUp } from "lucide-react";
+import { Eye } from "lucide-react";
 import Swal from 'sweetalert2';
-import Select from '@/components/Inputs/Select';
 
 interface ApplicationDetails {
     id: string;
@@ -30,7 +28,7 @@ const DetailForm: React.FC = () => {
     const router = useRouter(); 
     const [testedData, setTestedData] = useState<any | null>(null);
 
-    const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false);
+    const [, setIsDeviceDetailsOpen] = useState(false);
     const [isTestedDataOpen, setIsTestedDataOpen] = useState(false);  
 
     const toggleDeviceDetails = () => {
@@ -42,11 +40,7 @@ const DetailForm: React.FC = () => {
         const parts = applicationNumber.split("/");
         const parameter = parts[1]; // Extract the second part
     };
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setToken(localStorage.getItem("token"));
-        }
-    }, []);
+    
     const handleSubmit = async(values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
@@ -86,7 +80,6 @@ const DetailForm: React.FC = () => {
         }
     }
     const viewCertificate = async () => {
-        const token = localStorage.getItem("token");
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
@@ -128,7 +121,6 @@ const DetailForm: React.FC = () => {
         }
     };  
     const downloadExcel = async () => {
-        const token = localStorage.getItem("token");
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
@@ -166,7 +158,6 @@ const DetailForm: React.FC = () => {
         }
     };
     const fetchEquipment = async (id: any) => {
-        const token = localStorage.getItem("token");
 
         if (!token) {
             return;
@@ -240,10 +231,12 @@ const DetailForm: React.FC = () => {
         } catch (error) {
             console.error("Error fetching application details:", error);
         }
-    }, [applicationNumber, token]);
+    }, [applicationNumber, fetchEquipment, token]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
@@ -252,7 +245,7 @@ const DetailForm: React.FC = () => {
         }
         fetchApplicationDetails();
 
-    }, [applicationNumber, fetchApplicationDetails]);
+    }, [applicationNumber]);
 
     return (
         <>

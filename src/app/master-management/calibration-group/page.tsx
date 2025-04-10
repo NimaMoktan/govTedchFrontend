@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -33,7 +34,7 @@ const CalibrationGroupManagement: React.FC = () => {
   const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
   const [isEditing, setIsEditing] = useState(false);
   const [editingGroup, setEditingGroup] = useState<CalibrationGroup | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>();
 
   const toggleModal = () => {
     setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -147,15 +148,13 @@ const CalibrationGroupManagement: React.FC = () => {
   };
 
   useEffect(() => {
+    const storeToken = localStorage.getItem("token")
+    setToken(storeToken)
     if (token) {
       loadGroups();
       loadServices();
     }
   }, [token]);
-
-  if(isLoading){
-    return <Loader/>
-}
 
   return (
     <DefaultLayout>

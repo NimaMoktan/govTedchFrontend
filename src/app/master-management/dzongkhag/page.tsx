@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -22,11 +23,10 @@ interface Dzongkhag {
 
 const CalibrationParameters: React.FC = () => {
     const [dzoList, setDzoList] = useState<Dzongkhag[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<Dzongkhag | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -34,8 +34,7 @@ const CalibrationParameters: React.FC = () => {
         setEditingService(null);
     };
 
-    const loadDzongkhag = () => {
-        setIsLoading(true);
+    const loadDzongkhag = (token: string) => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -48,14 +47,11 @@ const CalibrationParameters: React.FC = () => {
                 }else{
                     setDzoList([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
-
-        setIsLoading(true);
 
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/calibrationService/${editingService?.id}/update`
@@ -78,7 +74,7 @@ const CalibrationParameters: React.FC = () => {
                         isEditing ? "Service updated successfully" : "Service created successfully",
                         { position: "top-right", autoClose: 1000 }
                     );
-                    loadDzongkhag();
+                    loadDzongkhag(token || "");
                     toggleModal();
                     resetForm();
                 } else {
@@ -116,7 +112,7 @@ const CalibrationParameters: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
                     
                     setTimeout(()=>{
-                        loadDzongkhag();
+                        loadDzongkhag(token || "");
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -134,14 +130,10 @@ const CalibrationParameters: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token) {
-            loadDzongkhag();
-        }
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
+        loadDzongkhag(storeToken || "");
     }, [isEditing]);
-
-    if(isLoading){
-        return <Loader/>
-    }
 
     return (
         <DefaultLayout>
@@ -151,11 +143,12 @@ const CalibrationParameters: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
                     
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                            i
                                 initialValues={{
                                     code: editingService?.code || "",
                                     description: editingService?.description || "",

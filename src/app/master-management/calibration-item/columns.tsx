@@ -28,7 +28,10 @@ export type CalibrationGroup = {
 export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void): ColumnDef<CalibrationGroup>[] => [
     {
         accessorKey: "id",
-        header: "Id"
+        header: "Id",
+        cell: ({ row }) => {        
+            return (<p>{row.index+1}</p>)
+        },
     },
     {
         accessorKey: "code",

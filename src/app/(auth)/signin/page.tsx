@@ -21,8 +21,8 @@ export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [authenticated, setAuthenticated] = useState(false)
-  const [os, setOs] = useState('');
+  const [,setAuthenticated] = useState(false)
+  const [, setOs] = useState('');
 
   const router = useRouter();
 
@@ -236,7 +236,7 @@ export default function Login() {
     } catch (error) {
       console.error("NATS connection error:", error);
     }
-  }, []);
+  }, [router]);
 
   const handleLoginWithNdi = useCallback(() => {
     setIsLoading(true);
