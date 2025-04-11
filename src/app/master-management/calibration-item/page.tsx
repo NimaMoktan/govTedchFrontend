@@ -22,7 +22,8 @@ interface CalibrationItem {
     test: string;
     calibration_group_id: number,
     active: string;
-    calibrationGroup: any
+    calibrationGroup: any;
+    subsequentRate: number;
 }
 interface Parameters {
     value: number;
@@ -73,6 +74,7 @@ const CalibrationItemGroup: React.FC = () => {
             calibration_group_id?: number;
             calibration_group_code?: string;
             calibration_group_description?: string;
+            subsequentRate?: number;
         },
         resetForm: () => void
     ) => {
@@ -182,7 +184,6 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     const handleEdit = (item: CalibrationItem) => {
-        console.log("Editing item:", item);
         setEditingGroup(item);
         setIsEditing(true);
         setShowModal("block");
@@ -245,6 +246,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     calibration_group_code: editingGroup?.calibrationGroup?.code || "",
                                     calibration_group_description: editingGroup?.calibrationGroup?.description || "",
                                     active: editingGroup?.active || "Y",
+                                    subsequentRate: editingGroup?.subsequentRate || 0
                                 }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
@@ -253,6 +255,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     charges: Yup.string().required("Charges is required"),
                                     test: Yup.string().required("Calibration is required"),
                                     calibration_group_id: Yup.number().required("Item Group is required"),
+                                    subsequentRate: Yup.number().required("Subsequent Rate is required")
                                 })}
                                 onSubmit={(values, { resetForm }) => {
                                     // Find the selected calibration group from the parameter list
@@ -329,6 +332,14 @@ const CalibrationItemGroup: React.FC = () => {
                                         </div>
 
                                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                    label="Subsequent Rate"
+                                                    name="subsequentRate"
+                                                    type="text"
+                                                    placeholder="Enter Subsequent Rate"
+                                                />
+                                            </div>
                                             <div className="w-full xl:w-1/2">
                                                 <Select
                                                     label="Status"
@@ -343,9 +354,7 @@ const CalibrationItemGroup: React.FC = () => {
                                                 />
                                             </div>
 
-                                            <div className="w-full xl:w-1/2">
-
-                                            </div>
+                                            
                                         </div>
 
 

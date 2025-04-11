@@ -23,6 +23,7 @@ export type CalibrationGroup = {
     test: string;
     calibration_group_id: number;
     active: string;
+    subsequentRate: number;
 };
 
 export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void): ColumnDef<CalibrationGroup>[] => [
