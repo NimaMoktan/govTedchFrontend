@@ -1,5 +1,7 @@
+// context/LoadingContext.tsx
 "use client"
 import { createContext, useState, useContext, ReactNode } from 'react';
+import { Spinner } from "@/components/ui/spinner"
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -14,6 +16,12 @@ export const LoadingProvider = ({ children }: { children: ReactNode }) => {
   return (
     <LoadingContext.Provider value={{ isLoading, setIsLoading }}>
       {children}
+      {/* Global Loading Component */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <Spinner size="large"/>
+        </div>
+      )}
     </LoadingContext.Provider>
   );
 };
