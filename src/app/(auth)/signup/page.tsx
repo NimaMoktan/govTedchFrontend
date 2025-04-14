@@ -3,7 +3,10 @@ import React from "react";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { BiQrScan, BiPlayCircle } from "react-icons/bi";
+import applestore from "/public/images/logo/appstore.png";
+import googleplay from "/public/images/logo/googleplay.png";
 const proofRequestURL = "your-proof-request-url";
+import Image from "next/image";
 
 const SignUp: React.FC = () => {
   return (
@@ -98,11 +101,13 @@ const SignUp: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
-                    src="/images/logo/googleplay.png"
-                    className="w-[99px] h-[30px]"
-                    alt="Google Play Store"
-                  />
+                  <Image
+                      src={googleplay}
+                      className="w-[99px] h-[30px]"
+                      alt="Google Play Store"
+                      width={100}
+                      height={100}
+                    />
                 </a>
                 <a
                   href="https://apps.apple.com/in/app/bhutan-ndi/id1645493166"
@@ -110,11 +115,13 @@ const SignUp: React.FC = () => {
                   rel="noopener noreferrer"
                   className="ml-3"
                 >
-                  <img
-                    src="/images/logo/appstore.png"
-                    className="w-[99px] h-[30px]"
-                    alt="Apple App Store"
-                  />
+                  <Image
+                      src={applestore}
+                      className="w-[99px] h-[30px]"
+                      alt="Apple App Store"
+                      width={100}
+                      height={100}
+                    />
                 </a>
               </div>
 

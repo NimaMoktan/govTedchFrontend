@@ -17,11 +17,48 @@ import googleplay from "/public/images/logo/googleplay.png";
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 
+type Role = {
+  id: number;
+  code: string;
+  role_name: string;
+  created_date: string | null;
+  created_by: string | null;
+  last_updated_date: string;
+  last_updated_by: string | null;
+  active: string;
+  privileges: any[];
+};
+
+type UserRole = {
+  id: number;
+  userRoleId: number;
+  roles: Role;
+  created_date: string;
+  created_by: string | null;
+  last_updated_date: string;
+  last_updated_by: string | null;
+};
+
+type User = {
+  id: number;
+  cidNumber: number;
+  fullName: string;
+  userName: string;
+  email: string;
+  mobileNumber: string;
+  created_date: string | null;
+  created_by: string | null;
+  last_updated_date: string;
+  last_updated_by: string;
+  active: string;
+  userRole: UserRole[];
+};
+
 export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [,setAuthenticated] = useState(false)
+  const [, setAuthenticated] = useState(false)
   const [, setOs] = useState('');
 
   const router = useRouter();
@@ -42,86 +79,74 @@ export default function Login() {
           password: values.password,
         }),
       });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        setAuthenticated(true);
-        toast.success("Login successful!", {
-          position: "top-right",
-          autoClose: 1500,
-        });
-  
-        const token = data.jwt;  // ✅ Store token from API response
-        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; samesite=Lax;`;
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", token);
-  
-        // ✅ Use the token directly in the next API call
-        try {
-          const userDetailsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/core/user/${values.username}/userDtls`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`, // ✅ Use freshly received token
-                "Content-Type": "application/json",
-              },
-            }
-          );
-  
-          const userDetails = await userDetailsResponse.json();
-          // console.log("User Details:", userDetails);
-          type Role = {
-            id: number;
-            code: string;
-            role_name: string;
-            created_date: string | null;
-            created_by: string | null;
-            last_updated_date: string;
-            last_updated_by: string | null;
-            active: string;
-            privileges: any[];
-          };
-          
-          type UserRole = {
-            id: number;
-            userRoleId: number;
-            roles: Role;
-            created_date: string;
-            created_by: string | null;
-            last_updated_date: string;
-            last_updated_by: string | null;
-          };
-          
-          type User = {
-            id: number;
-            cidNumber: number;
-            fullName: string;
-            userName: string;
-            email: string;
-            mobileNumber: string;
-            created_date: string | null;
-            created_by: string | null;
-            last_updated_date: string;
-            last_updated_by: string;
-            active: string;
-            userRole: UserRole[];
-          };
-          const user: User = userDetails.data;
-          
-          // Extract role codes
-          const roleCodes: string[] = user.userRole.map((ur) => ur.roles.code);
-          localStorage.setItem("roles", JSON.stringify(roleCodes));
-          localStorage.setItem("userDetails", JSON.stringify(userDetails.data));
 
-        } catch (userDetailsError) {
-          console.error("Error fetching user details:", userDetailsError);
+      const data = await response.json();
+
+      if (response.ok) {
+
+        if (data.userResponse.newUser === "Y") {
+            const res: Response = await fetch('/api/encrypt', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: String(data.userResponse.id),
+              password: 'Qni7p7"y4|?w',
+              action: 'encrypt'
+            })
+            });
+          
+          const encryptedData = await res.json();
+
+          setTimeout(() => {
+            router.push(`/password-change/${encryptedData.result}`);
+          }, 2000);
+        } else {
+
+          setAuthenticated(true);
+
+          toast.success("Login successful!", {
+            position: "top-right",
+            autoClose: 1500,
+          });
+
+          const token = data.jwt;  // ✅ Store token from API response
+          document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; samesite=Lax;`;
+          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("token", token);
+
+          try {
+            const userDetailsResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/core/user/${values.username}/userDtls`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            const userDetails = await userDetailsResponse.json();
+
+            const user: User = userDetails.data;
+
+            // Extract role codes
+            const roleCodes: string[] = user.userRole.map((ur) => ur.roles.code);
+            localStorage.setItem("roles", JSON.stringify(roleCodes));
+            localStorage.setItem("userDetails", JSON.stringify(userDetails.data));
+
+          } catch (userDetailsError) {
+            console.error("Error fetching user details:", userDetailsError);
+          }
+
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 2000);
+
         }
-  
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
+
       } else {
         toast.error(data.message || "An error occurred during login.", {
           position: "top-right",
@@ -141,7 +166,7 @@ export default function Login() {
         },
       });
     }
-  };  
+  };
 
   const detectDeviceType = () => {
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -150,11 +175,11 @@ export default function Login() {
     return "Other";
   };
 
-  const natsListener = useCallback(async (threadId : any) => {
+  const natsListener = useCallback(async (threadId: any) => {
 
-    const sendToServer = async (params : {
-      username: any; name: any; params : any
-}) => {
+    const sendToServer = async (params: {
+      username: any; name: any; params: any
+    }) => {
       try {
 
         toast.success("Login successful!", {
@@ -204,7 +229,7 @@ export default function Login() {
         setTimeout(() => {
           router.push("/user-dashboard");
         }, 1500);
-        
+
       } catch (error) {
         setErrorMessage("Error submitting data");
       }
@@ -246,7 +271,6 @@ export default function Login() {
       .then(response => {
         const { proofRequestURL, proofRequestThreadId } = response.data.data;
         setProofRequestURL(proofRequestURL);
-        console.log(proofRequestURL)
         natsListener(proofRequestThreadId);
       })
       .catch(() => setErrorMessage('Communication failed with server.'))
@@ -267,7 +291,7 @@ export default function Login() {
           <ToastContainer />
           <div className="hidden w-full xl:block xl:w-1/2">
             <div className="px-13 py-10">
-              
+
               <Formik
                 initialValues={{
                   username: '',
@@ -282,31 +306,30 @@ export default function Login() {
 
                 <Form>
                   <div className="w-full">
-                    <Input name="username" label={`Username`} placeholder="Enter under name" />
+                    <Input name="username" label={`Username`} placeholder="Enter Username" autoComplete="off" />
                   </div>
                   <div className="w-full mt-6">
-                    <Input type="password" name="password" label={`Password`} placeholder="Enter Password" />
+                    <Input type="password" name="password" label={`Password`} placeholder="Enter Password" autoComplete="off" />
                   </div>
                   <div className="w-full mt-6">
-                  <Button disabled={isLoading} className="w-full">
-                    {isLoading && 
-                    <Loader2 className="animate-spin" />
-                    }
-                    {
-                      isLoading ? "Please wait" : "Login"
-                    }
-                  </Button>
+                    <Button type='submit' disabled={isLoading} className="w-full">
+                      {isLoading &&
+                        <Loader2 className="animate-spin" />
+                      }
+                      {
+                        isLoading ? "Please wait" : "Login"
+                      }
+                    </Button>
                   </div>
                 </Form>
               </Formik>
 
               <div className="form-group text-center mt-4">
                 <span className="text-[#A1A0A0]">
-                  Don&apos;t have an account?{" "} <br></br>
-                  <Link href="/signup" className="text-[#5AC994] underline">
-                    Sign Up
+                  {/* Don&apos;t have an account?{" "} <br></br> */}
+                  <Link href="/forgot-password" className="text-[#5AC994] underline">
+                    Forgot Password?
                   </Link>
-                  {" "} With Bhutan NDI Wallet
                 </span>
               </div>
             </div>

@@ -66,6 +66,7 @@ const CalibrationItemGroup: React.FC = () => {
 
     const handleSubmit = (
         values: {
+            id: any;
             code: string;
             description: string;
             range: string;
@@ -75,6 +76,7 @@ const CalibrationItemGroup: React.FC = () => {
             calibration_group_code?: string;
             calibration_group_description?: string;
             subsequentRate?: number;
+            active?: string;
         },
         resetForm: () => void
     ) => {
@@ -91,9 +93,10 @@ const CalibrationItemGroup: React.FC = () => {
 
         const payload = isEditing
             ? {
+                id: values.id,
                 code: values.code,
                 description: values.description,
-                active: "Y",
+                active: values.active,
                 calibration_service_id: 0,
                 range: values.range,
                 charges: values.charges,
@@ -106,6 +109,8 @@ const CalibrationItemGroup: React.FC = () => {
                     description: values.calibration_group_description,
                     active: "Y",
                 },
+                calibration_group_id: values.calibration_group_id,
+                subsequentRate: values.subsequentRate
             }
             : {
                 ...values,
@@ -235,6 +240,7 @@ const CalibrationItemGroup: React.FC = () => {
                             <Formik
                                 enableReinitialize={true}
                                 initialValues={{
+                                    id: editingGroup?.id || "",
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
                                     range: editingGroup?.range || "",
@@ -274,6 +280,7 @@ const CalibrationItemGroup: React.FC = () => {
                                     <Form>
                                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                             <div className="w-full xl:w-1/2">
+                                                <Input label="Code" type="hidden" name="id"/>
                                                 <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing}/>
                                             </div>
 

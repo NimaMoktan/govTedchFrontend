@@ -6,19 +6,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { DataTable } from './table'
 import { Privilege } from '@/types/Privilege'
 import { getPrivileges, deletePrivilege } from '@/services/PrivilegesService'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { columns } from './columns'
 import Swal from 'sweetalert2'
+import { useLoading } from '@/context/LoadingContext'
 
 export default function Page() {
 
     const [privileges, setPrivileges] = useState<Privilege[]>([]);
-    const router = useRouter();
+    const { setIsLoading } = useLoading()
 
     const loadPrivileges = async () => {
+        setIsLoading(true)
         try {
-            const rs = await getPrivileges();
+            const rs = await getPrivileges().finally(()=>setIsLoading(false));
             setPrivileges(rs.data);
         } catch (error) {
             toast.error("An error occurred while fetching privileges.");
@@ -54,7 +55,6 @@ export default function Page() {
     };
 
     useEffect(() => {
-        // handleLoadPrivileges();
         loadPrivileges();
     }, []);
     

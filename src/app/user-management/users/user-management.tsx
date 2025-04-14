@@ -7,11 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 import { getUsers } from '@/services/UserService';
 import { User } from '@/types/User';
+import { useLoading } from '@/context/LoadingContext';
 
 const UserManagement = () => {
   const [usersList, setUsersList] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
+  const { setIsLoading } = useLoading()
 
   const handleCreateUser = () => {
     router.push('/user-management/users/create'); // Assuming you have a create route
@@ -22,8 +23,9 @@ const UserManagement = () => {
   };
 
   const fetchUsers = async () => {
+    setIsLoading(true)
     try {
-      const response = await getUsers();
+      const response = await getUsers().finally(()=>setIsLoading(false));
       setUsersList(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);

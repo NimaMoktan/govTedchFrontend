@@ -83,6 +83,25 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
         }
     },
     {
+        accessorKey: "active",
+        header: () => {
+            return (
+                <>Status</>
+            )
+        },
+        cell: ({ row }) => {
+            const status = row.original.active;
+        return (<p
+            className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
+            ? "bg-success text-success"
+            : "bg-danger text-danger"
+            }`}
+        >
+            {status === "Y" ? "Active" : "Inactive"}
+        </p>)
+        }
+    },
+    {
         id: "actions",
         cell: ({ row }) => {
 
