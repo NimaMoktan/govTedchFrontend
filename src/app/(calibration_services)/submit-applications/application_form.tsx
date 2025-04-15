@@ -123,7 +123,7 @@ const ApplicationSubmitForm = () => {
       try {
         const token = localStorage.getItem("token"); // Ensure the token is included for authentication
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/public/clientList`, {
           method: "GET",
           headers: {
             // Authorization: `Bearer ${token}`,
