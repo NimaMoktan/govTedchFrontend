@@ -6,6 +6,10 @@ import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { ToastContainer, toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
+import logo from "/public/images/logo/logo.png";
+
 
 const ForgotPassword = () => {
     const router = useRouter()
@@ -20,10 +24,19 @@ const ForgotPassword = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark w-full max-w-md">
+            <Card >
                 <ToastContainer />
                 <div className="flex flex-wrap items-center">
-                    <div className="flex flex-col justify-center bg-[#f8f8f8] rounded-lg p-6 space-y-4">
+                    <div className="flex flex-col justify-center rounded-lg p-6 space-y-4">
+                    <div className="flex justify-center mb-4">
+                            <Image 
+                                src={logo} // Update this path to your logo
+                                alt="BSB Logo"
+                                width={150} // Adjust as needed
+                                height={100} // Adjust as needed
+                                className="object-contain"
+                            />
+                        </div>
                         <div className="form-group text-center">
                             <span className="font-bold text-gray-400">
                                 Password Reset
@@ -75,7 +88,7 @@ const ForgotPassword = () => {
                         </Formik>
                     </div>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

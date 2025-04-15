@@ -45,7 +45,10 @@ const UsersCreate = () => {
                     // setIsLoading(false)
                     router.push("/user-management/users");
                 }, 2000);
-            })
+            }).catch((e)=>{
+                toast.error("Error while creating user.")
+            }).finally(()=>setIsLoading(false))
+
             resetForm();
         } catch (error) {
             console.error("ERROR", error);
