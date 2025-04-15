@@ -129,8 +129,8 @@ const menuGroups = [
         route: "#",
         role: ["ADM"],
         children: [
-          { label: "Alerts", role: [], route: "/ui/alerts" },
-          { label: "Buttons", role: [], route: "/ui/buttons" },
+          { label: "Submit Application", role: ["THT", "ADM"], route: "/product/submit-application" },
+          { label: "Application List", role: ["THT", "ADM"], route: "/product/application-list" },
         ],
       },
       {

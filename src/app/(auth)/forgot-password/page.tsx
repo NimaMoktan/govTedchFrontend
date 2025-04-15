@@ -14,10 +14,10 @@ import logo from "/public/images/logo/logo.png";
 const ForgotPassword = () => {
     const router = useRouter()
 
-
     const handleSubmit = async (values: any, { resetForm, setSubmitting }: any) => {
         
     };
+    
     useEffect(() => {
        
     }, []);
