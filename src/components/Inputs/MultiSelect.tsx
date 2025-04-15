@@ -14,18 +14,26 @@ interface MultiSelectProps {
 }
 
 const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
-  const [field, meta, helpers] = useField(name);
+  const [field, meta, helpers] = useField<string[]>(name);
   const [show, setShow] = useState(false);
   const [selected, setSelected] = useState<string[]>(field.value || []);
-  const dropdownRef = useRef<any>(null);
-  const triggerRef = useRef<any>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  // Sync selected values with Formik field value
+  useEffect(() => {
+    if (field.value) {
+      setSelected(field.value);
+    }
+  }, [field.value]);
 
   useEffect(() => {
     const handleClickOutside = ({ target }: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(target) &&
-        !triggerRef.current.contains(target)
+        !dropdownRef.current.contains(target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target as Node)
       ) {
         setShow(false);
       }
@@ -41,6 +49,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
       ? selected.filter((v) => v !== value)
       : [...selected, value];
     setSelected(newSelected);
+    console.log(newSelected)
     helpers.setValue(newSelected);
   };
 
@@ -87,6 +96,8 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
                 <Input
                   placeholder="Select an option"
                   size={40}
+                  readOnly
+                  className="cursor-pointer"
                 />
               </div>
             )}
@@ -113,9 +124,10 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ name, options, label }) => {
         </div>
       )}
 
-      {/* ✅ Show Formik Validation Error */}
       {meta.touched && meta.error && (
-        <p className="mt-1 text-sm text-red-500">{meta.error}</p>
+        <p className="mt-1 text-sm text-red-500">
+          {typeof meta.error === 'string' ? meta.error : 'Please select at least one option'}
+        </p>
       )}
     </div>
   );

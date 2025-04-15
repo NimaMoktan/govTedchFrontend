@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { DataTable } from "./table";
 import { columns } from "./columns";
 import { useCallback } from "react";
@@ -20,7 +20,7 @@ import axios from "axios";
 const ApplicationList: React.FC = () => {
     const [applicationList, setApplicatoinList] = useState<Application[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const loadItem = useCallback(async () => {
         setIsLoading(true);
@@ -46,6 +46,8 @@ const ApplicationList: React.FC = () => {
     }, [token]); // ✅ Now it's stable and will only change when `token` changes.
     
     useEffect(() => {
+        const storeToken = localStorage.getItem("token");
+        setToken(storeToken)
         if (token) {
             loadItem();
         }

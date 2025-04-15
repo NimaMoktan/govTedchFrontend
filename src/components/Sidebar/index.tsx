@@ -116,7 +116,7 @@ const menuGroups = [
           { label: "Submit Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submit-applications" },
           { label: "Submitted Application", role: ["THT", "ADM"], privilege: "can submit application", route: "/submitted-application" },
           // { label: "Verify", role: "", privilege: "", route: "/ui/buttons" },
-          { label: "Tested Report", role: ["ADM", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD",], privilege: "can view test report", route: "/tested-application-list" },
+          { label: "Tested Report", role: ["ADM", "MLD", "VLD", "TLD", "FLD", "LLD", "PLD"], privilege: "can view test report", route: "/tested-application-list" },
           { label: "Approved Application", role: ["ADM", "CLO"], privilege: "can approved application", route: "/approved-application-list" },
           { label: "Tested Certificate", role: ["ADM", "DIR", "CHF"], privilege: "can view tested certificate", route: "/tested-certificate" },
         ],
@@ -159,9 +159,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       imageUrl: "/images/user/default.jpg",
       roles: [],  // Ensure roles is included in initial state
     });
+    const [storedRoles, setStoredRoles] = useState("");
   useEffect(() => {
     // Fetch stored user details from localStorage
     const storedUser = localStorage.getItem("userDetails");
+    const roles = localStorage.getItem("roles");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       
@@ -175,7 +177,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         roles: userRoles,  // Now this is valid
       });
     }
+    if(roles){
+      const parsedRoles = Array.isArray(roles) ? roles : JSON.parse(roles);
+      setStoredRoles(parsedRoles);
+    }
   }, []);
+
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
@@ -209,7 +216,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </h3>
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.menuItems.map((menuItem, menuIndex) => {
-                    console.log("This is the menu item: ", menuItem);
                       return (
                         <SidebarItem
                           key={menuIndex}
@@ -217,6 +223,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             ...menuItem,
                             children: menuItem.children,
                           }}
+                          assignRoles={storedRoles}
                           roles={menuItem.role}
                           pageName={pageName}
                           setPageName={setPageName}

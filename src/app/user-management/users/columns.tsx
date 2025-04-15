@@ -12,18 +12,9 @@ import {
 
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
+import { User } from "@/types/User";
 
-export type OutLet = {
-    id: number;
-    userName: string;
-    email: string;
-    cidNumber: string;
-    fullName: string;
-    mobileNumber: string;
-    active: string;
-};
-
-export const columns = (handleEdit: (outLet: OutLet) => void, handleDelete: (id: OutLet) => void): ColumnDef<OutLet>[] => [
+export const columns = (handleEdit: (user: User) => void, handleDelete: (id: User) => void): ColumnDef<User>[] => [
     {
         accessorKey: "id",
         header: "Id",

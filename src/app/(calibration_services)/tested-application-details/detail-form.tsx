@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
@@ -42,11 +43,7 @@ const DetailForm: React.FC = () => {
         const parts = applicationNumber.split("/");
         const parameter = parts[1]; // Extract the second part
     };
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setToken(localStorage.getItem("token"));
-        }
-    }, []);
+    
     const handleSubmit = async(values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
@@ -86,7 +83,6 @@ const DetailForm: React.FC = () => {
         }
     }
     const viewCertificate = async () => {
-        const token = localStorage.getItem("token");
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
@@ -128,7 +124,6 @@ const DetailForm: React.FC = () => {
         }
     };  
     const downloadExcel = async () => {
-        const token = localStorage.getItem("token");
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
@@ -166,7 +161,6 @@ const DetailForm: React.FC = () => {
         }
     };
     const fetchEquipment = async (id: any) => {
-        const token = localStorage.getItem("token");
 
         if (!token) {
             return;
@@ -244,6 +238,8 @@ const DetailForm: React.FC = () => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         if (storedUser) {
             const { userRole } = JSON.parse(storedUser);
             const roleList = [userRole[0].roles];
@@ -752,7 +748,7 @@ const DetailForm: React.FC = () => {
                     <Form>
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
-                            <Select label="Select Status" name="status" options={[{ value: "tested", text: "Test Approved" }, { value: "retest", text: "Retest" }]} onValueChange={() => console.log("Selection changed!")} required />
+                            <Select label="Select Status" name="status" options={[{ value: "tested", text: "Test Approved" }, { value: "retest", text: "Retest" }]} onValueChange={() => console.log("Selection changed!")} />
                         </div>
                         <div className="w-full xl:w-1/2">
 

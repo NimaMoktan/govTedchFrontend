@@ -11,7 +11,6 @@ import axios from "axios";
 import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 
 interface TestType {
     id: number;
@@ -32,11 +31,10 @@ interface SampleType {
 const ProductTestType: React.FC = () => {
     const [services, setServices] = useState<TestType[]>([]);
     const [sampleType, setSampleType] = useState<SampleType[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<TestType | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -44,9 +42,10 @@ const ProductTestType: React.FC = () => {
         setEditingService(null);
     };
 
-    const loadServices = () => {
-        setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/productTestType/`, {
+    const loadServices = (token: string) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/productTestType/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -58,26 +57,25 @@ const ProductTestType: React.FC = () => {
                 } else {
                     setServices([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
-
-        setIsLoading(true);
-
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/productTestType/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/productTestType/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/productTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/productTestType/`;
 
         const method = isEditing ? "POST" : "POST";
-
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
         fetch(url, {
             method,
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
+                "userId": "999",
+                "userName": parsedUser.userName,
             },
             body: JSON.stringify(values),
         })
@@ -88,7 +86,7 @@ const ProductTestType: React.FC = () => {
                         isEditing ? "Service updated successfully" : "Service created successfully",
                         { position: "top-right", autoClose: 1000 }
                     );
-                    loadServices();
+                    loadServices(token || "");
                     toggleModal();
                     resetForm();
                 } else {
@@ -113,7 +111,7 @@ const ProductTestType: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/productTestType/${service.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/productTestType/${service.id}/delete`,
                     {},
                     {
                         headers: {
@@ -126,7 +124,7 @@ const ProductTestType: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadServices();
+                        loadServices(token || "");
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -144,37 +142,37 @@ const ProductTestType: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token) {
-            loadServices();
+        const storeToken = localStorage.getItem('token')
+        setToken(storeToken)
 
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/sampleTestType/`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    })
-                        .then((res) => res.json())
-                        .then((data) => {
-                            if (data.data != null) {
-                                const list = data.data;
+        loadServices(storeToken || "");
 
-                                const paramOptions = list?.map((param: { id: number; description: string }) => ({
-                                    value: param.id,  // Use string values for consistency
-                                    text: param.description,
-                                }));
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/`, {
+            headers: {
+                Authorization: `Bearer ${storeToken}`,
+                
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.data != null) {
+                    const list = data.data;
 
-                                setSampleType([{ value: '', text: 'Select Sample Type' }, ...paramOptions]);
-                            } else {
-                                setSampleType([])
-                            }
-                            setIsLoading(false)
-                        })
-                        .catch((err) => toast.error(err.message, { position: "top-right" }));
-        }
+                    const paramOptions = list?.map((param: { id: number; description: string }) => ({
+                        value: param.id,  // Use string values for consistency
+                        text: param.description,
+                    }));
+
+                    setSampleType([{ value: null, text: 'Select Sample Type' }, ...paramOptions]);
+                } else {
+                    setSampleType([])
+                }
+            })
+            .catch((err) => toast.error(err.message, { position: "top-right" }));
+
     }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
 
     return (
         <DefaultLayout>
@@ -184,11 +182,12 @@ const ProductTestType: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                            enableReinitialize={true}
                                 initialValues={{
                                     code: editingService?.code || "",
                                     description: editingService?.description || "",
@@ -209,85 +208,85 @@ const ProductTestType: React.FC = () => {
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
                                 <Form>
-                                    
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Input label="Code" name="code" type="text" placeholder="Enter code" />
+
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing}/>
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Description"
+                                                name="description"
+                                                type="text"
+                                                placeholder="Enter description"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Description"
-                                            name="description"
-                                            type="text"
-                                            placeholder="Enter description"
-                                        />
-                                    </div>
-                                </div>
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Sample Code"
+                                                name="sampleCode"
+                                                options={sampleType}
+                                            />
+                                        </div>
 
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Select
-                                            onValueChange={()=>{}}
-                                            label="Sample Code"
-                                            name="sampleCode"
-                                            options={sampleType}
-                                        />
-                                    </div>
-
-                                    <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Quantity Required"
-                                            name="quantityRequired"
-                                            type="text"
-                                            placeholder="Enter Quantity Required"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Input label="Rate in Nu" name="ratesInNu" type="text" placeholder="Enter Rate" />
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Quantity Required"
+                                                name="quantityRequired"
+                                                type="text"
+                                                placeholder="Enter Quantity Required"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                    <Select
-                                    onValueChange={()=>{}}
-                                            label="Test Site"
-                                            name="testSiteCode"
-                                            options={[{
-                                                value: "On-Site",
-                                                text: "On-Site"
-                                            },
-                                            {
-                                                value: "In-Lab",
-                                                text: "In-Lab"
-                                            }]}
-                                        />
-                                    </div>
-                                </div>
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input label="Rate in Nu" name="ratesInNu" type="text" placeholder="Enter Rate" />
+                                        </div>
 
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Select
-                                    onValueChange={()=>{}}
-                                            label="Status"
-                                            name="active"
-                                            options={[{
-                                                value: "Y",
-                                                text: "YES"
-                                            },
-                                            {
-                                                value: "N",
-                                                text: "NO"
-                                            }]}
-                                        />
+                                        <div className="w-full xl:w-1/2">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Test Site"
+                                                name="testSiteCode"
+                                                options={[{
+                                                    value: "On-Site",
+                                                    text: "On-Site"
+                                                },
+                                                {
+                                                    value: "In-Lab",
+                                                    text: "In-Lab"
+                                                }]}
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                  
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Status"
+                                                name="active"
+                                                options={[{
+                                                    value: "Y",
+                                                    text: "YES"
+                                                },
+                                                {
+                                                    value: "N",
+                                                    text: "NO"
+                                                }]}
+                                            />
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+
+                                        </div>
                                     </div>
-                                </div>
 
 
                                     <div className="flex justify-between">

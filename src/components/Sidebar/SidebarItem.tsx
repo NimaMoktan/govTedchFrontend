@@ -4,7 +4,7 @@ import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
 import { HasRole } from "@/context/PermissionContext";
 
-const SidebarItem = ({ item, pageName, setPageName, role }: any) => {
+const SidebarItem = ({ item, pageName, setPageName, assignRoles }: any) => {
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
@@ -23,10 +23,10 @@ const SidebarItem = ({ item, pageName, setPageName, role }: any) => {
 
   const isItemActive = isActive(item);
   const shouldRotate = item.children && pageName === item.label.toLowerCase();
-  console.log("role", item);
+  // console.log("role", item);
 
   return (
-    <HasRole role={item.role}>
+    <HasRole roles={item.role} hasRoles={assignRoles}>
       <li>
         <Link
           href={item.route}
@@ -63,7 +63,7 @@ const SidebarItem = ({ item, pageName, setPageName, role }: any) => {
               shouldRotate ? "" : "hidden"
             }`}
           >
-            <SidebarDropdown item={item.children} />
+            <SidebarDropdown item={item.children} assignRoles={assignRoles}/>
           </div>
         )}
       </li>

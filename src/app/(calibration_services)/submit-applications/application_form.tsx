@@ -30,6 +30,11 @@ interface FormValues {
   serialNumberOrModel: string[];
 }
 
+interface Options {
+  value: number;
+  text: string;
+}
+
 const validationSchema = Yup.object().shape({
   cid: Yup.string().required("CID is required"),
   fullName: Yup.string().required("Full name is required"),
@@ -50,8 +55,8 @@ const ApplicationSubmitForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [equipmentList, setEquipmentList] = useState([{}]);
   const [selectedEquipment, setSelectedEquipment] = useState<{ [key: number]: { equipmentId: string, rate: number } }>({});
-  const [organizationOptions, setOrganizationOptions] = useState<{ value: string; label: string }[]>([]);
-  const [equipmentOptions, setEquipmentOptions] = useState<{ value: string; label: string }[]>([]);
+  const [organizationOptions, setOrganizationOptions] = useState<Options[]>([]);
+  const [equipmentOptions, setEquipmentOptions] = useState<Options[]>([]);
   const [userDetails, setUserDetails] = useState({
     cid: "",
     fullName: "",
@@ -101,7 +106,6 @@ const ApplicationSubmitForm = () => {
           text: item.description,
         }))
       );
-      console.log("Filtered Equipment Data: ", filteredEquipment);
     } catch (error) {
       console.error("Error fetching equipment data:", error);
     }
@@ -140,7 +144,7 @@ const ApplicationSubmitForm = () => {
 
         setOrganizationOptions(
           data.data?.map((org: any) => ({
-            value: org.id.toString(),
+            value: org.id,
             text: org.description,
           }))
         );
@@ -150,7 +154,7 @@ const ApplicationSubmitForm = () => {
     };
 
     fetchOrganizations();
-  }, []);
+  }, [token]);
 
   const addEquipment = () => {
     setEquipmentList((prevList) => [

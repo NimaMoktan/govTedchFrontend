@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -12,7 +13,7 @@ import Select from "@/components/Inputs/Select";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
-import { useRouter } from "next/navigation";	
+import { useRouter } from "next/navigation";
 
 interface CalibrationGroupItem {
     id: number;
@@ -33,7 +34,7 @@ const CalibrationItemGroup: React.FC = () => {
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>("");
     const [parameter, setParameter] = useState<Parameters[]>([])
     const router = useRouter();
 
@@ -43,12 +44,12 @@ const CalibrationItemGroup: React.FC = () => {
         setEditingGroup(null);
     };
 
-    const loadItemGroup = () => {
+    const loadItemGroup = (storeToken: string) => {
         setIsLoading(true);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`, {
             method: "GET",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${storeToken}`,
             },
         })
             .then((res) => res.json())
@@ -91,26 +92,30 @@ const CalibrationItemGroup: React.FC = () => {
                         showConfirmButton: false,
                         position: 'top-end', // Adjust position if needed
                         toast: true
-                    });  
+                    });
                     return res.json()
                 } else {
                     Swal.fire({
-                            icon: 'error',
-                            title: "Error! Please try again",
-                            timer: 2000,
-                            showConfirmButton: false,
-                            position: 'top-end', // Adjust position if needed
-                            toast: true
-                        }).then(()=>{
-                            router.push('master-management/calibration')
-                        });  
+                        icon: 'error',
+                        title: "Error! Please try again",
+                        timer: 2000,
+                        showConfirmButton: false,
+                        position: 'top-end', // Adjust position if needed
+                        toast: true
+                    }).then(() => {
+                        router.push('master-management/calibration')
+                    });
                     throw new Error("Failed to save service");
                 }
-            }).then((response) =>{
+            }).then((response) => {
                 toast.success(response.messsage,
                     { position: "top-right", autoClose: 1000 }
                 );
-                loadItemGroup();
+                if (token) {
+                    loadItemGroup(token);
+                } else {
+                    toast.error("Token is missing", { position: "top-right" });
+                }
                 toggleModal();
                 resetForm();
             })
@@ -141,7 +146,9 @@ const CalibrationItemGroup: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadItemGroup();
+                        if (token) {
+                            loadItemGroup(token);
+                        }
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -153,49 +160,41 @@ const CalibrationItemGroup: React.FC = () => {
     };
 
     const handleEdit = (service: CalibrationGroupItem) => {
+        console.log(service)
         setEditingGroup(service);
         setIsEditing(true);
         setShowModal("block");
     };
 
     useEffect(() => {
-        console.log("Editing Group:", editingGroup); // Check what's in calibration_service_id
-        console.log("Parameter Options:", parameter); // Validate options are loaded
-    }, [editingGroup, parameter]);
+        setToken(localStorage.getItem("token"));
 
-    useEffect(() => {
-        if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.data != null) {
+                    const list = data.data;
+
+                    const paramOptions = list?.map((param: { id: number; description: string }) => ({
+                        value: param.id.toString(),  // Use string values for consistency
+                        text: param.description,
+                    }));
+
+                    setParameter([{ value: "Select Parameter", text: 'Select Parameter' }, ...paramOptions]);
+
+                } else {
+                    setParameter([])
+                }
+                setIsLoading(false)
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.data != null) {
-                        const list = data.data;
+            .catch((err) => toast.error(err.message, { position: "top-right" }));
+        loadItemGroup(localStorage.getItem("token") || "");
 
-                        const paramOptions = list?.map((param: { id: number; description: string }) => ({
-                            value: param.id,  // Use string values for consistency
-                            text: param.description,
-                        }));
-
-                        setParameter([{ value: '', text: 'Select Parameter' }, ...paramOptions]);
-                        console.log(paramOptions)
-
-                    } else {
-                        setParameter([])
-                    }
-                    setIsLoading(false)
-                })
-                .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItemGroup();
-        }
     }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
 
     return (
         <DefaultLayout>
@@ -205,17 +204,18 @@ const CalibrationItemGroup: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-5xl max-h-full">
                             <Formik
+                                enableReinitialize={true}
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
                                     active: editingGroup?.active || "Y",
                                     calibration_service_id: editingGroup?.id || "",
-                                    }}
+                                }}
                                 validationSchema={Yup.object({
                                     code: Yup.string().required("Code is required"),
                                     description: Yup.string().required("Description is required"),
@@ -223,60 +223,67 @@ const CalibrationItemGroup: React.FC = () => {
                                 })}
                                 onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
                             >
-                                <Form>
-                                    <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
-                                    </div>
-                                    <div className="mb-4">
-                                        <Input
-                                            label="Description"
-                                            name="description"
-                                            type="text"
-                                            placeholder="Enter description"
-                                        />
-                                    </div>
+                                {({ isSubmitting }) => (
 
-                                    <div className="mb-4">
-                                        <Select
-                                            onValueChange={() => {}}
-                                            label="Calibration Parameters"
-                                            name="calibration_service_id"
-                                            options={parameter}
-                                        />
-                                    </div>
+                                    <Form>
+                                        <div className="mb-4">
+                                            <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing} />
+                                        </div>
+                                        <div className="mb-4">
+                                            <Input
+                                                label="Description"
+                                                name="description"
+                                                type="text"
+                                                placeholder="Enter description"
+                                            />
+                                        </div>
 
-                                    <div className="mb-4">
-                                        <Select
-                                        onValueChange={() => {}}
-                                            label="Status"
-                                            name="active"
-                                            options={[{
-                                                value: "Y",
-                                                text: "YES"
-                                            },
-                                            {
-                                                value: "N",
-                                                text: "NO"
-                                            }]}
-                                        />
-                                    </div>
+                                        <div className="mb-4">
 
-                                    <div className="flex justify-between">
-                                        <button
-                                            type="submit"
-                                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                        >
-                                            Save
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={toggleModal}
-                                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </Form>
+                                            <Select
+                                                label="Calibration Parameter"
+                                                name="calibration_service_id"
+                                                onValueChange={() => { }}
+                                                options={parameter}
+                                            />
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Status"
+                                                name="active"
+                                                options={[{
+                                                    value: "Y",
+                                                    text: "YES"
+                                                },
+                                                {
+                                                    value: "N",
+                                                    text: "NO"
+                                                }]}
+                                            />
+                                        </div>
+
+                                        <div className="flex justify-between">
+                                            <button
+                                                type="submit"
+
+                                                disabled={isSubmitting}
+                                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                            >
+                                                {isSubmitting ? 'Submitting...' : 'Submit'}
+
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={toggleModal}
+                                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </Form>
+                                )}
                             </Formik>
                         </div>
                     </div>

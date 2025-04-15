@@ -22,11 +22,10 @@ interface SampleType {
 
 const SampleTestType: React.FC = () => {
     const [sampleType, setSampleType] = useState<SampleType[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false)
     const [editingService, setEditingService] = useState<SampleType | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
 
     const toggleModal = () => {
         setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -34,11 +33,14 @@ const SampleTestType: React.FC = () => {
         setEditingService(null);
     };
 
-    const loadServices = () => {
-        setIsLoading(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`, {
+    const loadServices = (storeToken: string | null) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/`, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${storeToken}`,
+                "userId": "999",
+                "userName": parsedUser.userName,
             },
         })
             .then((res) => res.json())
@@ -48,18 +50,15 @@ const SampleTestType: React.FC = () => {
                 } else {
                     setSampleType([])
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
     const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void) => {
 
-        setIsLoading(true);
-
         const url = isEditing
-            ? `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${editingService?.id}/update`
-            : `${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/${editingService?.id}/update`
+            : `${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/`;
 
         const method = isEditing ? "POST" : "POST";
 
@@ -78,7 +77,7 @@ const SampleTestType: React.FC = () => {
                         isEditing ? "Service updated successfully" : "Service created successfully",
                         { position: "top-right", autoClose: 1000 }
                     );
-                    loadServices();
+                    loadServices(token || "");
                     toggleModal();
                     resetForm();
                 } else {
@@ -103,7 +102,7 @@ const SampleTestType: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/sampleTestType/${sample.id}/delete`,
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/SampleTestType/${sample.id}/delete`,
                     {},
                     {
                         headers: {
@@ -116,7 +115,7 @@ const SampleTestType: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadServices();
+                        loadServices(token || "");
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -134,14 +133,11 @@ const SampleTestType: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token) {
-            loadServices();
-        }
-    }, [isEditing]);
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
+        loadServices(storeToken);
 
-    if (isLoading) {
-        return <Loader />
-    }
+    }, [isEditing]);
 
     return (
         <DefaultLayout>
@@ -151,11 +147,12 @@ const SampleTestType: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                                enableReinitialize={true}
                                 initialValues={{
                                     code: editingService?.code || "",
                                     description: editingService?.description || "",
@@ -170,7 +167,7 @@ const SampleTestType: React.FC = () => {
                                 <Form>
 
                                     <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                        <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing}/>
                                     </div>
                                     <div className="mb-4">
                                         <Input
@@ -183,7 +180,7 @@ const SampleTestType: React.FC = () => {
 
                                     <div className="mb-4">
                                         <Select
-                                        onValueChange={()=>{}}
+                                            onValueChange={() => { }}
                                             label="Status"
                                             name="active"
                                             options={[{

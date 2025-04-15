@@ -1,13 +1,14 @@
 // next.config.js
 module.exports = {
-    async rewrites() {
-      return [
-        {
-          source: '/:path*',
-          destination: 'http://172.30.3.182:9000/:path*', // Replace with backend URL
-        }
-      ];
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+      };
     }
+    return config;
+  }
   };
 
   // const nextConfig = {

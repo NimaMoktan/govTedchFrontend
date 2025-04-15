@@ -9,9 +9,9 @@ export const getRoles = async (): Promise<ApiResponse> => {
     return response.data;
   };
 export const getRole = async (id: number) => {
-    const response = await api.get(`/core/roles/${id}`);
+    const response = await api.get(`/core/roles/id/${id}`);
     return response.data;
 };
 export const createRole = async (data: Role) => api.post('/core/roles/', data);
-export const updateRole = async (id: number, data: Role) => api.put(`/core/roles/${id}`, data);
+export const updateRole = async (id: number, data: Role) => api.post(`/core/roles/${id}/update`, data);
 export const deleteRole = async (id: number) => api.delete(`/core/roles/${id}`);

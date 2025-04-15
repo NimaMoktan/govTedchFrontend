@@ -23,12 +23,16 @@ export type CalibrationGroup = {
     test: string;
     calibration_group_id: number;
     active: string;
+    subsequentRate: number;
 };
 
 export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void, handleDelete: (id: CalibrationGroup) => void): ColumnDef<CalibrationGroup>[] => [
     {
         accessorKey: "id",
-        header: "Id"
+        header: "Id",
+        cell: ({ row }) => {        
+            return (<p>{row.index+1}</p>)
+        },
     },
     {
         accessorKey: "code",
@@ -76,6 +80,25 @@ export const columns = (handleEdit: (calibrationGroup: CalibrationGroup) => void
             return (<p>
                 {group.description}
             </p>)
+        }
+    },
+    {
+        accessorKey: "active",
+        header: () => {
+            return (
+                <>Status</>
+            )
+        },
+        cell: ({ row }) => {
+            const status = row.original.active;
+        return (<p
+            className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${status === "Y"
+            ? "bg-success text-success"
+            : "bg-danger text-danger"
+            }`}
+        >
+            {status === "Y" ? "Active" : "Inactive"}
+        </p>)
         }
     },
     {

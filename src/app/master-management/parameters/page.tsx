@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -11,23 +12,21 @@ import axios from "axios";
 import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
 
 interface CalibrationService {
     id: number;
     code: string;
     description: string;
-    active: string
+    active: string;
 }
 
 const CalibrationParameters: React.FC = () => {
     const [services, setServices] = useState<CalibrationService[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingService, setEditingService] = useState<CalibrationService | null>(null);
-    const [token] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>("");
 
     const router = useRouter();
 
@@ -37,34 +36,34 @@ const CalibrationParameters: React.FC = () => {
         setEditingService(null);
     };
 
-    const loadServices = () => {
-        setIsLoading(true);
+    const loadServices = (storeToken: string | null) => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${storeToken}`,
             },
         })
             .then((res) => res.json())
             .then((data) => {
-                if(data.data != null){
+                if (data.data != null) {
                     setServices(data.data);
-                }else{
-                    setServices([])
+                } else {
+                    setServices([]);
                 }
-                setIsLoading(false)
             })
-            .catch((err) => toast.error(err.message, { position: "top-right" }));
+            .catch((err) =>
+                toast.error(err.message, { position: "top-right" })
+            );
     };
 
-    const handleSubmit = (values: { code: string; description: string; active: string }, resetForm: () => void ) => {
-
-        setIsLoading(true);
-
+    const handleSubmit = (
+        values: { code: string; description: string; active: string },
+        resetForm: () => void
+    ) => {
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${editingService?.id}/update`
             : `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`;
 
-        const method = isEditing ? "POST" : "POST";
+        const method = "POST";
 
         fetch(url, {
             method,
@@ -76,33 +75,41 @@ const CalibrationParameters: React.FC = () => {
         })
             .then((res) => {
                 if (res.ok) {
-
                     Swal.fire({
-                        icon: 'success',
-                        title: isEditing ? 'Service updated successfully' : 'Service created successfully',
+                        icon: "success",
+                        title: isEditing
+                            ? "Service updated successfully"
+                            : "Service created successfully",
                         timer: 2000,
                         showConfirmButton: false,
-                        position: 'top-end', // Adjust position if needed
-                        toast: true
-                    });                    
-                    loadServices();
+                        position: "top-end",
+                        toast: true,
+                    });
+                    loadServices(token);
                     toggleModal();
                     resetForm();
                 } else {
                     Swal.fire({
-                        icon: 'error',
-                        title: isEditing ? 'Service updated failed' : 'Service creation failed',
+                        icon: "error",
+                        title: isEditing
+                            ? "Service update failed"
+                            : "Service creation failed",
                         showConfirmButton: false,
                         timer: 1000,
-                        position: 'top-end', // Adjust position if needed
-                        toast: true
-                    }).then(()=>{
-                        router.push('/master-management/parameters');
-                    }); 
+                        position: "top-end",
+                        toast: true,
+                    }).then(() => {
+                        router.push("/master-management/parameters");
+                    });
                     throw new Error("Failed to save service");
                 }
             })
-            .catch((err) => toast.error(err.message, { position: "top-right", autoClose: 1000 }));
+            .catch((err) =>
+                toast.error(err.message, {
+                    position: "top-right",
+                    autoClose: 1000,
+                })
+            );
     };
 
     const handleDelete = (service: CalibrationService) => {
@@ -116,28 +123,30 @@ const CalibrationParameters: React.FC = () => {
             confirmButtonText: "Yes, delete it!",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${service.id}/delete`,
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/${service.id}/delete`,
                     {},
                     {
                         headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
+                            Authorization: `Bearer ${token}`,
+                        },
                     }
                 );
                 const { data } = response;
                 if (data.statusCode == 200) {
                     Swal.fire({
-                        icon: 'success',
+                        icon: "success",
                         title: data.message,
                         showConfirmButton: true,
-                        position: 'center'
-                    }).then(()=>{
-                        router.push('/master-management/parameters');
+                        position: "center",
+                    }).then(() => {
+                        router.push("/master-management/parameters");
                     });
                 } else {
-                    toast.error(data.message,
-                        { position: "top-right", autoClose: 1000 }
-                    );
+                    toast.error(data.message, {
+                        position: "top-right",
+                        autoClose: 1000,
+                    });
                 }
             }
         });
@@ -150,14 +159,10 @@ const CalibrationParameters: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token) {
-            loadServices();
-        }
+        const storeToken = localStorage.getItem("token");
+        setToken(storeToken);
+        loadServices(storeToken);
     }, [isEditing]);
-
-    if(isLoading){
-        return <Loader/>
-    }
 
     return (
         <DefaultLayout>
@@ -165,27 +170,42 @@ const CalibrationParameters: React.FC = () => {
             <div className="flex flex-col gap-10">
                 <ToastContainer />
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
-                    
+                    {/* Modal */}
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
-                            }`}
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${
+                            showModal === "block" ? "block" : "hidden"
+                        }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                                enableReinitialize={true}
                                 initialValues={{
                                     code: editingService?.code || "",
-                                    description: editingService?.description || "",
-                                    active: editingService?.active || "Y"
+                                    description:
+                                        editingService?.description || "",
+                                    active: editingService?.active || "Y",
                                 }}
                                 validationSchema={Yup.object({
-                                    code: Yup.string().required("Code is required"),
-                                    description: Yup.string().required("Description is required"),
+                                    code: Yup.string().required(
+                                        "Code is required"
+                                    ),
+                                    description: Yup.string().required(
+                                        "Description is required"
+                                    ),
                                 })}
-                                onSubmit={(values, { resetForm }) => handleSubmit(values, resetForm)}
+                                onSubmit={(values, { resetForm }) =>
+                                    handleSubmit(values, resetForm)
+                                }
                             >
                                 <Form>
                                     <div className="mb-4">
-                                        <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                        <Input
+                                            label="Code"
+                                            name="code"
+                                            type="text"
+                                            placeholder="Enter code"
+                                            disabled={isEditing}
+                                        />
                                     </div>
                                     <div className="mb-4">
                                         <Input
@@ -195,23 +215,23 @@ const CalibrationParameters: React.FC = () => {
                                             placeholder="Enter description"
                                         />
                                     </div>
-
                                     <div className="mb-4">
                                         <Select
-                                        onValueChange={()=>{}}
+                                            onValueChange={() => {}}
                                             label="Status"
                                             name="active"
-                                            options={[{
-                                                value: "Y",
-                                                text: "YES"
-                                            }, 
-                                            {
-                                                value: "N",
-                                                text: "NO"
-                                            }]}
+                                            options={[
+                                                {
+                                                    value: "Y",
+                                                    text: "YES",
+                                                },
+                                                {
+                                                    value: "N",
+                                                    text: "NO",
+                                                },
+                                            ]}
                                         />
                                     </div>
-
                                     <div className="flex justify-between">
                                         <button
                                             type="submit"
@@ -231,7 +251,13 @@ const CalibrationParameters: React.FC = () => {
                             </Formik>
                         </div>
                     </div>
-                    <DataTable columns={columns(handleEdit, handleDelete)} data={services} handleAdd={toggleModal}/>
+
+                    {/* Table */}
+                    <DataTable
+                        columns={columns(handleEdit, handleDelete)}
+                        data={services}
+                        handleAdd={toggleModal}
+                    />
                 </div>
             </div>
         </DefaultLayout>

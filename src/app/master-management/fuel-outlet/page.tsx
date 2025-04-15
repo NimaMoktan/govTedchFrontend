@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -11,7 +12,6 @@ import axios from "axios";
 import Select from "@/components/Inputs/Select";
 import { DataTable } from "./table";
 import { columns } from "./columns";
-import Loader from "@/components/common/Loader";
 
 interface OutLetItem {
     id: number;
@@ -31,11 +31,10 @@ interface Dzongkhag {
 
 const FuelOutLet: React.FC = () => {
     const [itemGroup, setItemGroup] = useState<OutLetItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
     const [isEditing, setIsEditing] = useState(false);
     const [editingGroup, setEditingGroup] = useState<OutLetItem | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+    const [token, setToken] = useState<string | null>();
     const [dzoList, setDzoList] = useState<Dzongkhag[]>([])
 
     const toggleModal = () => {
@@ -44,10 +43,10 @@ const FuelOutLet: React.FC = () => {
         setEditingGroup(null);
     };
 
-    const storedUser = localStorage.getItem("userDetails");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    const loadItem = () => {
-        setIsLoading(true);
+    const loadItem = (token: string) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/outlet/`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -63,20 +62,21 @@ const FuelOutLet: React.FC = () => {
                     setItemGroup([])
                     toast.error(data.message, { position: "top-right", autoClose: 1000 })
                 }
-                setIsLoading(false)
             })
             .catch((err) => toast.error(err.message, { position: "top-right" }));
     };
 
-    const handleSubmit = (values: { 
-        code: string; 
-        description: string; 
+    const handleSubmit = (values: {
+        code: string;
+        description: string;
         no_pumps: string;
         location: string;
         quantity: number;
         rate: number;
         dzongkhagId: number;
     }, resetForm: () => void) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
         const url = isEditing
             ? `${process.env.NEXT_PUBLIC_API_URL}/core/outlet/${editingGroup?.id}/update`
@@ -105,12 +105,12 @@ const FuelOutLet: React.FC = () => {
                     );
                     throw new Error("Failed to save service");
                 }
-            }).then((response) =>{
+            }).then((response) => {
                 toast.success(response.messsage,
                     { position: "top-right", autoClose: 1000 }
                 );
-                setTimeout(()=> {
-                    loadItem();
+                setTimeout(() => {
+                    loadItem(token || "");
                 }, 2000)
                 toggleModal();
                 resetForm();
@@ -119,6 +119,8 @@ const FuelOutLet: React.FC = () => {
     };
 
     const handleDelete = (itemGroup: OutLetItem) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
         Swal.fire({
             title: "Are you sure?",
             text: "This action cannot be undone!",
@@ -144,7 +146,7 @@ const FuelOutLet: React.FC = () => {
                     toast.success(data.message, { position: "top-right", autoClose: 1000 });
 
                     setTimeout(() => {
-                        loadItem();
+                        loadItem(token || "");
                     }, 2000)
                 } else {
                     toast.error(data.message,
@@ -162,37 +164,34 @@ const FuelOutLet: React.FC = () => {
     };
 
     useEffect(() => {
-        if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
+        
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/dzongkhag/`, {
+            headers: {
+                Authorization: `Bearer ${storeToken}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.data != null) {
+                    const list = data.data;
+
+                    const paramOptions = list?.map((param: { id: number; description: string }) => ({
+                        value: param.id,  // Use string values for consistency
+                        text: param.description,
+                    }));
+                    setDzoList(paramOptions);
+
+                } else {
+                    setDzoList([])
+                }
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.data != null) {
-                        const list = data.data;
+            .catch((err) => toast.error(err.message, { position: "top-right" }));
 
-                        const paramOptions = list?.map((param: { id: number; description: string }) => ({
-                            value: param.id,  // Use string values for consistency
-                            text: param.description,
-                        }));
+        loadItem(storeToken || "");
 
-                        setDzoList([{ value: '', text: 'Select Dzongkhag' }, ...paramOptions]);
-
-                    } else {
-                        setDzoList([])
-                    }
-                    setIsLoading(false)
-                })
-                .catch((err) => toast.error(err.message, { position: "top-right" }));
-            loadItem();
-        }
     }, [isEditing]);
-
-    if (isLoading) {
-        return <Loader />
-    }
 
     return (
         <DefaultLayout>
@@ -202,11 +201,12 @@ const FuelOutLet: React.FC = () => {
                 <div className="rounded-sm border bg-white p-5 shadow-sm">
 
                     <div
-                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9999 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
+                        className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-9 w-full md:inset-0 h-[calc(100%-1rem)] max-h-full ${showModal === "block" ? "block" : "hidden"
                             }`}
                     >
                         <div className="bg-white p-6 rounded-md shadow-lg p-4 w-full max-w-5xl max-h-full">
                             <Formik
+                                enableReinitialize={true}
                                 initialValues={{
                                     code: editingGroup?.code || "",
                                     description: editingGroup?.description || "",
@@ -222,7 +222,7 @@ const FuelOutLet: React.FC = () => {
                                     description: Yup.string().required("Description is required"),
                                     no_pumps: Yup.string().required("Number of is required"),
                                     location: Yup.string().required("Location is required"),
-                                dzongkhagId: Yup.string().required("Dzongkhag is required"),
+                                    dzongkhagId: Yup.string().required("Dzongkhag is required"),
                                     quantity: Yup.string().required("Number of nozzles is required"),
                                     rate: Yup.string().required("Rate is required")
                                 })}
@@ -238,77 +238,77 @@ const FuelOutLet: React.FC = () => {
                                     );
                                 }} >
                                 <Form>
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Input label="Code" name="code" type="text" placeholder="Enter code" />
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input label="Code" name="code" type="text" placeholder="Enter code" disabled={isEditing} />
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Description"
+                                                name="description"
+                                                type="text"
+                                                placeholder="Enter description"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Description"
-                                            name="description"
-                                            type="text"
-                                            placeholder="Enter description"
-                                        />
-                                    </div>
-                                </div>
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input label="Number of Pumps" name="no_pumps" type="number" placeholder="Enter Number of Pumps" />
+                                        </div>
 
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Input label="Number of Pumps" name="no_pumps" type="number" placeholder="Enter Number of Pumps" />
-                                    </div>
-
-                                    <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Location"
-                                            name="location"
-                                            type="text"
-                                            placeholder="Enter Location Name"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Input label="Number of nozzles" name="quantity" type="number" placeholder="Enter number of nozzles" />
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Location"
+                                                name="location"
+                                                type="text"
+                                                placeholder="Enter Location Name"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                    <Input
-                                            label="Rate"
-                                            name="rate"
-                                            type="text"
-                                            placeholder="Enter Rate"
-                                        />
-                                    </div>
-                                </div>
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Input label="Number of nozzles" name="quantity" type="number" placeholder="Enter number of nozzles" />
+                                        </div>
 
-                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                    <div className="w-full xl:w-1/2">
-                                    <Select
-                                    onValueChange={()=>{}}
-                                            label="Dzongkhag"
-                                            name="dzongkhagId"
-                                            options={dzoList}
-                                        />
+                                        <div className="w-full xl:w-1/2">
+                                            <Input
+                                                label="Rate"
+                                                name="rate"
+                                                type="text"
+                                                placeholder="Enter Rate"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="w-full xl:w-1/2">
-                                    <Select
-                                    onValueChange={()=>{}}
-                                            label="Status"
-                                            name="active"
-                                            options={[{
-                                                value: "Y",
-                                                text: "YES"
-                                            },
-                                            {
-                                                value: "N",
-                                                text: "NO"
-                                            }]}
-                                        />
+                                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                        <div className="w-full xl:w-1/2">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Dzongkhag"
+                                                name="dzongkhagId"
+                                                options={dzoList}
+                                            />
+                                        </div>
+
+                                        <div className="w-full xl:w-1/2">
+                                            <Select
+                                                onValueChange={() => { }}
+                                                label="Status"
+                                                name="active"
+                                                options={[{
+                                                    value: "Y",
+                                                    text: "YES"
+                                                },
+                                                {
+                                                    value: "N",
+                                                    text: "NO"
+                                                }]}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
 
                                     <div className="flex justify-between">

@@ -16,7 +16,7 @@ interface Service {
 const SampleTestTable = () => {
     const [products, setProducts] = useState<Service[]>([]);
     const [showModal, setShowModal] = useState(false);
-    const [token] = useState(localStorage.getItem('token'))
+    const [token, setToken] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<Service | null>(null);
 
     const fetchProducts = useCallback(async () => {
@@ -42,6 +42,8 @@ const SampleTestTable = () => {
     }, [token]); // Only recreate fetchProducts if token changes
     
     useEffect(() => {
+        const storeToken = localStorage.getItem("token")
+        setToken(storeToken)
         fetchProducts();
     }, [fetchProducts]); // Call fetchProducts when the component mounts or token changes    
 

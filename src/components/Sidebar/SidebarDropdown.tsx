@@ -4,14 +4,13 @@ import { usePathname } from "next/navigation";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { HasRole } from "@/context/PermissionContext";
 
-const SidebarDropdown = ({ item }: any) => {
+const SidebarDropdown = ({ item, assignRoles }: any) => {
   const pathname = usePathname();
-
   return (
     <>
       <ul className="mb-5.5 mt-4 flex flex-col gap-2.5 pl-3">
         {item.map((item: any, index: number) => (
-          <HasRole key={index} role={item.role}>
+          <HasRole key={index} roles={item.role} hasRoles={assignRoles}>
            <li>
               <Link
                 href={item.route}

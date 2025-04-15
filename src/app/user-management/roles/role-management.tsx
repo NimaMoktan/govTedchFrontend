@@ -11,14 +11,16 @@ import {
 } from '@/components/ui/card';
 import { deleteRole, getRoles } from "@/services/RoleService";
 import { Role } from "@/types/Role";
+import { useLoading } from "@/context/LoadingContext";
 
 const RoleManager: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [roles, setRoles] = useState<Role[]>([]);
+    const { setIsLoading } =useLoading()
     const router = useRouter();
 
     const loadRoles = async() => {
-        const rs = await getRoles();
+        const rs = await getRoles().finally(()=>setIsLoading(false));
         setRoles(rs.data);
         
     };
@@ -52,6 +54,7 @@ const RoleManager: React.FC = () => {
     };
 
     useEffect(() => {
+        setIsLoading(true)
         loadRoles();
     }, []);
 

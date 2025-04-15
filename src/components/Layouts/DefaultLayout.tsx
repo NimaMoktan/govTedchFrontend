@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { useLoading } from "@/context/LoadingContext";
-import { Spinner } from "@/components/ui/spinner"
 import { Toaster } from "sonner";
 
 export default function DefaultLayout({
@@ -12,22 +11,18 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isLoading, setIsLoading } = useLoading();
+  const { setIsLoading } = useLoading();
 
   useEffect(() => {
     setTimeout(() => {
-      setIsLoading(false)
+      // setIsLoading(false)
     },
-    1500)
-  }, [isLoading, setIsLoading])
+    100)
+  }, [setIsLoading])
 
   return (
     <>
-    {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-70">
-          <Spinner size="large" />
-        </div>
-    )}
+    
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex">
         <Toaster/>
