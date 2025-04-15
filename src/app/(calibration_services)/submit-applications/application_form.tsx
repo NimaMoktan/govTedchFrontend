@@ -96,7 +96,7 @@ const ApplicationSubmitForm = () => {
   
       // Filter out specific equipment based on their IDs
       const filteredEquipment = data.data.filter((item: EquipmentItem) =>
-        ![6,12,15].includes(item.id)  // Exclude items with id 12, 15, and 6
+        ![6,12,15,18,19].includes(item.id)  // Exclude items with id 12, 15, and 6
       );
   
       // Map the filtered data to options
@@ -123,7 +123,7 @@ const ApplicationSubmitForm = () => {
       try {
         const token = localStorage.getItem("token"); // Ensure the token is included for authentication
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/clientList/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/public/clientList`, {
           method: "GET",
           headers: {
             // Authorization: `Bearer ${token}`,
@@ -191,14 +191,12 @@ const ApplicationSubmitForm = () => {
       const data = await response.json();
       if (data && data.status === "OK") {
         const equipmentData = data.data;
-        const manufacturer = equipmentData?.manufacturer || "";
         const range = equipmentData?.range || "";
         const rate = equipmentData?.charges || 0; // Primary rate
         const subsequentRate = equipmentData?.subsequentRate || 0; // Subsequent rate
   
           // Only update the current field
           setFieldValue(`equipment[${index}]`, parseInt(selectedEquipmentId));
-          setFieldValue(`manufacturer[${index}]`, manufacturer);
           setFieldValue(`model[${index}]`, range); // Assuming 'range' is the model
           setFieldValue(`amount[${index}]`, rate); 
 
@@ -238,7 +236,6 @@ const ApplicationSubmitForm = () => {
         quantity: 1,
         testItemId: Number(values.equipment[index]),
         manufacturerOrTypeOrBrand: values.manufacturer[index],
-        serialNumberOrModel: values.serialNumberOrModel[index],
       })),
     };
 
@@ -409,7 +406,6 @@ const ApplicationSubmitForm = () => {
                     name={`manufacturer[${index}]`}
                     type="text"
                     placeholder="Enter Manufacturer/Type/Brand"
-                    value={values.manufacturer[index]} // Bind to Formik's value for manufacturer
                   />
                 </div>
               </div>
@@ -421,7 +417,6 @@ const ApplicationSubmitForm = () => {
                     name={`model[${index}]`}
                     type="text"
                     placeholder="Enter The Range"
-                    value={values.model[index]} // Bind to Formik's value for range/model
                     readOnly={true}
                   />
                 </div>
@@ -432,7 +427,6 @@ const ApplicationSubmitForm = () => {
                     name={`serialNumberOrModel[${index}]`}
                     type="text"
                     placeholder="Enter The Model/Serial Number"
-                    value={values.serialNumberOrModel[index]} // Bind to Formik's value for model/serial number
                   />
                 </div>
               </div>
