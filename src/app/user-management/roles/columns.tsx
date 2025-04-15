@@ -63,7 +63,7 @@ export const columns = (handleEdit: (testType: Role) => void, handleDelete: (id:
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                             onClick={() => handleDelete(row.original)}
                         >
 
@@ -73,7 +73,7 @@ export const columns = (handleEdit: (testType: Role) => void, handleDelete: (id:
                         <DropdownMenuItem onClick={() => handleEdit(row.original)}>
                             <BsPencil className="fill-current" size={20} />
                             Edit
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )

@@ -30,7 +30,6 @@ const CreateRole = () => {
     ) => {
         setIsLoading(true);
         try {
-            console.log("Submitting:", values);
             await createRole(values).then((response) => {
                 toast.success(response.data.message, {
                     duration: 1500,
@@ -39,7 +38,7 @@ const CreateRole = () => {
                 setTimeout(() => {
                     router.push("/user-management/roles");
                 }, 2000);
-            });
+            }).finally(()=>setIsLoading(false));
             resetForm();
         } catch (error) {
             console.error("ERROR", error);
