@@ -83,8 +83,8 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-
-        if (data.userResponse.newUser === "Y") {
+        if (data.data.userResponse.newUser === "Y") {
+          
             const res: Response = await fetch('/api/encrypt', {
             method: 'POST',
             headers: {
@@ -106,12 +106,12 @@ export default function Login() {
 
           setAuthenticated(true);
 
-          toast.success("Login successful!", {
+          toast.success(data.message, {
             position: "top-right",
             autoClose: 1500,
           });
 
-          const token = data.jwt;  // ✅ Store token from API response
+          const token = data.data.jwt;  // ✅ Store token from API response
           document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 1}; samesite=Lax;`;
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("token", token);
@@ -156,7 +156,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error(errorMessage, { position: "top-right", autoClose: 2000 });
+      // toast.error(errorMessage, { position: "top-right", autoClose: 2000 });
     } finally {
       setIsLoading(false);
       resetForm({
