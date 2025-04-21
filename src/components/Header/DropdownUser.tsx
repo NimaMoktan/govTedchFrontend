@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { useRouter } from "next/navigation";
+import { useLoading } from "@/context/LoadingContext";
 
 type UserDetails = {
   fullName: string;
@@ -13,13 +14,13 @@ type UserDetails = {
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userLoaded, setUserLoaded] = useState(false);
   const [userDetails, setUserDetails] = useState<UserDetails>({
     fullName: "Loading...",
     email: "Loading...",
     imageUrl: "/images/user/default.jpg",
     roles: [],  // Ensure roles is included in initial state
   });
+  const { setIsLoading } = useLoading();
 
   const router = useRouter();
 
@@ -28,8 +29,6 @@ const DropdownUser = () => {
     const storedUser = localStorage.getItem("userDetails");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      
-      // Extract roles from userRole array
       const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
       // console.log("This is the user details: ", userRoles, storedUser);
       setUserDetails({
@@ -42,10 +41,11 @@ const DropdownUser = () => {
   }, []);
   
   const handleLogout = async () => {
+    setIsLoading(true)
     try {
       await fetch('/api/logout', {
         method: 'POST'
-      });
+      }).finally(()=>setIsLoading(false));
       localStorage.removeItem("userDetails");  
       router.push("/signin");
     } catch (error) {
