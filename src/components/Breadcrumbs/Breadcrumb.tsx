@@ -11,9 +11,9 @@ const Breadcrumb = ({ pageName, parentPage = "Dashboard" }: BreadcrumbProps) => 
     <div className="mb-2 mx-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-title-md2 font-semibold text-black dark:text-white flex items-center gap-2">
         <Link href={`/dashboard`}>
-          <FiArrowLeftCircle className="text-blue-600" size={28} />
+          <FiArrowLeftCircle className="text-gray-700" size={30} />
         </Link>
-        <span>{pageName}</span>
+        <span> / {pageName}</span>
       </h2>
 
       <nav>

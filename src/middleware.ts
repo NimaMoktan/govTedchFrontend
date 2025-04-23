@@ -5,6 +5,7 @@ const protectedRoutes = [
   '/dashboard',
   '/user-management',
   '/master-management', // Example other protected route
+  '/product',
   '/settings', // Example other protected route
   // Add any other paths that need protection here
 ];
@@ -29,5 +30,5 @@ export function middleware(request: any) {
 }
 
 export const config = {
-    matcher: ['/', '/signin', '/dashboard', '/user-management/:path*', '/((?!api/).*)']
+    matcher: ['/', '/signin', '/dashboard', '/user-management/:path*','/product/:path*', '/((?!api/).*)']
 };

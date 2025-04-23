@@ -238,7 +238,7 @@ export default function Login() {
     } catch (error) {
       console.error("NATS connection error:", error);
     }
-  }, []);
+  }, [router]);
 
   const handleLoginWithNdi = useCallback(() => {
     setIsLoading(true);
