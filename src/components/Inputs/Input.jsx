@@ -13,7 +13,7 @@ const Input = ({ label, ...props }) => {
     return (
         <>
             <Label
-                className="mb-3 block text-sm font-medium"
+                className="mb-1.5 block text-sm font-medium"
                 htmlFor={props.id || props.name}
             >
                 {label}

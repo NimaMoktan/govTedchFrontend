@@ -7,6 +7,7 @@ export type ApiResponse = {
   }
   
 export type Organisation = {
+    map(arg0: (org: Organisation) => { value: number; text: string; }): import("react").SetStateAction<import("../../interface/Options").Options[]>;
     id: number;
     code: string;
     description: string;

@@ -2,8 +2,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BsTrash, BsPencil } from "react-icons/bs";
-
+import { BsTrash, BsPencil, BsEyeFill } from "react-icons/bs";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
 import { Product } from "@/types/product/Product";
+import Link from "next/link";
 
 export const columns = (handleEdit: (product: Product) => void, handleDelete: (id: Product) => void): ColumnDef<Product>[] => [
     {
@@ -51,14 +51,14 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
         },
     },
     {
-        accessorKey: "ratesInNu",
+        accessorKey: "amount",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Rate (Nu.)
+                    Amout (Nu.)
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -118,9 +118,12 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
                             <BsPencil className="fill-current" color="blue" size={20} />
                             Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-                            <BsPencil className="fill-current" color="blue" size={20} />
-                            View
+                        <DropdownMenuItem>
+                            <Link href={`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.id}`}>
+                                <span className="flex items-center gap-1">
+                                    <BsEyeFill className="fill-current" color="blue" size={20} /> View
+                                </span>
+                            </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

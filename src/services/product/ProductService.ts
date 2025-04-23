@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { Product } from '@/types/product/Product';
+import { Product, ApplicationFormValues } from '@/types/product/Product';
 
 interface ApiResponse<T> {
   data: T;
@@ -14,13 +14,15 @@ export const getProducts = async (): Promise<ApiResponse<Product[]>> => {
   return response.data;
 };
 
-export const getProduct = async (id: number): Promise<ApiResponse<Product>> => {
-  const response = await api.get<ApiResponse<Product>>(`/product/products/${id}`);
-  return response.data;
-};
+// export const getProduct = async (id: number): Promise<ApiResponse<ApplicationFormValues>> => {
+//   const response = await api.get<ApplicationFormValues>(`/product/productForm/register/${id}`);
+//   return response.data;
+// };
 
-export const createProduct = async (data: Product): Promise<ApiResponse<Product>> => {
-  const response = await api.post<ApiResponse<Product>>('/product/products/registrer', data);
+export const getProduct = async (id: number) => api.get(`/product/productForm/register/${id}`);
+
+export const createProduct = async (data: ApplicationFormValues): Promise<ApiResponse<Product>> => {
+  const response = await api.post<ApiResponse<Product>>('/product/productForm/register', data);
   return response.data;
 };
 
