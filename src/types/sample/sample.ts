@@ -1,4 +1,5 @@
 export type SampleType = {
+    map(arg0: (sample: SampleType) => { value: number; text: string; }): import("react").SetStateAction<import("../../interface/Options").Options[]>;
     id: number;
     code: string;
     description: string;

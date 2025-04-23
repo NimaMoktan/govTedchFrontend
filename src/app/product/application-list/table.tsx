@@ -21,20 +21,21 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { ptlCode: string; applicantId: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { ptlCode: string; applicantId: string; }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-
+  const router = useRouter();
   const table = useReactTable({
     data,
     columns,
@@ -117,6 +118,9 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => {
+                    router.push(`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.applicantId}`);
+                    }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

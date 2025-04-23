@@ -5,6 +5,7 @@ const protectedRoutes = [
   '/dashboard',
   '/user-management',
   '/master-management', // Example other protected route
+  '/product',
   '/settings', // Example other protected route
   // Add any other paths that need protection here
 ];

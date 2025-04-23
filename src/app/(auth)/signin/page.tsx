@@ -83,6 +83,7 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        console.log(data.data.userResponse.newUser)
         if (data.data.userResponse.newUser === "Y") {
           
             const res: Response = await fetch('/api/encrypt', {
@@ -91,7 +92,7 @@ export default function Login() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              text: String(data.userResponse.id),
+              text: String(data.data.userResponse.id),
               password: 'Qni7p7"y4|?w',
               action: 'encrypt'
             })

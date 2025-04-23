@@ -10,7 +10,7 @@ export const createSampleType = async (data: SampleType) => {
   
   return api.post('core/SampleTestType/', data)
 };
-export const getSampleType = async (id: number) => api.get(`core/SampleTestType/${id}`);
+export const getSampleType = async (id: number) => api.get(`core/SampleTestType/id/${id}`);
 
 export const updateSampleType = async (id: number, data: SampleType) => {
   
