@@ -63,6 +63,7 @@ const ApplicationSubmitForm = () => {
     address: "",
     contactNumber: "",
     email: "",
+    clientAddress: "",
     organizationId: "",
   });
   const router = useRouter();
@@ -232,23 +233,24 @@ const ApplicationSubmitForm = () => {
       contactNumber: values.contactNumber,
       emailAddress: values.email,
       organizationId: values.organizationId,
-      deviceRegistry: values.equipment.map((_, index) => ({
+      deviceRegistry: values.equipment.map((equipmentId, index) => ({
         quantity: 1,
-        testItemId: Number(values.equipment[index]),
+        testItemId: Number(equipmentId),
         manufacturerOrTypeOrBrand: values.manufacturer[index],
+        serialNumberOrModel: values.serialNumberOrModel[index],
       })),
     };
 
     try {
       const storedUser = localStorage.getItem("userDetails");
       const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
+      console.log("This is the user details: ", parsedUser);
       const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/calibrationForm/create`, {
         method: "POST",
         headers: {
           // Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
-          "userId": "999",
+          "userId": parsedUser.id,
           "userName": parsedUser.userName,
         },
         body: JSON.stringify(payload),
