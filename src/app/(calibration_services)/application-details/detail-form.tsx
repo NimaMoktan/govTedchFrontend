@@ -37,7 +37,6 @@ const DetailForm: React.FC = () => {
     const id = searchParams.get("id");
 
     const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false); 
-       
     const toggleDeviceDetails = () => {
         setIsDeviceDetailsOpen(prev => !prev);
     };    
@@ -78,44 +77,133 @@ const DetailForm: React.FC = () => {
         }
     };
 
-    const handleSubmit = async(values: any) => {
+    const calculateTotalPayableAmount = () => {
+        if (!applicationDetails?.deviceRegistry) return 0;
+    
+        return applicationDetails.deviceRegistry.reduce((total: number, device: any) => {
+            const rate = parseFloat(device.rate || 0); // Use `rate` if available
+            const quantity = parseFloat(device.quantity || 1); // Default to 1 if `quantity` is missing
+            return total + rate * quantity;
+        }, 0);
+    };
+
+    const handleSubmitForChief = async (values: any) => {
+        console.log("Reaching Here In handleSubmitForChief");
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        // Generate a unique reference number using a timestamp
+        const timestamp = Date.now().toString();
+        const ref_no = `TMS-INSTR-${timestamp}`; 
+        const totalPayableAmount = calculateTotalPayableAmount();
 
         const data = {
-            id: applicationDetails?.id,
+            code: "moit",
+            plateform: "TMS", 
+            ref: ref_no,
+            taxPayerNo: "DTH3733",
+            taxPayerDocumentNo: "123456789",
+            paymentRequestDate: "2023-08-14", 
+            agencyCode: "MPG5932",
+            payerEmail: parsedUser?.email || "",
+            mobileNo: parsedUser?.mobileNumber || "",
+            totalPayableAmount: totalPayableAmount, // Add a value here
+            id: applicationDetails?.id || "",
             applicationNumber: values.applicationNumber,
-            userId: parsedUser.id,
-            userName: parsedUser.userName,
+            userId: parsedUser?.id || "",
+            userName: parsedUser?.userName || "",
             status: values.status
-        }
-        
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
-            {
+        };
+    
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
+                method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
-                    "userId": parsedUser.id,
-                    "userName": parsedUser.userName,
-                }
-            }
-        );
-        if(response.status === 200){
-            // SweetAlert to notify the user of success
-            Swal.fire({
-                title: 'Success!',
-                text: 'Application status updated successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    router.push("/applications-list");
-                }
+                    "userId": parsedUser?.id || "",
+                    "userName": parsedUser?.userName || "",
+                },
+                body: JSON.stringify(data),
             });
-        }else{
-            // toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
+            console.log("Submitting data:", data, 'And This is the response data: ',response);
+
+    
+            if (response.status === 200) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Application status updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        router.push("/applications-list");
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update application status.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting data:", error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         }
-    }
+    };
+
+    const handleSubmitForLabHead = async (values: any) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    
+        const data = {
+            id: applicationDetails?.id,
+            applicationNumber: values.applicationNumber,
+            userId: parsedUser?.id,
+            userName: parsedUser?.userName,
+            status: values.status,
+            calibration_officer: values.calibration_officer, // Include calibration officer if applicable
+        };
+    
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        userId: parsedUser?.id,
+                        userName: parsedUser?.userName,
+                    },
+                }
+            );
+    
+            if (response.status === 200) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Application status updated successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        router.push("/applications-list");
+                    }
+                });
+            } else {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("Error submitting data:", error);
+            throw error; // Re-throw the error for Formik to handle
+        }
+    };
 
     const fetchApplicationDetails = useCallback(async () => {
         const storedUser = localStorage.getItem("userDetails");
@@ -311,31 +399,27 @@ const DetailForm: React.FC = () => {
                 </div>
             </div>
             <br></br>
-            {isChief &&
-            <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
-                <Form>
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-
-                        <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" required />
-                    </div>
-                </div>
-                <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                    Update
-                </button>
-                </Form>
-            </Formik>
-            }
-            {isLabHead && (
+            {isChief && (
                 <Formik
                     initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber }}
-                    onSubmit={(values) => handleSubmit(values)}
+                    onSubmit={async (values, { setSubmitting }) => {
+                        try {
+                            setSubmitting(true); // Start submission process
+                            await handleSubmitForChief(values);
+                        } catch (error) {
+                            console.error("Error submitting data:", error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong. Please try again later.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        } finally {
+                            setSubmitting(false); // End submission process
+                        }
+                    }}
                 >
-                    {({ values }) => ( // Destructure values to track selected status
+                    {({ isSubmitting }) => (
                         <Form>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full xl:w-1/2">
@@ -346,13 +430,73 @@ const DetailForm: React.FC = () => {
                                             { value: "approve", text: "Approve" },
                                             { value: "reject", text: "Reject" },
                                         ]}
-                                        onValueChange={() => console.log("Selection changed!")} 
+                                        onValueChange={() => console.log("Selection changed!")}
                                     />
                                 </div>
                                 <div className="w-full xl:w-1/2">
                                     <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''} />
                                     <Input label="Remarks" name="remarks" required />
                                 </div>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Updating..." : "Update"}
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            )}
+            {isLabHead && (
+                <Formik
+                    initialValues={{
+                        status: "",
+                        remarks: "",
+                        applicationNumber: applicationNumber,
+                        calibration_officer: "",
+                    }}
+                    onSubmit={async (values, { setSubmitting }) => {
+                        try {
+                            setSubmitting(true); // Start submission process
+                            await handleSubmitForLabHead(values);
+                        } catch (error) {
+                            console.error("Error submitting data:", error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong. Please try again later.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        } finally {
+                            setSubmitting(false); // End submission process
+                        }
+                    }}
+                >
+                    {({ values, isSubmitting }) => (
+                        <Form>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Select
+                                        label="Select Status"
+                                        name="status"
+                                        options={[
+                                            { value: "approve", text: "Approve" },
+                                            { value: "reject", text: "Reject" },
+                                        ]}
+                                        onValueChange={() => console.log("Selection changed!")}
+                                    />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <input
+                                        name="applicationNumber"
+                                        type="hidden"
+                                        value={applicationNumber ?? ""}
+                                    />
+                                    <Input label="Remarks" name="remarks" required />
+                                </div>
+
                                 {/* Only show Calibration Officer if status is "approve" */}
                                 {values.status === "approve" && (
                                     <div className="w-full xl:w-1/2">
@@ -363,13 +507,19 @@ const DetailForm: React.FC = () => {
                                                 { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
                                                 { value: "Pema Dorji", text: "Pema Dorji" },
                                             ]}
-                                            onValueChange={() => console.log("Selection changed!")} 
+                                            onValueChange={() => console.log("Selection changed!")}
                                         />
                                     </div>
                                 )}
                             </div>
-                            <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                                Update
+
+                            {/* Update Button with Dynamic Text */}
+                            <button
+                                type="submit"
+                                className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center"
+                                disabled={isSubmitting} // Disable the button during submission
+                            >
+                                {isSubmitting ? "Updating..." : "Update"}
                             </button>
                         </Form>
                     )}
