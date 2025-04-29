@@ -18,7 +18,7 @@ interface ApplicationDetails {
     clientName: string;
     contactNumber: string;
     emailAddress: string;
-    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; id?: number; }[];
+    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; id?: number; siteCode?: string;}[];
 }
 
 const DetailForm: React.FC = () => {
@@ -87,62 +87,133 @@ const DetailForm: React.FC = () => {
         }, 0);
     };
 
-    const handleSubmitForChief = async (values: any) => {
-        console.log("Reaching Here In handleSubmitForChief");
+    const handleSubmitForLabHead = async (values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-        // Generate a unique reference number using a timestamp
-        const timestamp = Date.now().toString();
-        const ref_no = `TMS-INSTR-${timestamp}`; 
-        const totalPayableAmount = calculateTotalPayableAmount();
-
-        const data = {
-            code: "moit",
-            plateform: "TMS", 
-            ref: ref_no,
-            taxPayerNo: "DTH3733",
-            taxPayerDocumentNo: "123456789",
-            paymentRequestDate: "2023-08-14", 
-            agencyCode: "MPG5932",
-            payerEmail: parsedUser?.email || "",
-            mobileNo: parsedUser?.mobileNumber || "",
-            totalPayableAmount: totalPayableAmount, // Add a value here
-            id: applicationDetails?.id || "",
-            applicationNumber: values.applicationNumber,
-            userId: parsedUser?.id || "",
-            userName: parsedUser?.userName || "",
-            status: values.status
-        };
     
+        // Extract siteCode from applicationDetails.deviceRegistry[0]
+        const siteCode = applicationDetails?.deviceRegistry[0]?.siteCode;
+        console.log("This the siteCode: ", siteCode);
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                    "userId": parsedUser?.id || "",
-                    "userName": parsedUser?.userName || "",
-                },
-                body: JSON.stringify(data),
-            });
-            console.log("Submitting data:", data, 'And This is the response data: ',response);
-
+            if (siteCode === "ON") {
+                console.log("Reaching for onsite: ", siteCode);
+                // Use the same logic as handleSubmitForChief for siteCode "ON"
+                const data = {
+                    id: applicationDetails?.id,
+                    applicationNumber: values.applicationNumber,
+                    userId: parsedUser?.id,
+                    userName: parsedUser?.userName,
+                    status: values.status,
+                    calibration_officer: values.calibration_officer, // Include calibration officer if applicable
+                };
     
-            if (response.status === 200) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Application status updated successfully!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        router.push("/applications-list");
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
+                    data,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            userId: parsedUser?.id,
+                            userName: parsedUser?.userName,
+                        },
                     }
+                );
+                console.log("This is the Onsite response: ", response);
+                if (response.status === 200) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Application status updated successfully!",
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.push("/applications-list");
+                        }
+                    });
+                } else {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+            } else if (siteCode === "ILT") {
+                console.log("Reaching for insite: ", siteCode);
+                // Current logic for siteCode "ILT"
+                const timestamp = Date.now().toString();
+                const formattedDate = new Date(Number(timestamp)).toISOString().split('T')[0];
+                const totalPayableAmount = calculateTotalPayableAmount();
+    
+                // Validate and log the application number
+                const applicationNumber = values.applicationNumber;
+                if (!applicationNumber) {
+                    console.error("Error: Application number is missing or invalid.");
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Application number is required.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+    
+                const data = {
+                    code: "moit",
+                    platform: "TMS", // Fixed typo: "plateform" -> "platform"
+                    refNo: applicationNumber, // Use the provided application number as refNo
+                    taxPayerNo: applicationDetails?.cid || "—",
+                    taxPayerDocumentNo: "123456789", // Added placeholder value
+                    paymentRequestDate: formattedDate,
+                    agencyCode: "MPG5932",
+                    payerEmail: parsedUser?.email || "",
+                    mobileNo: parsedUser?.mobileNumber || "",
+                    totalPayableAmount: totalPayableAmount.toString(), // Ensure this is a string
+                    paymentDueDate: null, // Fixed value: 'null' -> null
+                    id: applicationDetails?.id || "",
+                    taxPayerName: parsedUser?.userName || "",
+                    paymentLists: [
+                        {
+                            serviceCode: "100",
+                            description: "Fines and Penalties",
+                            payableAmount: totalPayableAmount.toString(),
+                        },
+                    ],
+                };
+                const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        "userId": parsedUser?.id || "",
+                        "userName": parsedUser?.userName || "",
+                    },
+                    body: JSON.stringify(data),
                 });
+                console.log("These are Datas Being Sent: ", JSON.stringify(data));
+                const responseData = await response.json();
+                console.log("These are the responseDate: ", responseData);
+                if (response.status === 200) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Application updated for payment!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.push("/applications-list");
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: `Failed to update application status. Server response: ${responseData.message || 'Unknown error'}`,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
             } else {
+                // Handle unknown siteCode
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Failed to update application status.',
+                    text: `Unknown siteCode: ${siteCode}. Please contact support.`,
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -158,7 +229,7 @@ const DetailForm: React.FC = () => {
         }
     };
 
-    const handleSubmitForLabHead = async (values: any) => {
+    const handleSubmitForChief = async (values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     

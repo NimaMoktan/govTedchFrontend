@@ -80,81 +80,113 @@ const DetailForm: React.FC = () => {
         }
     }
     const viewCertificate = async () => {
+        // Step 1: Validate token
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
         }
     
-        if (!applicationDetails || !applicationDetails.deviceRegistry || applicationDetails.deviceRegistry.length === 0) {
+        // Step 2: Validate application details and device registry
+        if (
+            !applicationDetails ||
+            !applicationDetails.deviceRegistry ||
+            applicationDetails.deviceRegistry.length === 0
+        ) {
             toast.error("Application details or device registry data is missing.");
             return;
         }
     
-        const parameter = applicationDetails.deviceRegistry[0].parameter; // Fetching parameter dynamically
+        // Step 3: Extract parameter dynamically
+        const parameter = applicationDetails.deviceRegistry[0].parameter;
     
         try {
+            // Step 4: Make API request to fetch the certificate
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/print/print`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    applicationNumber: applicationNumber, 
-                    parameter: parameter, // Passing the fetched parameter dynamically
+                    applicationNumber: applicationNumber,
+                    parameter: parameter, // Pass the dynamically fetched parameter
                 }),
             });
-            console.log("This is the body being passed for certificate: ", applicationNumber, parameter);
+    
+            console.log("Request Body for Certificate:", { applicationNumber, parameter });
+    
+            // Step 5: Handle non-OK responses
             if (!response.ok) {
-                throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+                const errorMessage = `Failed to fetch certificate: ${response.statusText}`;
+                console.error(errorMessage);
+                toast.error("Failed to fetch certificate.");
+                return;
             }
     
+            // Step 6: Process the response as a blob
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
+    
+            // Step 7: Open the blob in a new tab
             const newTab = window.open(blobUrl, "_blank");
             if (!newTab) {
-                toast.error("Popup blocked! Allow popups for this site.");
+                toast.error("Popup blocked! Please allow popups for this site.");
             }
         } catch (error) {
             console.error("Error viewing certificate:", error);
-            toast.error("Failed to view certificate.");
+            toast.error("An unexpected error occurred while fetching the certificate.");
         }
-    };  
+    };
+    
     const downloadExcel = async () => {
+        // Step 1: Validate token
         if (!token) {
             toast.error("Authentication token is missing.");
             return;
         }
-        // Fetch UUID from the tested data state
-        const uuid = testedData?.uuid;  // Ensure `testedData` contains the uuid
     
+        // Step 2: Validate UUID from testedData state
+        const uuid = testedData?.uuid; // Ensure `testedData` contains the UUID
         if (!uuid) {
             toast.error("UUID is missing.");
             return;
         }
     
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calibration/workflow/downloadDocument/${uuid}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-            if (response.ok) {
-                toast.success("File downloaded successfully!"); // Success message when status is 200
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                const newTab = window.open(blobUrl, "_blank");
-                if (!newTab) {
-                    toast.error("Popup blocked! Allow popups for this site.");
+            // Step 3: Make API request to download the Excel file
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/calibration/workflow/downloadDocument/${uuid}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
                 }
+            );
+    
+            // Step 4: Handle non-OK responses
+            if (!response.ok) {
+                const errorMessage = `Failed to download file: ${response.statusText}`;
+                console.error(errorMessage);
+                toast.error("Failed to download the file.");
+                return;
+            }
+    
+            // Step 5: Process the response as a blob
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+    
+            // Step 6: Open the blob in a new tab
+            const newTab = window.open(blobUrl, "_blank");
+            if (!newTab) {
+                toast.error("Popup blocked! Please allow popups for this site.");
             } else {
-                throw new Error(`Failed to download the file: ${response.statusText}`);
+                toast.success("File downloaded successfully!");
             }
         } catch (error) {
             console.error("Error downloading file:", error);
-            toast.error("Failed to download file.");
+            toast.error("An unexpected error occurred while downloading the file.");
         }
     };
     const fetchEquipment = async (id: any) => {
@@ -209,29 +241,42 @@ const DetailForm: React.FC = () => {
     const fetchApplicationDetails = useCallback(async () => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
+        const storeToken = localStorage.getItem("token"); // Retrieve the token dynamically
+    
+        if (!storeToken) {
+            console.error("Authentication token is missing!");
+            toast.error("Authentication token is missing!", { position: "top-right" });
+            return;
+        }
+    
         try {
             const response = await axios.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/calibration/calibrationForm/fetchByApplicationNo?applicationNumber=${applicationNumber}`,
                 {
                     headers: {
-                        "Authorization": `Bearer ${token}`,
+                        "Authorization": `Bearer ${storeToken}`, // Use the dynamically retrieved token
                         "Content-Type": "application/json",
                         "userId": parsedUser?.id || "999",
                         "userName": parsedUser?.userName,
-                    }
+                    },
                 }
             );
-
             const data = response.data.body.data;
             console.log("This is the application details: ", data);
             setApplicationDetails(data);
             fetchEquipment(data.deviceRegistry[0].testItemId);
-
         } catch (error) {
             console.error("Error fetching application details:", error);
+    
+            // Handle specific error cases
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.message || "An error occurred.";
+                toast.error(`Failed to fetch application details: ${errorMessage}`, { position: "top-right" });
+            } else {
+                toast.error("An unexpected error occurred.", { position: "top-right" });
+            }
         }
-    }, [applicationNumber, fetchEquipment, token]);
+    }, [applicationNumber, fetchEquipment]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");

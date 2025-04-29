@@ -95,8 +95,6 @@ const DetailForm: React.FC = () => {
             toast.error("Required data is missing (Application Number or Test Item ID)!", { position: "top-right" });
             return;
         }
-
-
         // Prepare FormData for the API request
         const formData = new FormData();
         formData.append("File", file);
@@ -126,65 +124,150 @@ const DetailForm: React.FC = () => {
             setSubmitting(false);
         }
     };
+    // Function to calculate total payable amount
+    const calculateTotalPayableAmount = () => {
+        if (!applicationDetails?.deviceRegistry) return 0;
+        return applicationDetails.deviceRegistry.reduce((total: number, device: any) => {
+            const rate = parseFloat(device.rate || 0); // Use `rate` if available
+            const quantity = parseFloat(device.quantity || 1); // Default to 1 if `quantity` is missing
+            return total + rate * quantity;
+        }, 0);
+    };
 
-    // Prevent update if no file has been uploaded
+    // Prevent update if no file has been uploade
     const handleSubmit = async () => {
         if (!fileUploaded) {
             toast.error("Please upload a file before updating!", { position: "top-right" });
             return;
         }
-    
         if (!applicationDetails) {
             toast.error("Application details not loaded!", { position: "top-right" });
             return;
         }
-    
         if (!id) {
             toast.error("Invalid application ID!", { position: "top-right" });
             return;
         }
     
+        // Retrieve user details from localStorage
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
     
-        const data = {
-            id: applicationDetails?.id || id, // Ensure ID is passed
-            applicationNumber: applicationDetails?.applicationNumber || "string", // Avoid undefined values
-            userId: parsedUser?.id || 999,
-            userName: parsedUser?.userName || "Unknown",
-            status: applicationDetails?.status || "Pending", // Default status if missing
-            assignedUser: "string",
-            parameter: "string",
-            createdDate: new Date().toISOString(), // Ensure valid timestamp
-        };
+        // Extract siteCode from applicationDetails.deviceRegistry[0]
+        const siteCode = applicationDetails?.deviceRegistry[0]?.siteCode;
     
-        console.log("Submitting Data:", data); // Debugging
+        // Calculate total payable amount (if needed)
+        const totalPayableAmount = calculateTotalPayableAmount();
+    
+        // Generate the current date in YYYY-MM-DD format
+        const timestamp = Date.now().toString();
+        const formattedDate = new Date(Number(timestamp)).toISOString().split('T')[0];
     
         try {
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
-                data,
-                {
+            // Handle logic based on siteCode
+            if (siteCode === "ILT") {
+                const data = {
+                    id: applicationDetails?.id || id,
+                    applicationNumber: applicationDetails?.applicationNumber || "string",
+                    userId: parsedUser?.id || 999,
+                    userName: parsedUser?.userName || "Unknown",
+                    status: applicationDetails?.status || "Pending",
+                    calibration_officer: "string",
+                };
+    
+                console.log("Submitting Update Workflow Data:", data);
+    
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
+                    data,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            "userId": parsedUser?.id || "999",
+                            "userName": parsedUser?.userName || "Unknown",
+                        },
+                    }
+                );
+    
+                console.log("Update Workflow Response:", response);
+    
+                if (response.status === 200) {
+                    toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
+                    setTimeout(() => router.push("/approved-application-list"), 1000);
+                } else {
+                    toast.error("Failed to update application status", { position: "top-right", autoClose: 1000 });
+                }
+            } else if (siteCode === "ON") {
+                // Ensure applicationNumber is valid
+                if (!applicationNumber) {
+                    toast.error("Application number is missing or invalid!", { position: "top-right" });
+                    return;
+                }
+                // Generate a unique refNo
+                const generateUniqueRefNo = (applicationNumber: string) => {
+                    return `${applicationNumber}`;
+                };
+    
+                const refNo = generateUniqueRefNo(applicationNumber);
+    
+                // Payment-specific logic for siteCode "ILT"
+                const data = {
+                    code: "moit",
+                    platform: "TMS",
+                    refNo: refNo,
+                    taxPayerNo: applicationDetails?.cid || "—",
+                    taxPayerDocumentNo: "123456789",
+                    paymentRequestDate: formattedDate,
+                    agencyCode: "MPG5932",
+                    payerEmail: parsedUser?.email || "",
+                    mobileNo: parsedUser?.mobileNumber || "",
+                    totalPayableAmount: totalPayableAmount.toString(),
+                    paymentDueDate: null,
+                    id: applicationDetails?.id || "",
+                    taxPayerName: parsedUser?.userName || "",
+                    paymentLists: [
+                        {
+                            serviceCode: "100",
+                            description: "Fines and Penalties",
+                            payableAmount: totalPayableAmount.toString(),
+                        },
+                    ],
+                };
+    
+                console.log("Generated refNo:", refNo);
+                console.log("Submitting Payment Request Data:", data);
+    
+                const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
+                    method: "POST",
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json",
-                        "userId": parsedUser?.id || "999",
-                        "userName": parsedUser?.userName || "Unknown",
+                        "userId": parsedUser?.id || "",
+                        "userName": parsedUser?.userName || "",
                     },
-                }
-            );
+                    body: JSON.stringify(data),
+                });
     
-            if (response.status === 200) {
-                toast.success("Application status updated successfully", { position: "top-right", autoClose: 1000 });
-                setTimeout(() => router.push("/approved-application-list"), 1000);
+                const responseData = await response.json();
+                console.log("Payment Request Response Data:", responseData);
+    
+                if (response.ok) {
+                    toast.success("Payment request submitted successfully", { position: "top-right", autoClose: 1000 });
+                    setTimeout(() => router.push("/approved-application-list"), 1000);
+                } else {
+                    const errorMessage = responseData.message || "Unknown error";
+                    toast.error(`Payment request failed: ${errorMessage}`, { position: "top-right", autoClose: 1000 });
+                }
             } else {
-                toast.error("Failed to update application status", { position: "top-right", autoClose: 1000 });
+                toast.error(`Unknown siteCode: ${siteCode}. Please contact support.`, { position: "top-right" });
             }
         } catch (error) {
-            console.error("Error updating application status:", error);
-            toast.error("An error occurred during update.", { position: "top-right" });
+            console.error("Error submitting data:", error);
+            toast.error("An error occurred during submission.", { position: "top-right" });
         }
     };
+
     useEffect(() => {
         const storedUser = localStorage.getItem("userDetails");
         const storeToken = localStorage.getItem("token")

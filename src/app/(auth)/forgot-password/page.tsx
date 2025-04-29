@@ -19,7 +19,7 @@ const ForgotPassword = () => {
     };
     
     useEffect(() => {
-       
+    
     }, []);
 
     return (
@@ -45,11 +45,11 @@ const ForgotPassword = () => {
 
                         <Formik
                             initialValues={{
-                                username: ''
+                                email: ''
                             }}
                             validationSchema={Yup.object({
-                                username: Yup.string()
-                                    .required("Username field is required.")
+                                email: Yup.string()
+                                    .required("Email field is required.")
                             })}
                             onSubmit={handleSubmit}
                         >
@@ -58,14 +58,12 @@ const ForgotPassword = () => {
                                     <div>
                                         <Input
                                             type="text"
-                                            name="username"
-                                            label="Username"
-                                            placeholder="Enter Username"
+                                            name="email"
+                                            label="Email ID"
+                                            placeholder="Enter Email ID"
                                             autoComplete="off"
                                             disabled={isSubmitting}
                                         />
-
-                                       
                                     </div>
 
                                     <Button
