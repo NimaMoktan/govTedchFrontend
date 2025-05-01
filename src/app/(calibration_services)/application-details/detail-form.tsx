@@ -90,22 +90,37 @@ const DetailForm: React.FC = () => {
     const handleSubmitForLabHead = async (values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    
         // Extract siteCode from applicationDetails.deviceRegistry[0]
         const siteCode = applicationDetails?.deviceRegistry[0]?.siteCode;
         console.log("This the siteCode: ", siteCode);
-
+    
         try {
+            // ==== NEW PAYLOAD FOR BOTH REQUESTS ====
+            const payloadForStandardEquipment = {
+                equipmentName: values.remarks,
+                traceability: values.traceability,
+                make: values.make,
+                balanceSensitivity: values.balanceSensitivity,
+                equipmentValidity: values.equipmentValidity,
+                calibrationProcedure: values.calibrationProcedure,
+                environmentCondition: values.environmentCondition,
+                relativeHumidity: values.relativeHumidity,
+                equipmentDetails: values.equipmentDetails,
+                equipmentCertificateNo: values.equipmentCertificateNo,
+            };
+    
+            const totalPayableAmount = calculateTotalPayableAmount();
+    
+            // ==== FIRST REQUEST TO EXISTING ENDPOINT ====
             if (siteCode === "ON") {
-                console.log("Reaching for onsite: ", siteCode);
-                // Use the same logic as handleSubmitForChief for siteCode "ON"
+                console.log("Reaching for onsite (existing logic): ", siteCode);
                 const data = {
                     id: applicationDetails?.id,
                     applicationNumber: values.applicationNumber,
                     userId: parsedUser?.id,
                     userName: parsedUser?.userName,
                     status: values.status,
-                    calibration_officer: values.calibration_officer, // Include calibration officer if applicable
+                    calibration_officer: values.calibration_officer,
                 };
     
                 const response = await axios.post(
@@ -120,7 +135,8 @@ const DetailForm: React.FC = () => {
                         },
                     }
                 );
-                console.log("This is the Onsite response: ", response);
+    
+                console.log("SiteCode=ON - updateWorkflow Response:", response);
                 if (response.status === 200) {
                     Swal.fire({
                         title: "Success!",
@@ -132,41 +148,26 @@ const DetailForm: React.FC = () => {
                             router.push("/applications-list");
                         }
                     });
-                } else {
-                    throw new Error(`API request failed: ${response.status}`);
                 }
+    
             } else if (siteCode === "ILT") {
-                console.log("Reaching for insite: ", siteCode);
-                // Current logic for siteCode "ILT"
+                console.log("Reaching for insite (existing logic): ", siteCode);
+    
                 const timestamp = Date.now().toString();
                 const formattedDate = new Date(Number(timestamp)).toISOString().split('T')[0];
-                const totalPayableAmount = calculateTotalPayableAmount();
-    
-                // Validate and log the application number
-                const applicationNumber = values.applicationNumber;
-                if (!applicationNumber) {
-                    console.error("Error: Application number is missing or invalid.");
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Application number is required.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
     
                 const data = {
                     code: "moit",
-                    platform: "TMS", // Fixed typo: "plateform" -> "platform"
-                    refNo: applicationNumber, // Use the provided application number as refNo
+                    platform: "TMS",
+                    refNo: values.applicationNumber,
                     taxPayerNo: applicationDetails?.cid || "—",
-                    taxPayerDocumentNo: "123456789", // Added placeholder value
+                    taxPayerDocumentNo: "123456789",
                     paymentRequestDate: formattedDate,
                     agencyCode: "MPG5932",
                     payerEmail: parsedUser?.email || "",
                     mobileNo: parsedUser?.mobileNumber || "",
-                    totalPayableAmount: totalPayableAmount.toString(), // Ensure this is a string
-                    paymentDueDate: null, // Fixed value: 'null' -> null
+                    totalPayableAmount: totalPayableAmount.toString(),
+                    paymentDueDate: null,
                     id: applicationDetails?.id || "",
                     taxPayerName: parsedUser?.userName || "",
                     paymentLists: [
@@ -177,6 +178,7 @@ const DetailForm: React.FC = () => {
                         },
                     ],
                 };
+    
                 const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
                     method: "POST",
                     headers: {
@@ -187,21 +189,53 @@ const DetailForm: React.FC = () => {
                     },
                     body: JSON.stringify(data),
                 });
-                console.log("These are Datas Being Sent: ", JSON.stringify(data));
+    
+                console.log("SiteCode=ILT - /workflow/payment Request Sent with Data: ", JSON.stringify(data));
                 const responseData = await response.json();
-                console.log("These are the responseDate: ", responseData);
+                console.log("SiteCode=ILT - /workflow/payment Response Received: ", responseData);
+    
                 if (response.status === 200) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Application updated for payment!',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            router.push("/applications-list");
+                    console.log("Successfully sent to /workflow/payment");
+    
+                    // ==== SECOND REQUEST TO NEW ENDPOINT ====
+                    console.log("Now sending to /standardEquipment/create...");
+    
+                    const standardEquipmentResponse = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/calibration/standardEquipment/create?application_number=${applicationNumber}`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json",
+                                "userId": parsedUser?.id || "",
+                                "userName": parsedUser?.userName || "",
+                            },
+                            body: JSON.stringify(payloadForStandardEquipment),
                         }
-                    });
+                    );
+                    console.log("This is the data being sent: ", payloadForStandardEquipment);
+                    const standardEquipmentData = await standardEquipmentResponse.json();
+                    console.log("New Endpoint /standardEquipment/create Response: ", standardEquipmentData);
+    
+                    if (standardEquipmentResponse.status === 200 || standardEquipmentResponse.status === 201) {
+                        console.log("Successfully saved to standard equipment.");
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Application and equipment details updated successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                router.push("/applications-list");
+                            }
+                        });
+                    } else {
+                        console.error("Failed to save to standard equipment.");
+                        throw new Error("Failed to save equipment data");
+                    }
+    
                 } else {
+                    console.error("Failed to update workflow payment.");
                     Swal.fire({
                         title: 'Error!',
                         text: `Failed to update application status. Server response: ${responseData.message || 'Unknown error'}`,
@@ -209,8 +243,9 @@ const DetailForm: React.FC = () => {
                         confirmButtonText: 'OK'
                     });
                 }
+    
             } else {
-                // Handle unknown siteCode
+                console.warn("Unknown siteCode provided:", siteCode);
                 Swal.fire({
                     title: 'Error!',
                     text: `Unknown siteCode: ${siteCode}. Please contact support.`,
@@ -219,7 +254,7 @@ const DetailForm: React.FC = () => {
                 });
             }
         } catch (error) {
-            console.error("Error submitting data:", error);
+            console.error("Error submitting Lab Head data:", error);
             Swal.fire({
                 title: 'Error!',
                 text: 'Something went wrong. Please try again later.',
@@ -547,6 +582,45 @@ const DetailForm: React.FC = () => {
                 >
                     {({ values, isSubmitting }) => (
                         <Form>
+                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Select Equipment Name" name="remarks" required />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Traceability" name="traceability" required />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Make" name="make" required />
+                            </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Balance Sensitivity" name="balanceSensitivity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Equipment Validity" type="date" name="equipmentValidity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Calibration Procedure" type="text" name="calibrationProcedure" required />
+                                </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Environment Condition" name="environmentCondition" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Relative Humidity" type="text" name="relativeHumidity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Equipment Certificate Number" type="text" name="equipmentCertificateNo" required />
+                                </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-full">
+                                    <Input label="Equipment Details" type="text" name="equipmentDetails" required />
+                                </div>
+                            </div>
+                            <br/>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full xl:w-1/2">
                                     <Select
