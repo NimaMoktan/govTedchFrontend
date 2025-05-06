@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/Inputs/Input';
 import * as Yup from 'yup';
 import Select from "@/components/Inputs/Select";
-import FileInput from '@/components/Inputs/FileInput';
 import { getOrganisations } from '@/services/organisation/OrganisationService';
 import { Options } from '@/interface/Options';
 import { Organisation } from '@/types/organisation/Organisation';
@@ -23,7 +22,8 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 import { ApplicationFormValues } from '@/types/product/Product';
-
+import { getLabSites } from '@/services/lab-site/LabSiteService';
+import { LabSite } from '@/types/lab-site/labsite';
 
 type TestType = {
     id: number;
@@ -39,11 +39,14 @@ type TestType = {
     rateNu: number;
 };
 
-
 const SubmitAppPage = () => {
     const [organizationOptions, setOrganizationOptions] = useState<Options[]>([]);
     const [sampleTypeOptions, setSampleTypeOptions] = useState<Options[]>([]);
-    const [testTypeOptionsList, setTestTypeOptionsList] = useState<Options[][]>([]);
+    const [testTypeOptionsList, setTestTypeOptionsList] = useState<{
+        value: string;
+        text: string;
+    }[]>([]);
+    const [labSite, setLabSite] = useState<Options[]>([]);
     const [originalSampleType, setOriginalSampleType] = useState<TestType[]>([])
     const { setIsLoading } = useLoading();
     const router = useRouter();
@@ -78,23 +81,11 @@ const SubmitAppPage = () => {
         await fetchUserByCid(cid, setFieldValue);
     }, [fetchUserByCid]);
 
-    const fetchSampleTypeById = async (sampleTypeId: number, index: number, setFieldValue: any) => {
+    const fetchSampleTypeById = async (sampleTypeId: number, setFieldValue: any) => {
         try {
             const response = await getSampleType(sampleTypeId);
             setOriginalSampleType(response.data.data.productTestTypes)
-            const options = response.data.data.productTestTypes.map((type: SampleType) => ({
-                value: type.code,
-                text: type.description,
-            }));
-
-            setTestTypeOptionsList(prev => {
-                const updated = [...prev];
-                updated[index] = options;
-                return updated;
-            });
-
-            setFieldValue(`productDetailsEntities[${index}].sampleTypeId`, sampleTypeId.toString());
-
+            setFieldValue(`sampleTypeId`, sampleTypeId.toString());
         } catch (error) {
             console.error("Failed to fetch sample type", error);
         }
@@ -102,8 +93,10 @@ const SubmitAppPage = () => {
 
     const handleChangeTestType = (value: string, index: number, setFieldValue: any) => {
         const result = originalSampleType.find(item => item.code === value);
-        setFieldValue(`productDetailsEntities[${index}].testCode`, value)
-        setFieldValue(`productDetailsEntities[${index}].rate`, result?.rateNu)
+        if (result) {
+            setFieldValue(`productDetailsEntities[${index}].testCode`, value)
+            setFieldValue(`productDetailsEntities[${index}].rate`, result?.rateNu)
+        }
     }
 
     const handleChangeQuantity = (
@@ -124,14 +117,14 @@ const SubmitAppPage = () => {
         }
     };
 
-
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
             try {
-                const [orgRes, sampleRes] = await Promise.all([
+                const [orgRes, sampleRes, labsiteRes] = await Promise.all([
                     getOrganisations(),
-                    getSampleTypes()
+                    getSampleTypes(),
+                    getLabSites()
                 ]);
 
                 setOrganizationOptions(orgRes.data.map((org: Organisation) => ({
@@ -142,7 +135,14 @@ const SubmitAppPage = () => {
                 setSampleTypeOptions(sampleRes.data.map((sample: SampleType) => ({
                     value: sample.id,
                     text: sample.description,
+                    type: sample.test,
                 })));
+
+                setLabSite(labsiteRes.data.map((item: LabSite) => ({
+                    value: item.code,
+                    text: item.description,
+                })));
+
             } catch (error) {
                 console.error("Error loading form data", error);
             } finally {
@@ -160,7 +160,10 @@ const SubmitAppPage = () => {
         contactNumber: '',
         emailAddress: '',
         organizationId: '',
-        productDetailsEntities: [{}].map(() => ({
+        amount: 0,
+        sampleTypeId: '',
+        testCode: '',
+        productDetailsEntities: [{
             sampleTypeId: '',
             testCode: '',
             typeOfWork: '',
@@ -168,8 +171,20 @@ const SubmitAppPage = () => {
             quantity: 0,
             rate: 0,
             siteCode: '',
-            totalAmount: 0
-        }))
+            totalAmount: 0,
+            amount: 0,
+            sampleTestType: { id: 0, code: '', description: '', active: '' },
+            productTestType: {
+                id: 0,
+                sampleCode: '',
+                code: '',
+                description: '',
+                active: '',
+                quantityRequired: '',
+                rateNu: 0,
+                testSiteCode: ''
+            }
+        }]
     };
 
     const validationSchema = Yup.object({
@@ -179,32 +194,84 @@ const SubmitAppPage = () => {
         contactNumber: Yup.string().required("Contact number is required"),
         emailAddress: Yup.string().email("Invalid email").required("Email is required"),
         organizationId: Yup.string().required("Organization is required"),
-        tests: Yup.array().of(
+        sampleTypeId: Yup.string().required("Sample Type is required"),
+        productDetailsEntities: Yup.array().of(
             Yup.object().shape({
-                sampleTypeId: Yup.string().required("Sample Type is required"),
                 testCode: Yup.string().required("Test Type is required"),
                 typeOfWork: Yup.string().required("Type of work is required"),
                 sourceOfSample: Yup.string().required("Source of sample is required"),
-                quantity: Yup.number().required("Quantity is required"),
-                rate: Yup.number(),
-                totalAmount: Yup.number(),
+                quantity: Yup.number().required("Quantity is required").min(1, "Quantity must be at least 1"),
+                rate: Yup.number().required("Rate is required"),
+                totalAmount: Yup.number().required("Total amount is required"),
             })
-        )
+        ).min(1, "At least one product detail is required")
     });
 
-    const handleSubmit = async (values: ApplicationFormValues) => {
-        setIsLoading(true)
-        await createProduct(values).then((response)=>{
-            const { data } = response;
-            console.log(data)
+    const handleSubmit = async (values: ApplicationFormValues, { setSubmitting, setErrors }: any) => {
+        try {
+            setIsLoading(true);
+            
+            // Validate the form values before submission
+            await validationSchema.validate(values, { abortEarly: false });
+            const submissionData = {
+                ...values,
+                productDetailsEntities: values.productDetailsEntities.map(item => ({
+                    ...item,
+                    siteCOde: values.testCode, // Add siteCode from the main form
+                    sampleTestTypeId: values.sampleTypeId, 
+                }))
+            };
+
+            const response = await createProduct(submissionData);
             toast.success(response.message, { position: "top-right", autoClose: 1000 });
             Swal.fire({
-                      title: "Success",
-                      text: `These are your application number: `,
-                      icon: "success",
-                      confirmButtonText: "Ok",
-                    }).then(() => router.push("/product/application-list"));
-        }).finally(()=>setIsLoading(false))
+                title: "Success",
+                text: `These are your application number: `,
+                icon: "success",
+                confirmButtonText: "Ok",
+            }).then(() => router.push("/product/application-list"));
+        } catch (error) {
+            if (error instanceof Yup.ValidationError) {
+                // Convert Yup errors to Formik errors format
+                const errors = error.inner.reduce((acc: any, curr: any) => {
+                    // Handle nested errors for productDetailsEntities
+                    if (curr.path.includes('productDetailsEntities')) {
+                        const match = curr.path.match(/productDetailsEntities\[(\d+)\]\.(\w+)/);
+                        if (match) {
+                            const index = match[1];
+                            const field = match[2];
+                            if (!acc.productDetailsEntities) {
+                                acc.productDetailsEntities = [];
+                            }
+                            if (!acc.productDetailsEntities[index]) {
+                                acc.productDetailsEntities[index] = {};
+                            }
+                            acc.productDetailsEntities[index][field] = curr.message;
+                        }
+                    } else {
+                        acc[curr.path] = curr.message;
+                    }
+                    return acc;
+                }, {});
+                
+                setErrors(errors);
+                
+                // Show a general error message
+                toast.error("Please fix the form errors before submitting", {
+                    position: "top-right",
+                    autoClose: 5000,
+                });
+            } else {
+                console.error("Submission error:", error);
+                toast.error("Failed to submit application. Please try again.", {
+                    position: "top-right",
+                    autoClose: 5000,
+                });
+            }
+        } finally {
+            setIsLoading(false);
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -212,8 +279,26 @@ const SubmitAppPage = () => {
             <Breadcrumb pageName="Submit Application" parentPage="Products" />
             <Card>
                 <CardContent>
-                    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-                        {({ values, setFieldValue, isSubmitting, isValid }) => (
+                    <Formik 
+                        initialValues={initialValues} 
+                        validationSchema={validationSchema} 
+                        onSubmit={handleSubmit}
+                        validateOnBlur={true}
+                        validateOnChange={false}
+                    >
+                        {({ 
+                            values, 
+                            setFieldValue, 
+                            isSubmitting, 
+                            isValid,
+                            errors,
+                            touched,
+                            handleBlur,
+                            handleChange,
+                            validateForm
+                        }) => {
+                            
+                            return (
                             <Form>
                                 <div className="flex flex-col gap-6 xl:flex-row mt-4">
                                     <div className="w-full xl:w-1/2">
@@ -221,12 +306,21 @@ const SubmitAppPage = () => {
                                             label="CID Number"
                                             name="cid"
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCidChange(e, setFieldValue)}
+                                            onBlur={handleBlur}
                                             type="text"
                                             placeholder="Enter Your CID Number"
+                                            error={touched.cid && errors.cid}
                                         />
                                     </div>
                                     <div className="w-full xl:w-1/2">
-                                        <Input label="Full Name" name="name" type="text" disabled placeholder="Full Name" />
+                                        <Input 
+                                            label="Full Name" 
+                                            name="name" 
+                                            type="text" 
+                                            disabled 
+                                            placeholder="Full Name" 
+                                            error={touched.name && errors.name}
+                                        />
                                     </div>
                                     <div className="w-full xl:w-1/2">
                                         <Input
@@ -234,16 +328,33 @@ const SubmitAppPage = () => {
                                             name="address"
                                             type="text"
                                             placeholder="Enter Your Address"
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={touched.address && errors.address}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-6 xl:flex-row mt-6">
                                     <div className="w-full xl:w-1/2">
-                                        <Input name="contactNumber" label="Contact Number" type="text" />
+                                        <Input 
+                                            name="contactNumber" 
+                                            label="Contact Number" 
+                                            type="text" 
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={touched.contactNumber && errors.contactNumber}
+                                        />
                                     </div>
                                     <div className="w-full xl:w-1/2">
-                                        <Input name="emailAddress" label="Email" type="email" />
+                                        <Input 
+                                            name="emailAddress" 
+                                            label="Email" 
+                                            type="email" 
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            error={touched.emailAddress && errors.emailAddress}
+                                        />
                                     </div>
                                     <div className="w-full xl:w-1/2">
                                         <Select
@@ -251,30 +362,62 @@ const SubmitAppPage = () => {
                                             name="organizationId"
                                             options={organizationOptions}
                                             onValueChange={(value: string) => setFieldValue("organizationId", value)}
+                                            // onBlur={handleBlur}
+                                            // error={touched.organizationId && errors.organizationId}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="flex flex-col gap-6 xl:flex-row mt-2">
+                                    <div className="w-full xl:w-1/2">
+                                        <Select
+                                            label="Type of Sample"
+                                            name={`sampleTypeId`}
+                                            options={sampleTypeOptions}
+                                            onValueChange={(value) => fetchSampleTypeById(Number(value), setFieldValue)}
+                                            // onBlur={handleBlur}
+                                            // error={touched.sampleTypeId && errors.sampleTypeId}
+                                        />
+                                    </div>
+                                    <div className="w-full xl:w-1/2">
+                                        <Select
+                                            label="Site Code"
+                                            name={`siteCode`}
+                                            options={labSite}
+                                            onValueChange={(value) => {
+                                                const result = originalSampleType
+                                                    .filter(item => item.test === value)
+                                                    .map(type => ({
+                                                        value: type.code,
+                                                        text: type.description
+                                                    }));
+                                                setTestTypeOptionsList(result);
+                                                setFieldValue(`productDetailsEntities[0].siteCode`, value);
+                                            }}
+                                            // onBlur={handleBlur}
+                                        />
+                                    </div>
+                                    <div className="w-full xl:w-1/2"/>
                                 </div>
 
                                 <FieldArray name="productDetailsEntities">
                                     {({ push, remove }) => (
                                         <>
-                                            {values.productDetailsEntities.map((product, index) => (
+                                            {values.productDetailsEntities.map((product, index) => {
+                                                const productErrors = errors.productDetailsEntities?.[index] as any;
+                                                const productTouched = touched.productDetailsEntities?.[index] as any;
+                                                
+                                                return (
                                                 <div key={index} className="border p-4 mt-6 bg-gray-100 rounded">
                                                     <div className="flex flex-col gap-6 xl:flex-row">
                                                         <div className="w-full xl:w-1/2">
                                                             <Select
-                                                                label="Type of Sample"
-                                                                name={`productDetailsEntities[${index}].sampleTypeId`}
-                                                                options={sampleTypeOptions}
-                                                                onValueChange={(value) => fetchSampleTypeById(Number(value), index, setFieldValue)}
-                                                            />
-                                                        </div>
-                                                        <div className="w-full xl:w-1/2">
-                                                            <Select
                                                                 label="Test Type"
                                                                 name={`productDetailsEntities[${index}].testCode`}
-                                                                options={testTypeOptionsList[index] || []}
+                                                                options={testTypeOptionsList}
                                                                 onValueChange={(value) => handleChangeTestType(value, index, setFieldValue)}
+                                                                // onBlur={handleBlur}
+                                                                // error={productTouched?.testCode && productErrors?.testCode}
                                                             />
                                                         </div>
                                                         <div className="w-full xl:w-1/2">
@@ -283,6 +426,20 @@ const SubmitAppPage = () => {
                                                                 name={`productDetailsEntities[${index}].typeOfWork`}
                                                                 type="text"
                                                                 placeholder="Enter type of work"
+                                                                onChange={handleChange}
+                                                                onBlur={handleBlur}
+                                                                error={productTouched?.typeOfWork && productErrors?.typeOfWork}
+                                                            />
+                                                        </div>
+                                                        <div className="w-full xl:w-1/2">
+                                                            <Input
+                                                                label="Source of Sample"
+                                                                name={`productDetailsEntities[${index}].sourceOfSample`}
+                                                                type="text"
+                                                                placeholder="Enter source of sample"
+                                                                onChange={handleChange}
+                                                                onBlur={handleBlur}
+                                                                error={productTouched?.sourceOfSample && productErrors?.sourceOfSample}
                                                             />
                                                         </div>
                                                     </div>
@@ -290,18 +447,15 @@ const SubmitAppPage = () => {
                                                     <div className="flex flex-col gap-6 xl:flex-row mt-4">
                                                         <div className="w-full xl:w-1/2">
                                                             <Input
-                                                                label="Source of Sample"
-                                                                name={`productDetailsEntities[${index}].sourceOfSample`}
-                                                                type="text"
-                                                                placeholder="Enter source of sample"
-                                                            />
-                                                        </div>
-                                                        <div className="w-full xl:w-1/2">
-                                                            <Input
                                                                 label="Quantity"
                                                                 name={`productDetailsEntities[${index}].quantity`}
                                                                 type="number"
-                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeQuantity(e, index, setFieldValue, values)}
+                                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                    handleChange(e);
+                                                                    handleChangeQuantity(e, index, setFieldValue, values);
+                                                                }}
+                                                                onBlur={handleBlur}
+                                                                error={productTouched?.quantity && productErrors?.quantity}
                                                             />
                                                         </div>
                                                         <div className="w-full xl:w-1/2">
@@ -310,6 +464,9 @@ const SubmitAppPage = () => {
                                                                 name={`productDetailsEntities[${index}].rate`}
                                                                 type="number"
                                                                 readOnly
+                                                                onChange={handleChange}
+                                                                onBlur={handleBlur}
+                                                                error={productTouched?.rate && productErrors?.rate}
                                                             />
                                                         </div>
                                                         <div className="w-full xl:w-1/2">
@@ -318,38 +475,58 @@ const SubmitAppPage = () => {
                                                                 name={`productDetailsEntities[${index}].totalAmount`}
                                                                 type="number"
                                                                 readOnly
+                                                                onChange={handleChange}
+                                                                onBlur={handleBlur}
+                                                                error={productTouched?.totalAmount && productErrors?.totalAmount}
                                                             />
                                                         </div>
-                                                        <Button
-                                                            type="button"
-                                                            size={`sm`}
-                                                            variant="destructive"
-                                                            className="mt-7 rounded-full"
-                                                            onClick={() => remove(index)}
-                                                        >
-                                                            <BsTrash3 /> Remove
-                                                        </Button>
+                                                        {index > 0 && (
+                                                            <Button
+                                                                type="button"
+                                                                size={`sm`}
+                                                                variant="destructive"
+                                                                className="mt-7 rounded-full"
+                                                                onClick={() => remove(index)}
+                                                            >
+                                                                <BsTrash3 /> Remove
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )})}
 
                                             <div className="flex justify-end mt-4">
                                                 <Button
                                                     className='rounded-full'
                                                     type="button"
                                                     size={`sm`}
-                                                    onClick={() => {
-                                                        push({
-                                                            sampleTypeId: '',
-                                                            testTypeId: '',
-                                                            model: '',
-                                                            serialNumberOrModel: '',
-                                                            quantity: 0,
-                                                            amount: 0,
-                                                            total_quantity: 0
-                                                        });
-                                                        setTestTypeOptionsList(prev => [...prev, []]);
-                                                    }}
+                                                    onClick={() => push({
+                                                        sampleTypeId: '',
+                                                        testCode: '',
+                                                        typeOfWork: '',
+                                                        sourceOfSample: '',
+                                                        quantity: 0,
+                                                        rate: 0,
+                                                        siteCode: values.productDetailsEntities[0]?.siteCode || '',
+                                                        totalAmount: 0,
+                                                        amount: 0,
+                                                        sampleTestType: { id: 0, name: '', code: '', description: '', active: '' },
+                                                        productTestType: {
+                                                            id: 0,
+                                                            sampleCode: '',
+                                                            code: '',
+                                                            description: '',
+                                                            created_date: '',
+                                                            created_by: '',
+                                                            last_updated_date: '',
+                                                            last_updated_by: '',
+                                                            active: '',
+                                                            quantityRequired: '',
+                                                            rateNu: 0,
+                                                            ratesInNu: 0,
+                                                            testSiteCode: ''
+                                                        }
+                                                    })}
                                                 >
                                                     <IoAddCircleSharp size={20} className="mr-2" /> Add More
                                                 </Button>
@@ -358,18 +535,18 @@ const SubmitAppPage = () => {
                                     )}
                                 </FieldArray>
 
-                                {/* <div className="mt-6">
-                                    <h3 className="font-medium text-black dark:text-white">Additional Information (Optional)</h3>
-                                    <FileInput label="Upload Specific Document" />
-                                </div> */}
-
                                 <div className="flex justify-center mt-6">
-                                    <Button type="submit" className='rounded-full' size={`lg`} disabled={!isValid || isSubmitting}>
+                                    <Button 
+                                        type="submit" 
+                                        className='rounded-full' 
+                                        size={`lg`}
+                                        disabled={isSubmitting}
+                                    >
                                         {isSubmitting ? "Submitting..." : "Submit Application"}
                                     </Button>
                                 </div>
                             </Form>
-                        )}
+                        )}}
                     </Formik>
                 </CardContent>
             </Card>

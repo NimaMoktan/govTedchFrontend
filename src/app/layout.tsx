@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { Metadata } from "next";
-
+import { Suspense } from "react";
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -37,11 +37,13 @@ export default function RootLayout({
               <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
               <main className="dark:bg-boxdark-2 dark:text-bodydark">
                 <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10"> */}
-        <LoadingProvider>
-          <PermissionProvider>
-            {children}
-          </PermissionProvider>
-        </LoadingProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <LoadingProvider>
+            <PermissionProvider>
+              {children}
+            </PermissionProvider>
+          </LoadingProvider>
+        </Suspense>
         {/* </div>
               </main>
             </div>

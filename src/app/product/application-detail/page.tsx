@@ -7,33 +7,66 @@ import Select from "@/components/Inputs/Select";
 import { Formik, Form } from 'formik';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ApplicationFormValues } from '@/types/product/Product';
+import { Registration } from '@/types/product/Product';
 import { getProduct } from '@/services/product/ProductService';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
+import { HasRole } from '@/context/PermissionContext';
+import * as Yup from 'yup';
+import { Options } from '@/interface/Options';
+import axios from 'axios';
 
 const AppDetailsPage: React.FC = () => {
-    // const [sampleTypeOptions, setSampleTypeOptions] = useState<Options[]>([]);
-    const [appDetails, setAppDetails] = useState<ApplicationFormValues | null>(null);
+    const [appDetails, setAppDetails] = useState<Registration | null>(null);
+    const [defaultAccordionValue, setDefaultAccordionValue] = useState<string>("item-0");
+    const [storedRoles, setStoredRoles] = useState("");
+    const [technicianOption, setTechnician] = useState<Options[]>([]);
 
     const searchParams = useSearchParams();
     const applicationNumber = searchParams.get("applicationNumber");
     const id = searchParams.get("id");
 
-    useEffect(()=>{
+    const loadTechnician = async () => {
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/core/public/getAll`)
+            .then((response) => {
+                const data = response.data.data;
+                const options = data.map((item: any) => ({
+                    value: item.userId,
+                    text: item.fullName,
+                }));
+                setTechnician(options);
+            })
+            .catch((error) => {
+                console.error("Error fetching technician data:", error);
+            }
+        );
+    }
+
+    useEffect(() => {
+        const roles = localStorage.getItem("roles");
+        if (roles) {
+            const parsedRoles = Array.isArray(roles) ? roles : JSON.parse(roles);
+            setStoredRoles(parsedRoles);
+        }
         const fetchAppDetails = async () => {
-            getProduct(Number(id)).then((res)=>{
+            getProduct(Number(id)).then((res) => {
                 const { data } = res.data;
                 setAppDetails(data || null);
             })
         }
         fetchAppDetails();
-    },[id])
+    }, [id])
 
     return (
         <DefaultLayout>
             <Breadcrumb parentPage='Product' pageName="Application Details" />
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6.5">
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300">
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Application Number */}
                         <div>
                             <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -83,108 +116,139 @@ const AppDetailsPage: React.FC = () => {
                                 {appDetails?.emailAddress}
                             </div>
                         </div>
-                    </div>
-                </div>
-                {appDetails?.productDetailsEntities.map((item, index)=>(<>
-                <div key={index} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300 mt-4">
-                    {/* Header */}
-                    <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                            Test Sample Details
-                        </h2>
-                    </div>
-
-                    {/* Collapsible Content */}
-                    <div
-                        className={`overflow-hidden transition-all duration-500 ease-in-out`}
-                    >
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                            {/* Equipment/Instrument */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Test Code
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                    {item?.testCode}
-                                </div>
-                            </div>
-
-                            {/* Manufacturer/Type/Brand */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Site Code
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                {item?.siteCode}
-                                </div>
-                            </div>
-
-                            {/* Range */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Range
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                    {/* {equipment?.[0]?.range || "—"} */}
-                                </div>
-                            </div>
-
-                            {/* Serial Number/Model */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Serial Number/Model
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                    {/* {appDetails?.deviceRegistry?.[0]?.serialNumberOrModel || "—"} */}
-                                </div>
-                            </div>
-
-                            {/* Rate */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Rate
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                    {/* {appDetails?.deviceRegistry?.[0]?.rate || "—"} */}
-                                </div>
-                            </div>
-
-                            {/* Amount */}
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Amount
-                                </label>
-                                <div className="text-base font-medium text-gray-800 dark:text-white">
-                                    {/* {appDetails?.deviceRegistry?.[0]?.amount || "—"} */}
-                                </div>
+                        <div>
+                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                Organization
+                            </label>
+                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                {appDetails?.organizationDetails.description}
                             </div>
                         </div>
                     </div>
                 </div>
-                </>))}
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300 mt-4">
-                    <Formik
-                        initialValues={{ status: "", remarks: "", applicationNumber: "" }}
-                        onSubmit={(values) => console.log(values)}
-                    >
-                        <Form>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full xl:w-1/2">
-                                    <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} />
-                                </div>
-                                <div className="w-full xl:w-1/2">
+                {appDetails?.productDetailsEntities.map((item, index) => (
+                    <div key={index} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300 mt-4">
+                        <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                            value={defaultAccordionValue}
+                            onValueChange={(value) => setDefaultAccordionValue(value)}
+                        >
+                            <AccordionItem
+                                value={`item-${index}`}
+                                className="border-0"
+                            >
+                                <AccordionTrigger className="[&[data-state=open]>svg:last-child:rotate-180 [&[data-state=open]]:no-underline hover:no-underline">
+                                    <h2>
+                                        <span className="text-xl font-bold text-gray-800 dark:text-white">
+                                            Sample - {index + 1}
+                                        </span>
+                                        <span className="text-lg text-gray-500 dark:text-gray-400 ml-2">
+                                            ( {item?.sampleTestType.description} ({item.sampleTestType.code}) -
+                                        </span>
+                                        <span className="text-lg text-gray-500 dark:text-gray-400 ml-2">
+                                            {item?.productTestType.description} ({item.productTestType.code}) )
+                                        </span>
 
-                                    {/* <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/> */}
-                                    <Input label="Remarks" name="remarks" required />
-                                </div>
-                            </div>
-                            <Button type="submit" className='rounded-full'>
-                                Submit
-                            </Button>
-                        </Form>
-                    </Formik>
-                </div>
+                                    </h2>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-4">
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Sample Test Type
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {`${item?.sampleTestType.description} (${item.sampleTestType.code})`}
+                                            </div>
+                                        </div>
 
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Test Type
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {`${item?.productTestType.description} (${item.productTestType.code})`}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Source of Sample
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {`${item?.sourceOfSample}`}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Type of Work
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {`${item?.typeOfWork}`}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Rate
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {item?.productTestType.rateNu}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Quantity
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {item?.quantity}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                                Amount (Quantity x Rate)
+                                            </label>
+                                            <div className="text-base font-medium text-gray-800 dark:text-white">
+                                                {item?.amount}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
+                ))}
+
+                <HasRole hasRoles={storedRoles} roles={["SRP"]}>
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300 mt-4">
+                        <Formik
+                            initialValues={{ assignTo: "", remarks: "", applicationId: applicationNumber?.toUpperCase()}}
+                            validationSchema={Yup.object({
+                                    assignTo: Yup.string().required("Technician is required."),
+                                    remarks: Yup.string().required("Remarks is required"),
+                                   
+                                })}
+                            onSubmit={(values) => console.log(values)}
+                        >
+                            <Form>
+                                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                        <Select label="Assign To" name="assignTo" options={technicianOption} onValueChange={() => console.log("Selection changed!")} />
+                                    </div>
+                                    <div className="w-full xl:w-1/2">
+                                        <Input label="Remarks" name="remarks" required />
+                                    </div>
+                                </div>
+                                <Button type="submit" className='rounded-full'>
+                                    Submit
+                                </Button>
+                            </Form>
+                        </Formik>
+                    </div>
+                </HasRole>
             </div>
         </DefaultLayout>
     );

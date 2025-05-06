@@ -23,12 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
-interface DataTableProps<TData extends { ptlCode: string; applicantId: string }, TValue> {
+interface DataTableProps<TData extends { ptlCode: string; applicantId: number }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData extends { ptlCode: string; applicantId: string; }, TValue>({
+export function DataTable<TData extends { ptlCode: string; applicantId: number; }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -66,30 +66,24 @@ export function DataTable<TData extends { ptlCode: string; applicantId: string; 
           }
           className="max-w-[250px]"
         />
-        {/* <Input
-          placeholder="Search by Full Name"
-          value={(table.getColumn("fullName")?.getFilterValue() as string) ?? ""}
+        <Input
+          placeholder="Search by CID"
+          value={(table.getColumn("cid")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("fullName")?.setFilterValue(event.target.value)
+            table.getColumn("cid")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px] ml-6"
         />
-        <Input
-          placeholder="Search by Email"
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+         <Input
+          placeholder="Search by Client Name"
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px] ml-6"
         />
-        <Input
-          placeholder="Search by Mobile Number"
-          value={(table.getColumn("mobileNumber")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("mobileNumber")?.setFilterValue(event.target.value)
-          }
-          className="max-w-[250px] ml-6"
-        /> */}
+        
+        
         
       </div>
       <div className="rounded-md border">
@@ -114,7 +108,7 @@ export function DataTable<TData extends { ptlCode: string; applicantId: string; 
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

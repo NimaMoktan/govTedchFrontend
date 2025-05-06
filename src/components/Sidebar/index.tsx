@@ -127,10 +127,10 @@ const menuGroups = [
         ),
         label: "Material Testing Services",
         route: "#",
-        role: ["ADM"],
+        role: ["ADM","SRP","THT"],
         children: [
           { label: "Submit Application", role: ["THT", "ADM"], route: "/product/submit-application" },
-          { label: "Search Application", role: ["THT", "ADM"], route: "/product/application-list" },
+          { label: "Search Application", role: ["THT", "ADM", "SRP", "CLO"], route: "/product/application-list" },
         ],
       },
       {
