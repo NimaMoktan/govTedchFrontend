@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Swal from 'sweetalert2';
+import * as Yup from 'yup';
 
 interface ApplicationDetails {
     id: string;
@@ -39,7 +40,23 @@ const DetailForm: React.FC = () => {
     const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false); 
     const toggleDeviceDetails = () => {
         setIsDeviceDetailsOpen(prev => !prev);
-    };    
+    };  
+    const validationSchema = Yup.object({
+        status: Yup.string()
+            .required('Select a status (Approve or Reject)')
+            .oneOf(['approve', 'reject'], 'Invalid status selected'),
+        calibration_officer: Yup.string().when('status', {
+            is: 'approve',
+            then: (schema) =>
+            schema
+                .required('Please select a Calibration Officer')
+                .oneOf(
+                ['Dorji Wangchuk', 'Pema Dorji'],
+                'Invalid Calibration Officer selected'
+                ),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        });
     const fetchEquipment = async (id: any) => {
 
         if (!token) {
@@ -99,7 +116,7 @@ const DetailForm: React.FC = () => {
             const payloadForStandardEquipment = {
                 equipmentName: values.remarks,
                 traceability: values.traceability,
-                make: values.make,
+                equipmentMake: values.make,
                 balanceSensitivity: values.balanceSensitivity,
                 equipmentValidity: values.equipmentValidity,
                 calibrationProcedure: values.calibrationProcedure,
@@ -563,6 +580,7 @@ const DetailForm: React.FC = () => {
                         applicationNumber: applicationNumber,
                         calibration_officer: "",
                     }}
+                    validationSchema={validationSchema} 
                     onSubmit={async (values, { setSubmitting }) => {
                         try {
                             setSubmitting(true); // Start submission process
@@ -580,7 +598,7 @@ const DetailForm: React.FC = () => {
                         }
                     }}
                 >
-                    {({ values, isSubmitting }) => (
+                    {({ values, isSubmitting, errors, touched }) => (
                         <Form>
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
@@ -623,15 +641,19 @@ const DetailForm: React.FC = () => {
                             <br/>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full xl:w-1/2">
-                                    <Select
-                                        label="Select Status"
-                                        name="status"
-                                        options={[
-                                            { value: "approve", text: "Approve" },
-                                            { value: "reject", text: "Reject" },
-                                        ]}
-                                        onValueChange={() => console.log("Selection changed!")}
+                                <Select
+                                    label="Select Status"
+                                    name="status"
+                                    options={[
+                                        { value: "approve", text: "Approve" },
+                                        { value: "reject", text: "Reject" },
+                                    ]}
+                                    onValueChange={() => console.log("Selection changed!")}
                                     />
+                                    {/* Show error message */}
+                                    {touched.status && errors.status && (
+                                    <div className="text-red-500 text-sm mt-1">{errors.status}</div>
+                                    )}
                                 </div>
                                 <div className="w-full xl:w-1/2">
                                     <input
@@ -644,17 +666,23 @@ const DetailForm: React.FC = () => {
 
                                 {/* Only show Calibration Officer if status is "approve" */}
                                 {values.status === "approve" && (
-                                    <div className="w-full xl:w-1/2">
-                                        <Select
-                                            label="Select Calibration Officer"
-                                            name="calibration_officer"
-                                            options={[
-                                                { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
-                                                { value: "Pema Dorji", text: "Pema Dorji" },
-                                            ]}
-                                            onValueChange={() => console.log("Selection changed!")}
-                                        />
+                                <div className="w-full xl:w-1/2">
+                                    <Select
+                                    label="Select Calibration Officer"
+                                    name="calibration_officer"
+                                    options={[
+                                        { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
+                                        { value: "Pema Dorji", text: "Pema Dorji" },
+                                    ]}
+                                    onValueChange={() => console.log("Selection changed!")}
+                                    />
+                                    {/* Show error message */}
+                                    {touched.calibration_officer && errors.calibration_officer && (
+                                    <div className="text-red-500 text-sm mt-1">
+                                        {errors.calibration_officer}
                                     </div>
+                                    )}
+                                </div>
                                 )}
                             </div>
 

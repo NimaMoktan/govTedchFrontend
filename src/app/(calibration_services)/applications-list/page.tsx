@@ -18,6 +18,7 @@ import Loader from "@/components/common/Loader";
 
 
 const ApplicationList: React.FC = () => {
+    const [token, setToken] = useState<string | null>();
     const [applicationList, setApplicationList] = useState<Application[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -25,10 +26,13 @@ const ApplicationList: React.FC = () => {
         setIsLoading(true);
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    
+        if (!token) {
+            console.log("There is no token ma broder!");
+        }
         try {
             const list = await api.get(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/populateWorkflowDtls`, {
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     "userId": parsedUser.id,
                     "userName": parsedUser.userName,
                 },
