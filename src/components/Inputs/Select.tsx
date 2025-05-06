@@ -57,9 +57,6 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
           </SelectGroup>
         </SelectContent>
       </Select>
-      {meta.touched && meta.error && (
-        <p className="text-sm text-red-500">{meta.error}</p>
-      )}
     </div>
   );
 };

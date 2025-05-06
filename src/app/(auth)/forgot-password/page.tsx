@@ -19,7 +19,6 @@ const ForgotPassword = () => {
     };
 
     useEffect(() => {
-
     }, []);
 
     return (

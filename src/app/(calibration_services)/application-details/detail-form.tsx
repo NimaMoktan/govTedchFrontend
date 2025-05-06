@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Swal from 'sweetalert2';
+import * as Yup from 'yup';
 
 interface ApplicationDetails {
     id: string;
@@ -18,7 +19,7 @@ interface ApplicationDetails {
     clientName: string;
     contactNumber: string;
     emailAddress: string;
-    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; id?: number; }[];
+    deviceRegistry: { testItemId: string; manufacturerOrTypeOrBrand: string; rate?: string; amount?: string; serialNumberOrModel?: string, quantity?: string; id?: number; siteCode?: string;}[];
 }
 
 const DetailForm: React.FC = () => {
@@ -37,10 +38,25 @@ const DetailForm: React.FC = () => {
     const id = searchParams.get("id");
 
     const [isDeviceDetailsOpen, setIsDeviceDetailsOpen] = useState(false); 
-       
     const toggleDeviceDetails = () => {
         setIsDeviceDetailsOpen(prev => !prev);
-    };    
+    };  
+    const validationSchema = Yup.object({
+        status: Yup.string()
+            .required('Select a status (Approve or Reject)')
+            .oneOf(['approve', 'reject'], 'Invalid status selected'),
+        calibration_officer: Yup.string().when('status', {
+            is: 'approve',
+            then: (schema) =>
+            schema
+                .required('Please select a Calibration Officer')
+                .oneOf(
+                ['Dorji Wangchuk', 'Pema Dorji'],
+                'Invalid Calibration Officer selected'
+                ),
+            otherwise: (schema) => schema.notRequired(),
+        }),
+        });
     const fetchEquipment = async (id: any) => {
 
         if (!token) {
@@ -78,44 +94,239 @@ const DetailForm: React.FC = () => {
         }
     };
 
-    const handleSubmit = async(values: any) => {
+    const calculateTotalPayableAmount = () => {
+        if (!applicationDetails?.deviceRegistry) return 0;
+    
+        return applicationDetails.deviceRegistry.reduce((total: number, device: any) => {
+            const rate = parseFloat(device.rate || 0); // Use `rate` if available
+            const quantity = parseFloat(device.quantity || 1); // Default to 1 if `quantity` is missing
+            return total + rate * quantity;
+        }, 0);
+    };
+
+    const handleSubmitForLabHead = async (values: any) => {
         const storedUser = localStorage.getItem("userDetails");
         const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        // Extract siteCode from applicationDetails.deviceRegistry[0]
+        const siteCode = applicationDetails?.deviceRegistry[0]?.siteCode;
+        console.log("This the siteCode: ", siteCode);
+    
+        try {
+            // ==== NEW PAYLOAD FOR BOTH REQUESTS ====
+            const payloadForStandardEquipment = {
+                equipmentName: values.remarks,
+                traceability: values.traceability,
+                equipmentMake: values.make,
+                balanceSensitivity: values.balanceSensitivity,
+                equipmentValidity: values.equipmentValidity,
+                calibrationProcedure: values.calibrationProcedure,
+                environmentCondition: values.environmentCondition,
+                relativeHumidity: values.relativeHumidity,
+                equipmentDetails: values.equipmentDetails,
+                equipmentCertificateNo: values.equipmentCertificateNo,
+            };
+    
+            const totalPayableAmount = calculateTotalPayableAmount();
+    
+            // ==== FIRST REQUEST TO EXISTING ENDPOINT ====
+            if (siteCode === "ON") {
+                console.log("Reaching for onsite (existing logic): ", siteCode);
+                const data = {
+                    id: applicationDetails?.id,
+                    applicationNumber: values.applicationNumber,
+                    userId: parsedUser?.id,
+                    userName: parsedUser?.userName,
+                    status: values.status,
+                    calibration_officer: values.calibration_officer,
+                };
+    
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
+                    data,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            userId: parsedUser?.id,
+                            userName: parsedUser?.userName,
+                        },
+                    }
+                );
+    
+                console.log("SiteCode=ON - updateWorkflow Response:", response);
+                if (response.status === 200) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Application status updated successfully!",
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            router.push("/applications-list");
+                        }
+                    });
+                }
+    
+            } else if (siteCode === "ILT") {
+                console.log("Reaching for insite (existing logic): ", siteCode);
+    
+                const timestamp = Date.now().toString();
+                const formattedDate = new Date(Number(timestamp)).toISOString().split('T')[0];
+    
+                const data = {
+                    code: "moit",
+                    platform: "TMS",
+                    refNo: values.applicationNumber,
+                    taxPayerNo: applicationDetails?.cid || "—",
+                    taxPayerDocumentNo: "123456789",
+                    paymentRequestDate: formattedDate,
+                    agencyCode: "MPG5932",
+                    payerEmail: parsedUser?.email || "",
+                    mobileNo: parsedUser?.mobileNumber || "",
+                    totalPayableAmount: totalPayableAmount.toString(),
+                    paymentDueDate: null,
+                    id: applicationDetails?.id || "",
+                    taxPayerName: parsedUser?.userName || "",
+                    paymentLists: [
+                        {
+                            serviceCode: "100",
+                            description: "Fines and Penalties",
+                            payableAmount: totalPayableAmount.toString(),
+                        },
+                    ],
+                };
+    
+                const response = await fetch(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/payment`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        "userId": parsedUser?.id || "",
+                        "userName": parsedUser?.userName || "",
+                    },
+                    body: JSON.stringify(data),
+                });
+    
+                console.log("SiteCode=ILT - /workflow/payment Request Sent with Data: ", JSON.stringify(data));
+                const responseData = await response.json();
+                console.log("SiteCode=ILT - /workflow/payment Response Received: ", responseData);
+    
+                if (response.status === 200) {
+                    console.log("Successfully sent to /workflow/payment");
+    
+                    // ==== SECOND REQUEST TO NEW ENDPOINT ====
+                    console.log("Now sending to /standardEquipment/create...");
+    
+                    const standardEquipmentResponse = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/calibration/standardEquipment/create?application_number=${applicationNumber}`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json",
+                                "userId": parsedUser?.id || "",
+                                "userName": parsedUser?.userName || "",
+                            },
+                            body: JSON.stringify(payloadForStandardEquipment),
+                        }
+                    );
+                    console.log("This is the data being sent: ", payloadForStandardEquipment);
+                    const standardEquipmentData = await standardEquipmentResponse.json();
+                    console.log("New Endpoint /standardEquipment/create Response: ", standardEquipmentData);
+    
+                    if (standardEquipmentResponse.status === 200 || standardEquipmentResponse.status === 201) {
+                        console.log("Successfully saved to standard equipment.");
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Application and equipment details updated successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                router.push("/applications-list");
+                            }
+                        });
+                    } else {
+                        console.error("Failed to save to standard equipment.");
+                        throw new Error("Failed to save equipment data");
+                    }
+    
+                } else {
+                    console.error("Failed to update workflow payment.");
+                    Swal.fire({
+                        title: 'Error!',
+                        text: `Failed to update application status. Server response: ${responseData.message || 'Unknown error'}`,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+    
+            } else {
+                console.warn("Unknown siteCode provided:", siteCode);
+                Swal.fire({
+                    title: 'Error!',
+                    text: `Unknown siteCode: ${siteCode}. Please contact support.`,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting Lab Head data:", error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    };
 
+    const handleSubmitForChief = async (values: any) => {
+        const storedUser = localStorage.getItem("userDetails");
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    
         const data = {
             id: applicationDetails?.id,
             applicationNumber: values.applicationNumber,
-            userId: parsedUser.id,
-            userName: parsedUser.userName,
-            status: values.status
-        }
-        
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,data,
-            {
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                    "userId": parsedUser.id,
-                    "userName": parsedUser.userName,
+            userId: parsedUser?.id,
+            userName: parsedUser?.userName,
+            status: values.status,
+            calibration_officer: values.calibration_officer, // Include calibration officer if applicable
+        };
+    
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_CAL_API_URL}/workflow/${id}/updateWorkflow`,
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        userId: parsedUser?.id,
+                        userName: parsedUser?.userName,
+                    },
                 }
+            );
+    
+            if (response.status === 200) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Application status updated successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        router.push("/applications-list");
+                    }
+                });
+            } else {
+                throw new Error(`API request failed: ${response.status}`);
             }
-        );
-        if(response.status === 200){
-            // SweetAlert to notify the user of success
-            Swal.fire({
-                title: 'Success!',
-                text: 'Application status updated successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    router.push("/applications-list");
-                }
-            });
-        }else{
-            // toast.error("Failed to update application statu", { position: "top-right", autoClose: 1000 });
+        } catch (error) {
+            console.error("Error submitting data:", error);
+            throw error; // Re-throw the error for Formik to handle
         }
-    }
+    };
 
     const fetchApplicationDetails = useCallback(async () => {
         const storedUser = localStorage.getItem("userDetails");
@@ -311,31 +522,27 @@ const DetailForm: React.FC = () => {
                 </div>
             </div>
             <br></br>
-            {isChief &&
-            <Formik initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber}} onSubmit={(values) => handleSubmit(values)}>
-                <Form>
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    <div className="w-full xl:w-1/2">
-                        <Select label="Select Status" name="status" options={[{ value: "approve", text: "Approve" }, { value: "reject", text: "Reject" }]} onValueChange={() => console.log("Selection changed!")} />
-                    </div>
-                    <div className="w-full xl:w-1/2">
-
-                        <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''}/>
-                        <Input label="Remarks" name="remarks" required />
-                    </div>
-                </div>
-                <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                    Update
-                </button>
-                </Form>
-            </Formik>
-            }
-            {isLabHead && (
+            {isChief && (
                 <Formik
                     initialValues={{ status: "", remarks: "", applicationNumber: applicationNumber }}
-                    onSubmit={(values) => handleSubmit(values)}
+                    onSubmit={async (values, { setSubmitting }) => {
+                        try {
+                            setSubmitting(true); // Start submission process
+                            await handleSubmitForChief(values);
+                        } catch (error) {
+                            console.error("Error submitting data:", error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong. Please try again later.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        } finally {
+                            setSubmitting(false); // End submission process
+                        }
+                    }}
                 >
-                    {({ values }) => ( // Destructure values to track selected status
+                    {({ isSubmitting }) => (
                         <Form>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full xl:w-1/2">
@@ -346,30 +553,146 @@ const DetailForm: React.FC = () => {
                                             { value: "approve", text: "Approve" },
                                             { value: "reject", text: "Reject" },
                                         ]}
-                                        onValueChange={() => console.log("Selection changed!")} 
+                                        onValueChange={() => console.log("Selection changed!")}
                                     />
                                 </div>
                                 <div className="w-full xl:w-1/2">
                                     <input name="applicationNumber" type="hidden" value={applicationNumber ?? ''} />
                                     <Input label="Remarks" name="remarks" required />
                                 </div>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Updating..." : "Update"}
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+            )}
+            {isLabHead && (
+                <Formik
+                    initialValues={{
+                        status: "",
+                        remarks: "",
+                        applicationNumber: applicationNumber,
+                        calibration_officer: "",
+                    }}
+                    validationSchema={validationSchema} 
+                    onSubmit={async (values, { setSubmitting }) => {
+                        try {
+                            setSubmitting(true); // Start submission process
+                            await handleSubmitForLabHead(values);
+                        } catch (error) {
+                            console.error("Error submitting data:", error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong. Please try again later.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        } finally {
+                            setSubmitting(false); // End submission process
+                        }
+                    }}
+                >
+                    {({ values, isSubmitting, errors, touched }) => (
+                        <Form>
+                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Select Equipment Name" name="remarks" required />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Traceability" name="traceability" required />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                                <Input label="Make" name="make" required />
+                            </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Balance Sensitivity" name="balanceSensitivity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Equipment Validity" type="date" name="equipmentValidity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Calibration Procedure" type="text" name="calibrationProcedure" required />
+                                </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Environment Condition" name="environmentCondition" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Relative Humidity" type="text" name="relativeHumidity" required />
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <Input label="Equipment Certificate Number" type="text" name="equipmentCertificateNo" required />
+                                </div>
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-full">
+                                    <Input label="Equipment Details" type="text" name="equipmentDetails" required />
+                                </div>
+                            </div>
+                            <br/>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full xl:w-1/2">
+                                <Select
+                                    label="Select Status"
+                                    name="status"
+                                    options={[
+                                        { value: "approve", text: "Approve" },
+                                        { value: "reject", text: "Reject" },
+                                    ]}
+                                    onValueChange={() => console.log("Selection changed!")}
+                                    />
+                                    {/* Show error message */}
+                                    {touched.status && errors.status && (
+                                    <div className="text-red-500 text-sm mt-1">{errors.status}</div>
+                                    )}
+                                </div>
+                                <div className="w-full xl:w-1/2">
+                                    <input
+                                        name="applicationNumber"
+                                        type="hidden"
+                                        value={applicationNumber ?? ""}
+                                    />
+                                    <Input label="Remarks" name="remarks" required />
+                                </div>
+
                                 {/* Only show Calibration Officer if status is "approve" */}
                                 {values.status === "approve" && (
-                                    <div className="w-full xl:w-1/2">
-                                        <Select
-                                            label="Select Calibration Officer"
-                                            name="calibration_officer"
-                                            options={[
-                                                { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
-                                                { value: "Pema Dorji", text: "Pema Dorji" },
-                                            ]}
-                                            onValueChange={() => console.log("Selection changed!")} 
-                                        />
+                                <div className="w-full xl:w-1/2">
+                                    <Select
+                                    label="Select Calibration Officer"
+                                    name="calibration_officer"
+                                    options={[
+                                        { value: "Dorji Wangchuk", text: "Dorji Wangchuk" },
+                                        { value: "Pema Dorji", text: "Pema Dorji" },
+                                    ]}
+                                    onValueChange={() => console.log("Selection changed!")}
+                                    />
+                                    {/* Show error message */}
+                                    {touched.calibration_officer && errors.calibration_officer && (
+                                    <div className="text-red-500 text-sm mt-1">
+                                        {errors.calibration_officer}
                                     </div>
+                                    )}
+                                </div>
                                 )}
                             </div>
-                            <button type="submit" className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center">
-                                Update
+
+                            {/* Update Button with Dynamic Text */}
+                            <button
+                                type="submit"
+                                className="w-1/4 rounded bg-primary p-3 text-gray font-medium hover:bg-opacity-90 justify-center"
+                                disabled={isSubmitting} // Disable the button during submission
+                            >
+                                {isSubmitting ? "Updating..." : "Update"}
                             </button>
                         </Form>
                     )}
