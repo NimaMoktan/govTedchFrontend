@@ -602,7 +602,7 @@ const DetailForm: React.FC = () => {
                         <Form>
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
-                                <Input label="Select Equipment Name" name="remarks" required />
+                                <Input label="Equipment Name" name="remarks" required />
                             </div>
                             <div className="w-full xl:w-1/2">
                                 <Input label="Traceability" name="traceability" required />
