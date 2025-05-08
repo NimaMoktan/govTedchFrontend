@@ -8,7 +8,7 @@ import { Formik, Form } from 'formik';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Registration } from '@/types/product/Product';
-import { getProduct } from '@/services/product/ProductService';
+import { getProductByAppNumber } from '@/services/product/ProductService';
 import {
     Accordion,
     AccordionContent,
@@ -19,6 +19,7 @@ import { HasRole } from '@/context/PermissionContext';
 import * as Yup from 'yup';
 import { Options } from '@/interface/Options';
 import axios from 'axios';
+import Status from '@/components/Status/Status';
 
 const AppDetailsPage: React.FC = () => {
     const [appDetails, setAppDetails] = useState<Registration | null>(null);
@@ -43,7 +44,7 @@ const AppDetailsPage: React.FC = () => {
             .catch((error) => {
                 console.error("Error fetching technician data:", error);
             }
-        );
+            );
     }
 
     useEffect(() => {
@@ -53,13 +54,17 @@ const AppDetailsPage: React.FC = () => {
             setStoredRoles(parsedRoles);
         }
         const fetchAppDetails = async () => {
-            getProduct(Number(id)).then((res) => {
-                const { data } = res.data;
-                setAppDetails(data || null);
-            })
+            if (applicationNumber !== null) {
+                getProductByAppNumber(applicationNumber).then((res) => {
+                    const { data } = res.data;
+                    setAppDetails(data || null);
+                })
+            }
         }
         fetchAppDetails();
-    }, [id])
+        loadTechnician();
+
+    }, [applicationNumber])
 
     return (
         <DefaultLayout>
@@ -73,7 +78,7 @@ const AppDetailsPage: React.FC = () => {
                                 Application Number
                             </label>
                             <div className="text-lg font-bold text-gray-800 dark:text-white">
-                                {applicationNumber?.toUpperCase()}
+                                {applicationNumber?.toUpperCase()} <Status code={appDetails?.statusId ?? 0} label={appDetails?.status} />
                             </div>
                         </div>
 
@@ -225,16 +230,34 @@ const AppDetailsPage: React.FC = () => {
                 <HasRole hasRoles={storedRoles} roles={["SRP"]}>
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md dark:border-gray-700 dark:bg-gray-900 transition-all duration-300 mt-4">
                         <Formik
-                            initialValues={{ assignTo: "", remarks: "", applicationId: applicationNumber?.toUpperCase()}}
+                            initialValues={{ assignTo: "", remarks: "", applicationId: applicationNumber?.toUpperCase() }}
                             validationSchema={Yup.object({
-                                    assignTo: Yup.string().required("Technician is required."),
-                                    remarks: Yup.string().required("Remarks is required"),
-                                   
-                                })}
+                                statusId: Yup.string().required("Status is required."),
+                                applicationId: Yup.string().required("Application ID is required."),
+                                assignTo: Yup.string().required("Technician is required."),
+                                remarks: Yup.string().required("Remarks is required"),
+
+                            })}
                             onSubmit={(values) => console.log(values)}
                         >
                             <Form>
                                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                    <div className="w-full xl:w-1/2">
+                                        <Select label="Action" name="statusId" options={[{
+                                            value: "1002",
+                                            text: "Verify"
+                                        },
+                                        {
+                                            value: "1005",
+                                            text: "Assign"
+                                        },
+                                        {
+                                            value: "1011",
+                                            text: "Reject"
+
+                                        }
+                                        ]} onValueChange={() => console.log("Selection changed!")} />
+                                    </div>
                                     <div className="w-full xl:w-1/2">
                                         <Select label="Assign To" name="assignTo" options={technicianOption} onValueChange={() => console.log("Selection changed!")} />
                                     </div>

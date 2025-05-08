@@ -112,6 +112,8 @@ export interface Registration {
   approvalDate: string | null;
   productDetailsEntities: ProductDetailsEntity[];
   organizationDetails: Organisation;
-  
-
+  amount: number;
+  applicationNumber: string;
+  status: string;
+  statusId: number;
 }

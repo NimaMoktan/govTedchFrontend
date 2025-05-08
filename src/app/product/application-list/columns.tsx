@@ -13,6 +13,7 @@ import {
 import { ArrowUpDown } from "lucide-react"
 import { Registration } from "@/types/product/Product";
 import Link from "next/link";
+import Status from "@/components/Status/Status";
 
 export const columns = (handleEdit: (product: Registration) => void, handleDelete: (id: Registration) => void): ColumnDef<Registration>[] => [
     {
@@ -23,7 +24,7 @@ export const columns = (handleEdit: (product: Registration) => void, handleDelet
         },
     },
     {
-        accessorKey: "ptlCode",
+        accessorKey: "applicationNumber",
         header: ({ column }) => {
             return (
                 <Button
@@ -87,21 +88,33 @@ export const columns = (handleEdit: (product: Registration) => void, handleDelet
             return <>{row.original.organizationDetails.description}</>;
         }
     },
+    // {
+    //     accessorKey: "amount",
+    //     header: ({ column }) => {
+    //         return (
+    //             <Button
+    //                 variant="ghost"
+    //                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //             >
+    //                 Amount (Nu.)
+    //                 <ArrowUpDown className="ml-2 h-4 w-4" />
+    //             </Button>
+    //         )
+    //     },
+    //     cell: ({ row }) => {
+    //         return <>{row.original.amount}</>;
+    //     }
+    // },
+
     {
-        accessorKey: "amount",
+        accessorKey: "status",
         header: ({ column }) => {
             return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Amount (Nu.)
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
+                <>Status</>
             )
         },
         cell: ({ row }) => {
-            return <>{row.original.productDetailsEntities.reduce((total, item) => total + item.amount, 0)}</>;
+            return <Status code={row.original.statusId} label={row.original.status}/>;
         }
     },
     
@@ -146,7 +159,7 @@ export const columns = (handleEdit: (product: Registration) => void, handleDelet
                             Edit
                         </DropdownMenuItem> */}
                         <DropdownMenuItem>
-                            <Link href={`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.applicantId}`}>
+                            <Link href={`/product/application-detail?applicationNumber=${row.original.applicationNumber}`}>
                                 <span className="flex items-center gap-1">
                                     <BsEyeFill className="fill-current" color="blue" size={20} /> View
                                 </span>

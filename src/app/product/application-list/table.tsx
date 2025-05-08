@@ -23,12 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
-interface DataTableProps<TData extends { ptlCode: string; applicantId: number }, TValue> {
+interface DataTableProps<TData extends { applicationNumber: string; }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData extends { ptlCode: string; applicantId: number; }, TValue>({
+export function DataTable<TData extends { applicationNumber: string; }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -60,9 +60,9 @@ export function DataTable<TData extends { ptlCode: string; applicantId: number; 
       <div className="flex items-center py-4">
         <Input
           placeholder="Search by Code"
-          value={(table.getColumn("ptlCode")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("applicationNumber")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("ptlCode")?.setFilterValue(event.target.value)
+            table.getColumn("applicationNumber")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px]"
         />
@@ -113,7 +113,7 @@ export function DataTable<TData extends { ptlCode: string; applicantId: number; 
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    router.push(`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.applicantId}`);
+                    router.push(`/product/application-detail?applicationNumber=${row.original.applicationNumber}`);
                     }}
                 >
                   {row.getVisibleCells().map((cell) => (

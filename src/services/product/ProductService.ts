@@ -10,7 +10,7 @@ interface ApiResponse<T> {
 }
 
 export const getProducts = async (): Promise<ApiResponse<Registration[]>> => {
-  const response = await api.get<ApiResponse<Registration[]>>('/product/productForm/registeredUser/all');
+  const response = await api.get<ApiResponse<Registration[]>>('/product/workflow/populateWorkflowDtls');
   return response.data;
 };
 
@@ -20,6 +20,8 @@ export const getProducts = async (): Promise<ApiResponse<Registration[]>> => {
 // };
 
 export const getProduct = async (id: number) => api.get(`/product/productForm/registeredUser/${id}`);
+
+export const getProductByAppNumber = async (appNumber: string) => api.get(`/product/workflow/fetchByApplicationNo?applicationNumber=${appNumber}`);
 
 export const createProduct = async (data: ApplicationFormValues): Promise<ApiResponse<Product>> => {
   const response = await api.post<ApiResponse<Product>>('/product/productForm/saveRegistrationDetails', data);
