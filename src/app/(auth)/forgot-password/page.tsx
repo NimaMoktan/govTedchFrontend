@@ -15,11 +15,10 @@ const ForgotPassword = () => {
     const router = useRouter()
 
     const handleSubmit = async (values: any, { resetForm, setSubmitting }: any) => {
-        
+
     };
-    
+
     useEffect(() => {
-    
     }, []);
 
     return (
@@ -28,8 +27,8 @@ const ForgotPassword = () => {
                 <ToastContainer />
                 <div className="flex flex-wrap items-center">
                     <div className="flex flex-col justify-center rounded-lg p-6 space-y-4">
-                    <div className="flex justify-center mb-4">
-                            <Image 
+                        <div className="flex justify-center mb-4">
+                            <Image
                                 src={logo} // Update this path to your logo
                                 alt="BSB Logo"
                                 width={150} // Adjust as needed
@@ -49,7 +48,7 @@ const ForgotPassword = () => {
                             }}
                             validationSchema={Yup.object({
                                 email: Yup.string()
-                                    .required("Email field is required.")
+                                    .required("Username field is required.")
                             })}
                             onSubmit={handleSubmit}
                         >
@@ -57,13 +56,15 @@ const ForgotPassword = () => {
                                 <Form className="w-full space-y-4">
                                     <div>
                                         <Input
-                                            type="text"
+                                            type="email"
                                             name="email"
-                                            label="Email ID"
-                                            placeholder="Enter Email ID"
+                                            label="Email"
+                                            placeholder="Enter email address"
                                             autoComplete="off"
                                             disabled={isSubmitting}
                                         />
+
+
                                     </div>
 
                                     <Button
@@ -84,6 +85,13 @@ const ForgotPassword = () => {
                                 </Form>
                             )}
                         </Formik>
+                        <Button
+                            type="button"
+                            className="w-full"
+                            variant={"outline"}
+                        >
+                            Back
+                        </Button>
                     </div>
                 </div>
             </Card>

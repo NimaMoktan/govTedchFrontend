@@ -1,5 +1,6 @@
 export type SampleType = {
-    map(arg0: (sample: SampleType) => { value: number; text: string; }): import("react").SetStateAction<import("../../interface/Options").Options[]>;
+    [x: string]: any;
+    map(arg0: (sample: SampleType) => { value: number; text: string; type: string; }): import("react").SetStateAction<import("../../interface/Options").Options[]>;
     id: number;
     code: string;
     description: string;
@@ -17,4 +18,11 @@ export type SampleType = {
       status: string;
       message: string;
       data: SampleType;
+    }
+
+    export type SampleTestType = {
+        id: number;
+        code: string;
+        description: string;
+        active: string
     }

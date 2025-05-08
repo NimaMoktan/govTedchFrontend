@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { Product, ApplicationFormValues } from '@/types/product/Product';
+import { Product, ApplicationFormValues, Registration } from '@/types/product/Product';
 
 interface ApiResponse<T> {
   data: T;
@@ -9,8 +9,8 @@ interface ApiResponse<T> {
   timestamp: number;
 }
 
-export const getProducts = async (): Promise<ApiResponse<Product[]>> => {
-  const response = await api.get<ApiResponse<Product[]>>('/product/products/all');
+export const getProducts = async (): Promise<ApiResponse<Registration[]>> => {
+  const response = await api.get<ApiResponse<Registration[]>>('/product/productForm/registeredUser/all');
   return response.data;
 };
 
@@ -19,10 +19,10 @@ export const getProducts = async (): Promise<ApiResponse<Product[]>> => {
 //   return response.data;
 // };
 
-export const getProduct = async (id: number) => api.get(`/product/productForm/register/${id}`);
+export const getProduct = async (id: number) => api.get(`/product/productForm/registeredUser/${id}`);
 
 export const createProduct = async (data: ApplicationFormValues): Promise<ApiResponse<Product>> => {
-  const response = await api.post<ApiResponse<Product>>('/product/productForm/register', data);
+  const response = await api.post<ApiResponse<Product>>('/product/productForm/saveRegistrationDetails', data);
   return response.data;
 };
 

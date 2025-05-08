@@ -5,12 +5,12 @@ import DefaultLayout from '@/components/Layouts/DefaultLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { DataTable } from './table';
 import { columns } from "./columns";
-import { Product } from '@/types/product/Product';
+import { Registration } from '@/types/product/Product';
 import { getProducts } from '@/services/product/ProductService';
 import { useLoading } from '@/context/LoadingContext';
 
 const ProductPage = () => {
-    const [productList, setProductList] = useState<Product[]>([]);
+    const [productList, setProductList] = useState<Registration[]>([]);
     const { setIsLoading} =useLoading();
 
     const handleEdit = () => {
@@ -25,8 +25,8 @@ const ProductPage = () => {
 
         const fetchProducts = async() => {
             setIsLoading(true)
-            const list = await getProducts().finally(()=>setIsLoading(false));
-            setProductList(list.data)
+            const response = await getProducts().finally(() => setIsLoading(false));
+            setProductList(response.data);
         }
 
         fetchProducts()

@@ -11,10 +11,10 @@ import {
 
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown } from "lucide-react"
-import { Product } from "@/types/product/Product";
+import { Registration } from "@/types/product/Product";
 import Link from "next/link";
 
-export const columns = (handleEdit: (product: Product) => void, handleDelete: (id: Product) => void): ColumnDef<Product>[] => [
+export const columns = (handleEdit: (product: Registration) => void, handleDelete: (id: Registration) => void): ColumnDef<Registration>[] => [
     {
         accessorKey: "id",
         header: "SL",
@@ -37,18 +37,55 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
         },
     },
     {
-        accessorKey: "sourceOfSample",
+        accessorKey: "cid",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Source Of Sample
+                    Client CID
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
+        cell: ({ row }) => {
+            return <>{row.original.cid}</>;
+        }
+    },
+    {
+        accessorKey: "name",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Client Name
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            return <>{row.original.name}</>;
+        }
+    },
+    {
+        accessorKey: "orgName",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Organization
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            return <>{row.original.organizationDetails.description}</>;
+        }
     },
     {
         accessorKey: "amount",
@@ -58,35 +95,25 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Amout (Nu.)
+                    Amount (Nu.)
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
-            )
-        }
-    },
-    {
-        accessorKey: "quantity",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Quantity
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        }
-    },
-    {
-        accessorKey: "createdDate",
-        header: ({ column }) => {
-            return (
-                <>Submit At</>
             )
         },
         cell: ({ row }) => {
-            const date = new Date(row.original.createdDate);
+            return <>{row.original.productDetailsEntities.reduce((total, item) => total + item.amount, 0)}</>;
+        }
+    },
+    
+    {
+        accessorKey: "submittedDate",
+        header: ({ column }) => {
+            return (
+                <>Submitted Date</>
+            )
+        },
+        cell: ({ row }) => {
+            const date = new Date(row.original.submittedDate);
             return <>{date.toLocaleString()}</>;
         }
     },
@@ -108,7 +135,7 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                             onClick={() => handleDelete(row.original)}
                         >
                             <BsTrash className="fill-current" color="red" fill="red" size={18} />
@@ -117,9 +144,9 @@ export const columns = (handleEdit: (product: Product) => void, handleDelete: (i
                         <DropdownMenuItem onClick={() => handleEdit(row.original)}>
                             <BsPencil className="fill-current" color="blue" size={20} />
                             Edit
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem>
-                            <Link href={`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.id}`}>
+                            <Link href={`/product/application-detail?applicationNumber=${row.original.ptlCode}&id=${row.original.applicantId}`}>
                                 <span className="flex items-center gap-1">
                                     <BsEyeFill className="fill-current" color="blue" size={20} /> View
                                 </span>
