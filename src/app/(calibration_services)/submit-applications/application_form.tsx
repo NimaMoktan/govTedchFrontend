@@ -290,12 +290,24 @@ const ApplicationSubmitForm = () => {
         contactNumber: values.contactNumber,
         emailAddress: values.email,
         organizationId: values.organizationId,
-        deviceRegistry: values.equipment.map((equipmentId: string, index: number) => ({
-          quantity: 1,
-          testItemId: Number(equipmentId),
-          manufacturerOrTypeOrBrand: values.manufacturer[index],
-          serialNumberOrModel: values.serialNumberOrModel[index],
-        })),
+        deviceRegistry: values.equipment.map((equipmentId: string, index: number) => {
+          const baseDevice = {
+            quantity: 1,
+            testItemId: Number(equipmentId),
+            manufacturerOrTypeOrBrand: values.manufacturer[index],
+            serialNumberOrModel: values.serialNumberOrModel[index],
+          };
+        
+          // Only add selectedWeights if equipmentId is "3"
+          if (equipmentId === "3") {
+            return {
+              ...baseDevice,
+              selectedWeights: values.model[index], // assuming model holds the selected weight(s)
+            };
+          }
+        
+          return baseDevice;
+        }),
       };
       
       const storedUser = localStorage.getItem("userDetails");
@@ -311,6 +323,7 @@ const ApplicationSubmitForm = () => {
         },
         body: JSON.stringify(payload),
       });
+      console.log("This is the data being sent: ", payload);
       
       if (!response.ok) throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       
