@@ -327,7 +327,6 @@ export default function Login() {
 
               <div className="form-group text-center mt-4">
                 <span className="text-[#A1A0A0]">
-                  {/* Don&apos;t have an account?{" "} <br></br> */}
                   <Link href="/forgot-password" className="text-[#5AC994] underline">
                     Forgot Password?
                   </Link>
