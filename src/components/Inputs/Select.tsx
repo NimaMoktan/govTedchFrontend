@@ -32,6 +32,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
   id,
 }) => {
   const [field, meta, helpers] = useField(name);
+  
   return (
     <div className="grid w-full items-center gap-1.5 mb-4">
       <Label htmlFor={id || name} className="text-sm font-medium">
@@ -41,22 +42,29 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
         value={field.value}
         onValueChange={(value) => {
           helpers.setValue(value);
+          helpers.setTouched(true);
           onValueChange?.(value);
         }}
       >
-        <SelectTrigger id={id || name} className="w-full">
+        <SelectTrigger 
+          id={id || name} 
+          className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
+        >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent>
-        <SelectGroup>
-          {options?.map((option) => (
-            <SelectItem key={option.value} value={`${option?.value}`}>
-              {option?.text}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {options?.map((option) => (
+              <SelectItem key={option.value} value={`${option?.value}`}>
+                {option?.text}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>
+      {meta.touched && meta.error ? (
+        <span className="text-red-500 text-xs ml-3">{meta.error}</span>
+      ) : null}
     </div>
   );
 };

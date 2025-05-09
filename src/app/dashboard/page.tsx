@@ -49,6 +49,7 @@ export default function Home () {
               FID: "Force Lab Head",
               LLD: "Length Lab Head",
               PID: "Force Pressure Head",
+              SRP: "Sample Receptionist",
             };
 
             return roleMap[role] || "Unknown";

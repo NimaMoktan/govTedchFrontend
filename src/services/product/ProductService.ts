@@ -9,8 +9,49 @@ interface ApiResponse<T> {
   timestamp: number;
 }
 
+interface ClaimApp{
+  id: number;
+  applicationNumber: string;
+  serviceId: number;
+  statusId: number;
+  parameter: string;
+  taskStatusId: number;
+}
+
 export const getProducts = async (): Promise<ApiResponse<Registration[]>> => {
   const response = await api.get<ApiResponse<Registration[]>>('/product/workflow/populateWorkflowDtls');
+  return response.data;
+};
+
+export const getProductsByUser = async (): Promise<ApiResponse<Registration[]>> => {
+  const response = await api.get<ApiResponse<Registration[]>>('/product/workflow/populateClaimedWorkflowDtls');
+  return response.data;
+};
+
+export const claimApplication = async (data: ClaimApp): Promise<ApiResponse<Product>> => {
+  const response = await api.post<ApiResponse<Product>>('/product/workflow/openAndClaimApplication', data);
+  return response.data;
+};
+
+export const updateWorkFlow = async (data: ClaimApp): Promise<ApiResponse<Product>> => {
+  const response = await api.post<ApiResponse<Product>>('/product/workflow/updateWorkflow', data);
+  return response.data;
+};
+
+// upload row data
+export const uploadRawData = async (data: any): Promise<ApiResponse<Product>> => {
+  
+  const response = await api.post<ApiResponse<Product>>('/product/workflow/uploadRawDocFile', data, {
+    headers: {
+        'Content-Type': 'multipart/form-data'
+    }
+});
+  return response.data;
+};
+
+// upload test result
+export const uploadResultFile = async (data: ClaimApp): Promise<ApiResponse<Product>> => {
+  const response = await api.post<ApiResponse<Product>>('/product/workflow/uploadDocFile', data);
   return response.data;
 };
 

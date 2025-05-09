@@ -47,7 +47,7 @@ const menuGroups = [
     ],
   },
   {
-    name: "Master Management",
+    // name: "Master Management",
     menuItems: [
       {
         icon: (
@@ -102,7 +102,7 @@ const menuGroups = [
     ],
   },
   {
-    name: "Service Modules",
+    // name: "Service Modules",
     menuItems: [
       {
         icon: (
@@ -127,10 +127,10 @@ const menuGroups = [
         ),
         label: "Material Testing Services",
         route: "#",
-        role: ["ADM","SRP","THT", "DIR"],
+        role: ["ADM","SRP","THT", "DIR", "CLO", "MLD"],
         children: [
           { label: "Submit Application", role: ["THT", "ADM"], route: "/product/submit-application" },
-          { label: "Search Application", role: ["THT", "ADM", "SRP", "CLO", "DIR"], route: "/product/application-list" },
+          { label: "Search Application", role: ["THT", "ADM", "SRP", "CLO", "DIR", "CLO", "MLD"], route: "/product/application-list" },
         ],
       },
       {
@@ -211,9 +211,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <nav className="mt-2 px-2 py-2 lg:mt-1 lg:px-2">
           {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
-                <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                {/* <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}
-                </h3>
+                </h3> */}
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.menuItems.map((menuItem, menuIndex) => {
                       return (

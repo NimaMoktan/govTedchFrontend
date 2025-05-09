@@ -6,11 +6,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DataTable } from './table';
 import { columns } from "./columns";
 import { Registration } from '@/types/product/Product';
-import { getProducts } from '@/services/product/ProductService';
+import { getProducts, getProductsByUser } from '@/services/product/ProductService';
 import { useLoading } from '@/context/LoadingContext';
 
 const ProductPage = () => {
     const [productList, setProductList] = useState<Registration[]>([]);
+    const [assignAppList, setAssignAppList] = useState<Registration[]>([]);
     const { setIsLoading} =useLoading();
 
     const handleEdit = () => {
@@ -29,7 +30,14 @@ const ProductPage = () => {
             setProductList(response.data);
         }
 
+        const fetchAssignApp = async() => {
+            setIsLoading(true)
+            const response = await getProductsByUser().finally(() => setIsLoading(false));
+            setAssignAppList(response.data);
+        }
+
         fetchProducts()
+        fetchAssignApp()
 
     },[setIsLoading])
 
@@ -43,6 +51,18 @@ const ProductPage = () => {
                             columns={columns(handleEdit, handleDelete)}
                             data={productList}
                         />
+                    </CardContent>
+                </Card>
+            </div>
+            <h2 className="text-lg font-semibold mt-4">Claimed Application List</h2>
+            <div className="flex flex-col gap-2">
+                <Card className="w-full">
+                    <CardContent className="max-w-full overflow-x-auto">
+                        {assignAppList != null ? <DataTable
+                            columns={columns(handleEdit, handleDelete)}
+                            data={assignAppList}
+                        /> : <p className='mt-2'>No Claimed Application</p>}
+                        
                     </CardContent>
                 </Card>
             </div>

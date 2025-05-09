@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { useLoading } from "@/context/LoadingContext";
 import { Toaster } from "sonner";
 import { usePathname } from "next/navigation";
+import { ToastContainer } from "react-toastify";
 
 export default function DefaultLayout({
   children,
@@ -37,6 +38,7 @@ export default function DefaultLayout({
     <>
       <div className="flex">
         <Toaster />
+        <ToastContainer/>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="relative flex flex-1 flex-col lg:ml-72.5 overflow-x-hidden">
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />

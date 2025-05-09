@@ -49,6 +49,11 @@ export function DataTable<TData extends { applicationNumber: string; }, TValue>(
       sorting,
       columnFilters
     },
+    initialState: {
+      pagination: {
+        pageSize: 5, // Set the initial page size to 10
+      }
+    },
   })
 
   const totalPages = table.getCoreRowModel()?.rows?.length && table.getState()?.pagination?.pageSize
@@ -117,7 +122,7 @@ export function DataTable<TData extends { applicationNumber: string; }, TValue>(
                     }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="p-1 text-sm text-center">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

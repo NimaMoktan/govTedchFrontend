@@ -88,6 +88,7 @@ export interface ProductDetailsEntity {
   minimumQuantityRequired: string;
   ratesInNu: number;
   siteCOde: string;
+  siteCode: string;
   createdBy: string;
   createdDate: string; // ISO date string
   updatedBy: string | null;
@@ -99,8 +100,8 @@ export interface ProductDetailsEntity {
 }
 
 export interface Registration {
-  applicantId: number;
-  ptlCode: string;
+  id: number;
+  serviceId: string;
   organizationId: number;
   cid: string;
   name: string;
@@ -116,4 +117,6 @@ export interface Registration {
   applicationNumber: string;
   status: string;
   statusId: number;
+  taskStatusId: number;
+  siteCode: string;
 }
