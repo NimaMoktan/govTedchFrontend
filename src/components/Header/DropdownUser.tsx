@@ -9,7 +9,7 @@ type UserDetails = {
   fullName: string;
   email: string;
   imageUrl: string;
-  roles: string[];  // Add roles here
+  roles: string[]; // Add roles here
 };
 
 const DropdownUser = () => {
@@ -18,7 +18,7 @@ const DropdownUser = () => {
     fullName: "Loading...",
     email: "Loading...",
     imageUrl: "/images/user/default.jpg",
-    roles: [],  // Ensure roles is included in initial state
+    roles: [], // Ensure roles is included in initial state
   });
   const { setIsLoading } = useLoading();
 
@@ -29,24 +29,27 @@ const DropdownUser = () => {
     const storedUser = localStorage.getItem("userDetails");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
+      const userRoles =
+        parsedUser.userRole?.map(
+          (role: { roles: { code: string } }) => role.roles.code,
+        ) || [];
       // console.log("This is the user details: ", userRoles, storedUser);
       setUserDetails({
-        fullName: parsedUser.fullName,
+        fullName: parsedUser.username,
         email: parsedUser.email,
         imageUrl: "/images/user/jigme.jpg",
-        roles: userRoles,  // Now this is valid
+        roles: userRoles, // Now this is valid
       });
     }
   }, []);
-  
+
   const handleLogout = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await fetch('/api/logout', {
-        method: 'POST'
-      }).finally(()=>setIsLoading(false));
-      localStorage.removeItem("userDetails");  
+      await fetch("/api/logout", {
+        method: "POST",
+      }).finally(() => setIsLoading(false));
+      localStorage.removeItem("userDetails");
       router.push("/signin");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -68,7 +71,7 @@ const DropdownUser = () => {
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          <Image 
+          <Image
             width={70}
             height={70}
             src={"/images/user/jigme.jpg"}
@@ -126,7 +129,7 @@ const DropdownUser = () => {
               </Link>
             </li>
             {/* Show only if the user has Admin role */}
-            
+
             <li>
               <Link
                 href="/settings"
@@ -153,7 +156,10 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base" onClick={handleLogout}>
+          <button
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+            onClick={handleLogout}
+          >
             <svg
               className="fill-current"
               width="22"

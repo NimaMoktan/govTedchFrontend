@@ -21,16 +21,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  handleAdd: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  handleAdd,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -53,10 +54,10 @@ export function DataTable<TData, TValue>({
   });
 
   const totalPages =
-    table?.getCoreRowModel()?.rows?.length &&
+    table.getCoreRowModel()?.rows?.length &&
     table.getState()?.pagination?.pageSize
       ? Math.ceil(
-          table?.getCoreRowModel().rows.length /
+          table.getCoreRowModel().rows.length /
             table.getState().pagination.pageSize,
         )
       : 0; // Default to 0 if data or pagination is not ready
@@ -64,33 +65,48 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center py-4">
-        {/* <Input
-            placeholder="Filter Code..."
-            value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-                table.getColumn("code")?.setFilterValue(event.target.value)
-            }
-            className="max-w-[250px]"
-            /> */}
         <Input
-          placeholder="Search by role name"
+          placeholder="Search by Phone No"
           value={
-            (table.getColumn("role_name")?.getFilterValue() as string) ?? ""
+            (table.getColumn("phone_no")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("role_name")?.setFilterValue(event.target.value)
+            table.getColumn("phone_no")?.setFilterValue(event.target.value)
           }
-          className="ml-0 max-w-[250px]"
+          className="max-w-[250px]"
         />
-        <div className="mb-0 ml-4 flex max-w-full items-center justify-between">
-          <Link
-            href="/user-management/roles/create"
-            className="flex items-center"
-          >
-            <Button className="rounded-full bg-red-700">Add Role</Button>
-          </Link>
-        </div>
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        >
+          <option selected>Search by Category</option>
+          <option value="US">Category 1</option>
+          <option value="CA">Category 2</option>
+          <option value="FR">Category 3</option>
+          <option value="DE">Category 4</option>
+        </select>
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        >
+          <option selected>Search by Status</option>
+          <option value="US">Pending</option>
+          <option value="CA">Assigned</option>
+          <option value="FR">In-Progress 3</option>
+          <option value="DE">Completed</option>
+        </select>
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        >
+          <option selected>Search by Agent</option>
+          <option value="US">Agent 1</option>
+          <option value="CA">Agent 2</option>
+          <option value="FR">Agent 3</option>
+          <option value="DE">Agent 4</option>
+        </select>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>

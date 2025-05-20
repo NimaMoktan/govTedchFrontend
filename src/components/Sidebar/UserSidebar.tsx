@@ -20,22 +20,18 @@ const menuGroups = [
   {
     menuItems: [
       {
-        icon: (
-          <GrDashboard className="fill-current" size={22} />
-        ),
+        icon: <GrDashboard className="fill-current" size={22} />,
         label: "Dashboard",
         route: "/dashboard",
-      }
+      },
     ],
   },
- 
+
   {
     name: "Service Modules",
     menuItems: [
       {
-        icon: (
-          <CiCalculator1 className="fill-current" size={22} />
-        ),
+        icon: <CiCalculator1 className="fill-current" size={22} />,
         label: "Calibration Services",
         route: "#",
         children: [
@@ -44,7 +40,7 @@ const menuGroups = [
         ],
       },
     ],
-  }
+  },
 ];
 
 const UserSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
@@ -59,9 +55,9 @@ const UserSidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
-        <div className="flex items-center justify-between gap-2 px-6 py-2 lg:py-6.5 bg-graydark">
+        <div className="flex items-center justify-between gap-2 bg-graydark px-6 py-2 lg:py-6.5">
           <Link href="/">
-            <p className="text-white font-bold">Bhutan Standard Bureau</p>
+            <p className="font-bold text-white">1199 Citizen Services, PSDD</p>
           </Link>
 
           <button

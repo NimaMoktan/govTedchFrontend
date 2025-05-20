@@ -140,9 +140,7 @@ const SampleReceptionistForm = ({applicationNumber, appDetails}: { applicationNu
                 }}
                 validationSchema={Yup.object({
                     status: Yup.string().required("Action is required."),
-                    assignedUser: selectedStatus === "1005" ? 
-                        Yup.string().required("Technician is required.") : 
-                        Yup.string(),
+                    assignedUser: Yup.string().required("Technician is required."),
                     remarks: Yup.string().required("Remarks is required"),
                 })}
                 onSubmit={(values) => handleSubmit(values)}
@@ -159,10 +157,6 @@ const SampleReceptionistForm = ({applicationNumber, appDetails}: { applicationNu
                                         text: "Verify"
                                     },
                                     {
-                                        value: "1005",
-                                        text: "Assign"
-                                    },
-                                    {
                                         value: "1011",
                                         text: "Reject"
                                     }
@@ -171,7 +165,6 @@ const SampleReceptionistForm = ({applicationNumber, appDetails}: { applicationNu
                             />
                         </div>
                         
-                        {selectedStatus === "1005" && (
                             <div className="w-full xl:w-1/2">
                                 <Select 
                                     label="Assign To" 
@@ -179,8 +172,6 @@ const SampleReceptionistForm = ({applicationNumber, appDetails}: { applicationNu
                                     options={technicianOption} 
                                 />
                             </div>
-                        )}
-                        
                         <div className="w-full xl:w-1/2">
                             <Input label="Remarks" name="remarks" />
                         </div>

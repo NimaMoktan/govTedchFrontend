@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { ApplicationFormValues } from '@/types/product/Product';
 import { getLabSites } from '@/services/lab-site/LabSiteService';
 import { LabSite } from '@/types/lab-site/labsite';
+import { Product } from '@/types/product/Product';
 
 type TestType = {
     id: number;
@@ -222,14 +223,28 @@ const SubmitAppPage = () => {
                 }))
             };
 
-            const response = await createProduct(submissionData);
-            toast.success(response.message, { position: "top-right", autoClose: 1000 });
-            Swal.fire({
-                title: "Success",
-                text: `These are your application number: `,
-                icon: "success",
-                confirmButtonText: "Ok",
-            }).then(() => router.push("/product/application-list"));
+           await createProduct(submissionData).then((response) => {
+
+               toast.success(response.message, { position: "top-right", autoClose: 1000 });
+               const { data } = response;
+               
+               const ptlCodes = Array.isArray(data) 
+                   ? data.map((item: Product) => item.ptlCode).filter((code: string) => code) 
+                   : [];
+               if (ptlCodes.length > 0) {
+                   Swal.fire({
+                       title: "Success",
+                       html: `Your application numbers are:<br>${ptlCodes.join('<br>')}`,
+                       icon: "success",
+                       confirmButtonText: "Ok",
+                   }).then(() => router.push("/product/application-list"));
+               } else {
+                   toast.error("No application numbers returned. Please check your submission.", {
+                       position: "top-right",
+                       autoClose: 5000,
+                   });
+               }
+           });
         } catch (error) {
             if (error instanceof Yup.ValidationError) {
                 // Convert Yup errors to Formik errors format

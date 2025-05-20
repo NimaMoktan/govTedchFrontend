@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import * as React from "react";
 import {
   ColumnDef,
@@ -9,8 +9,8 @@ import {
   SortingState,
   getSortedRowModel,
   ColumnFiltersState,
-  getFilteredRowModel
-} from "@tanstack/react-table"
+  getFilteredRowModel,
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -18,26 +18,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BiUserPlus } from "react-icons/bi";
 import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  handleAdd: () => void
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  handleAdd: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  handleAdd
+  handleAdd,
 }: DataTableProps<TData, TValue>) {
-
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
 
   const table = useReactTable({
     data,
@@ -50,32 +51,31 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
-      columnFilters
+      columnFilters,
     },
-  })
+  });
 
-  const totalPages = table.getCoreRowModel()?.rows?.length && table.getState()?.pagination?.pageSize
-    ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
-    : 0; // Default to 0 if data or pagination is not ready
+  const totalPages =
+    table.getCoreRowModel()?.rows?.length &&
+    table.getState()?.pagination?.pageSize
+      ? Math.ceil(
+          table.getCoreRowModel().rows.length /
+            table.getState().pagination.pageSize,
+        )
+      : 0; // Default to 0 if data or pagination is not ready
 
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
           placeholder="Search by Username"
-          value={(table.getColumn("userName")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("userName")?.setFilterValue(event.target.value)
+            table.getColumn("username")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px]"
-        />
-        <Input
-          placeholder="Search by Full Name"
-          value={(table.getColumn("fullName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("fullName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-[250px] ml-6"
         />
         <Input
           placeholder="Search by Email"
@@ -83,20 +83,18 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn("email")?.setFilterValue(event.target.value)
           }
-          className="max-w-[250px] ml-6"
+          className="ml-6 max-w-[250px]"
         />
-        <Input
+        {/* <Input
           placeholder="Search by Mobile Number"
-          value={(table.getColumn("mobileNumber")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("mobile")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("mobileNumber")?.setFilterValue(event.target.value)
+            table.getColumn("mobile")?.setFilterValue(event.target.value)
           }
-          className="max-w-[250px] ml-6"
-        />
+          className="ml-6 max-w-[250px]"
+        /> */}
         <Link href="/user-management/users/create">
-          <Button
-            className="ml-10 right-10 gap-2 px-4 py-2 btn-sm rounded-full"
-          >
+          <Button className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
             <BiUserPlus size={20} />
             Add New
           </Button>
@@ -113,11 +111,11 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -131,21 +129,27 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-end space-x-2 py-4 mr-5">
+        <div className="mr-5 flex items-center justify-end space-x-2 py-4">
           <Button
             variant="outline"
             size="sm"
@@ -168,5 +172,5 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
     </div>
-  )
+  );
 }

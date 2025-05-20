@@ -21,16 +21,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  handleAdd: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  handleAdd,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -53,10 +54,10 @@ export function DataTable<TData, TValue>({
   });
 
   const totalPages =
-    table?.getCoreRowModel()?.rows?.length &&
+    table.getCoreRowModel()?.rows?.length &&
     table.getState()?.pagination?.pageSize
       ? Math.ceil(
-          table?.getCoreRowModel().rows.length /
+          table.getCoreRowModel().rows.length /
             table.getState().pagination.pageSize,
         )
       : 0; // Default to 0 if data or pagination is not ready
@@ -64,32 +65,28 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center py-4">
-        {/* <Input
-            placeholder="Filter Code..."
-            value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-                table.getColumn("code")?.setFilterValue(event.target.value)
-            }
-            className="max-w-[250px]"
-            /> */}
         <Input
-          placeholder="Search by role name"
-          value={
-            (table.getColumn("role_name")?.getFilterValue() as string) ?? ""
-          }
+          placeholder="Filter Code..."
+          value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("role_name")?.setFilterValue(event.target.value)
+            table.getColumn("code")?.setFilterValue(event.target.value)
           }
-          className="ml-0 max-w-[250px]"
+          className="max-w-[250px]"
         />
-        <div className="mb-0 ml-4 flex max-w-full items-center justify-between">
-          <Link
-            href="/user-management/roles/create"
-            className="flex items-center"
-          >
-            <Button className="rounded-full bg-red-700">Add Role</Button>
-          </Link>
-        </div>
+        <Input
+          placeholder="Search by Gender"
+          value={(table.getColumn("gender")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("gender")?.setFilterValue(event.target.value)
+          }
+          className="ml-6 max-w-[250px]"
+        />
+        <button
+          onClick={handleAdd}
+          className="btn-sm right-10 ml-10 gap-2 rounded-lg bg-red-700 px-4 py-2 text-white"
+        >
+          Add New
+        </button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -112,7 +109,7 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {/* {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -137,7 +134,7 @@ export function DataTable<TData, TValue>({
                   No results.
                 </TableCell>
               </TableRow>
-            )}
+            )} */}
           </TableBody>
         </Table>
         <div className="mr-5 flex items-center justify-end space-x-2 py-4">

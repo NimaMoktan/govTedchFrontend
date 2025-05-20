@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
@@ -10,20 +10,19 @@ import Image from "next/image";
 
 const SignUp: React.FC = () => {
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded-sm  border bg-white shadow-default ">
       <div className="flex flex-wrap items-center">
-
         <div className="w-full border-stroke dark:border-strokedark xl:border-l-2">
-          <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-            <div className="flex flex-col justify-center items-center bg-[#f8f8f8] rounded-lg p-6 space-y-4">
-
+          <div className="w-full p-4 sm:p-12.5 xl:p-10.5">
+            <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-[#f8f8f8] p-6">
               <div className="form-group text-center">
-                <span className="font-bold text-gray-400">
-                  Scan with <span className="text-green-500">Bhutan NDI</span> Wallet
+                <span className="font-bold text-gray-500">
+                  Scan with <span className="text-red-700">Bhutan NDI</span>{" "}
+                  Wallet
                 </span>
               </div>
 
-              <div className="flex border-2 border-green-500 p-2.5 rounded-2xl">
+              <div className="flex rounded-2xl border-2 border-green-500 p-2.5">
                 <QRCodeCanvas
                   value={proofRequestURL}
                   size={200}
@@ -42,14 +41,20 @@ const SignUp: React.FC = () => {
                     <tbody>
                       <tr>
                         <td>
-                          <ol className="list-decimal text-gray-400 text-sm font-medium">
+                          <ol className="list-decimal text-sm font-medium text-gray-400">
                             <li>Open Bhutan NDI Wallet on your phone.</li>
-                            <li>Tap the Scan button located on the menu bar <br /> and capture code.</li>
+                            <li>
+                              Tap the Scan button located on the menu bar <br />{" "}
+                              and capture code.
+                            </li>
                           </ol>
                         </td>
                         <td>
-                          <span className="text-center bg-green-500 h-6 w-6 rounded-full inline-block">
-                            <BiQrScan className="text-white p-0.5 pb-1.5" size={25} />
+                          <span className="inline-block h-6 w-6 rounded-full bg-red-500 text-center">
+                            <BiQrScan
+                              className="p-0.5 pb-1.5 text-white"
+                              size={25}
+                            />
                           </span>
                         </td>
                       </tr>
@@ -71,19 +76,18 @@ const SignUp: React.FC = () => {
                     </div>
                   </>
                 )} */}
-              <div className="flex justify-center mt-7.5">
+              <div className="mt-7.5 flex justify-center">
                 <a
                   href="https://www.youtube.com/@BhutanNDI"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn rounded-full bg-[#5ac994] text-white flex items-center space-x-2 px-4 py-2"
+                  className="btn flex items-center space-x-2 rounded-full bg-red-700 px-4 py-2 text-white"
                 >
                   <span>Watch video guide</span>
                   <BiPlayCircle size={24} />
                 </a>
-
               </div>
-              <div className="flex justify-center mt-7.5">
+              <div className="mt-7.5 flex justify-center">
                 <span>
                   <a
                     href="https://kiwhp.app.link/?t="
@@ -95,19 +99,19 @@ const SignUp: React.FC = () => {
                   </a>
                 </span>
               </div>
-              <div className="flex justify-center mt-2.5 mb-4">
+              <div className="mb-4 mt-2.5 flex justify-center">
                 <a
                   href="https://play.google.com/store/search?q=bhutan%20ndi&amp;c=apps&amp;hl=en_IN&amp;gl=US"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <Image
-                      src={googleplay}
-                      className="w-[99px] h-[30px]"
-                      alt="Google Play Store"
-                      width={100}
-                      height={100}
-                    />
+                    src={googleplay}
+                    className="h-[30px] w-[99px]"
+                    alt="Google Play Store"
+                    width={100}
+                    height={100}
+                  />
                 </a>
                 <a
                   href="https://apps.apple.com/in/app/bhutan-ndi/id1645493166"
@@ -116,26 +120,24 @@ const SignUp: React.FC = () => {
                   className="ml-3"
                 >
                   <Image
-                      src={applestore}
-                      className="w-[99px] h-[30px]"
-                      alt="Apple App Store"
-                      width={100}
-                      height={100}
-                    />
+                    src={applestore}
+                    className="h-[30px] w-[99px]"
+                    alt="Apple App Store"
+                    width={100}
+                    height={100}
+                  />
                 </a>
               </div>
-
             </div>
 
-            <div className="form-group text-center mt-4">
+            <div className="form-group mt-4 text-center">
               <span className="text-[#A1A0A0]">
                 Already have an account?{" "}
-                <Link href="/" className="text-[#5AC994] underline">
+                <Link href="/" className="font-bold text-red-700 underline">
                   Sign In
                 </Link>
               </span>
             </div>
-
           </div>
         </div>
       </div>

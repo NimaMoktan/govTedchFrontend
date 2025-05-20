@@ -15,9 +15,8 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title:
-    "Bhutan Standard Bureau",
-  description: "Login page for Bhutan Standard Bureau",
+  title: "1199 Citizen Services, PSDD",
+  description: "Login page for 1199 Citizen Services, PSDD",
 };
 
 export default function RootLayout({
@@ -27,10 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true} className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        fontSans.variable
-      )}>
+      <body
+        suppressHydrationWarning={true}
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable,
+        )}
+      >
         {/* <div className="flex">
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <div className="relative flex flex-1 flex-col lg:ml-72.5">
@@ -39,9 +41,7 @@ export default function RootLayout({
                 <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10"> */}
         <Suspense fallback={<div>Loading...</div>}>
           <LoadingProvider>
-            <PermissionProvider>
-              {children}
-            </PermissionProvider>
+            <PermissionProvider>{children}</PermissionProvider>
           </LoadingProvider>
         </Suspense>
         {/* </div>

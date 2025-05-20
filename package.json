@@ -37,7 +37,7 @@
     "mathjs": "^14.2.1",
     "moment": "^2.30.1",
     "nats.ws": "^1.30.1",
-    "next": "^14.2.24",
+    "next": "^15.3.2",
     "next-auth": "^4.24.11",
     "next-themes": "^0.4.6",
     "qrcode.react": "^4.2.0",
@@ -50,7 +50,7 @@
     "react-toastify": "^11.0.3",
     "sharp": "^0.34.1",
     "sonner": "^2.0.2",
-    "sweetalert2": "^11.15.10",
+    "sweetalert2": "^11.6.13",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.6.1"
