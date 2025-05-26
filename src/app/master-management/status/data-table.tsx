@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -81,12 +82,13 @@ export function DataTable<TData, TValue>({
           }
           className="ml-6 max-w-[250px]"
         />
-        <button
+        <Button
           onClick={handleAdd}
-          className="btn-sm right-10 ml-10 gap-2 rounded-lg bg-red-700 px-4 py-2 text-white"
+          className="btn-sm py-2text-white right-10 ml-10 gap-2 rounded-full bg-red-700 px-4"
         >
+          <BiUserPlus size={20} />
           Add New
-        </button>
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>

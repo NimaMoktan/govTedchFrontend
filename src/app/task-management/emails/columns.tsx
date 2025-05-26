@@ -14,10 +14,9 @@ import { ArrowUpDown } from "lucide-react";
 
 export type CalibrationGroup = {
   id: number;
+  date: number;
   code: string;
-  phone_no: number;
-  time_stamp: number;
-  calls: string;
+  emails: string;
   Query: string;
   query_Category: string;
   query_SubCategory: string;
@@ -39,14 +38,14 @@ export const columns = (
     },
   },
   {
-    accessorKey: "phone_no",
+    accessorKey: "emails",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Phone No
+          Email ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );

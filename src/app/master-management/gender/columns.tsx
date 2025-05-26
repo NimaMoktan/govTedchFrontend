@@ -1,86 +1,59 @@
-"use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { GenderItem } from "./page";
 import { Button } from "@/components/ui/button";
-import { BsTrash, BsPencil } from "react-icons/bs";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ArrowUpDown } from "lucide-react";
-
-export type CalibrationGroup = {
-  id: number;
-  code: string;
-  gender: string;
-  calibration_service_id: number;
-  active: string;
-};
+import { Pencil, Trash2 } from "lucide-react";
 
 export const columns = (
-  handleEdit: (calibrationGroup: CalibrationGroup) => void,
-  handleDelete: (id: CalibrationGroup) => void,
-): ColumnDef<CalibrationGroup>[] => [
-  {
-    accessorKey: "id",
-    header: "Id",
-    cell: ({ row }) => {
-      return <p>{row.index + 1}</p>;
-    },
-  },
+  handleEdit: (gender: GenderItem) => void,
+  handleDelete: (gender: GenderItem) => void,
+): ColumnDef<GenderItem>[] => [
   {
     accessorKey: "code",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Code
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: "Code",
+    cell: ({ row }) => <div className="uppercase">{row.getValue("code")}</div>,
   },
   {
-    accessorKey: "gender",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Gender
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "name",
+    header: "Gender Name",
   },
-
   {
-    accessorKey: "Action",
-    id: "actions",
+    accessorKey: "is_active",
+    header: "Status",
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.getValue("is_active") ? "Active" : "Inactive"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "created_at",
+    header: "Created At",
     cell: ({ row }) => {
+      const date = new Date(row.getValue("created_at"));
+      return date.toLocaleDateString();
+    },
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const gender = row.original;
+
       return (
         <div className="flex space-x-2">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEdit(row.original)}
-            aria-label="Edit"
+            variant="outline"
+            size="sm"
+            onClick={() => handleEdit(gender)}
           >
-            <BsPencil className="h-4 w-4" />
+            <Pencil className="h-4 w-4" />
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(row.original)}
-            aria-label="Delete"
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDelete(gender)}
           >
-            <BsTrash className="h-4 w-4 text-red-500" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       );

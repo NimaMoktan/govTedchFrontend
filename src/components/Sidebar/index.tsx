@@ -7,11 +7,13 @@ import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Image from "next/image";
 import { GrDashboard } from "react-icons/gr";
-import { BsCardList } from "react-icons/bs";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import { FaDatabase } from "react-icons/fa6";
 import { FaTasks } from "react-icons/fa";
+import { LuMessagesSquare } from "react-icons/lu";
+import { IoIosInformationCircle } from "react-icons/io";
+
 import {
   BiSolidBox,
   BiSolidBadgeCheck,
@@ -74,7 +76,7 @@ const menuGroups = [
         ],
       },
       {
-        icon: <FaUser className="fill-current" size={22} color="#4bc9d9" />,
+        icon: <FaUser className="fill-current" size={22} color="#ec782b" />,
         label: "User Management",
         route: "#",
         role: ["ADM"],
@@ -119,6 +121,44 @@ const menuGroups = [
             route: "/task-management/emails",
           },
         ],
+      },
+      {
+        icon: (
+          <IoIosInformationCircle
+            className="fill-current"
+            size={22}
+            color="#46cfef"
+          />
+        ),
+        label: "Information",
+        route: "#",
+        role: ["ADM"],
+        children: [
+          {
+            label: "Noticeboard",
+            role: ["ADM"],
+            privilege: "can view users",
+            route: "/information/noticeboard",
+          },
+          {
+            label: "GovTech Helpdesk",
+            role: ["ADM"],
+            privilege: "can view roles",
+            route: "/information/govtech-helpdesk",
+          },
+        ],
+      },
+      {
+        icon: (
+          <LuMessagesSquare
+            className="fill-current"
+            size={22}
+            color="#e96976"
+          />
+        ),
+        label: "FAQ",
+        route: "/faq",
+        role: ["ADM"],
       },
     ],
   },

@@ -9,129 +9,165 @@ import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import Select from "@/components/Inputs/Select";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
-interface CalibrationGroupItem {
+interface GenderItem {
   id: number;
   code: string;
-  gender: string;
-  active: string;
-  calibration_service_id: number;
-}
-
-interface Parameters {
-  value: number;
-  text: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 const gender: React.FC = () => {
-  const [itemGroup, setItemGroup] = useState<CalibrationGroupItem[]>([]);
+  const [genderList, setGenderList] = useState<GenderItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
   const [isEditing, setIsEditing] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(
-    null,
-  );
+  const [editingGender, setEditingGender] = useState<GenderItem | null>(null);
   const [token, setToken] = useState<string | null>("");
-  const [parameter, setParameter] = useState<Parameters[]>([]);
   const router = useRouter();
+
+  // Sample data with 5 new random entries
+  const sampleData: GenderItem[] = [
+    {
+      id: 1,
+      code: "MALE",
+      name: "Male",
+      description: "Male gender",
+      is_active: true,
+      created_at: "2023-01-15T10:30:00Z",
+    },
+    {
+      id: 2,
+      code: "FEMALE",
+      name: "Female",
+      description: "Female gender",
+      is_active: true,
+      created_at: "2023-01-16T11:45:00Z",
+    },
+    {
+      id: 3,
+      code: "OTHER",
+      name: "Other",
+      description: "Other gender identities",
+      is_active: true,
+      created_at: "2023-02-20T09:15:00Z",
+    },
+    {
+      id: 4,
+      code: "NONBIN",
+      name: "Non-binary",
+      description: "Non-binary gender",
+      is_active: true,
+      created_at: "2023-03-10T14:20:00Z",
+    },
+    {
+      id: 5,
+      code: "UNKWN",
+      name: "Unknown",
+      description: "Gender not specified",
+      is_active: false,
+      created_at: "2023-04-05T16:40:00Z",
+    },
+  ];
 
   const toggleModal = () => {
     setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
     setIsEditing(false);
-    setEditingGroup(null);
+    setEditingGender(null);
   };
 
-  const loadItemGroup = (storeToken: string) => {
+  const loadGenderList = (storeToken: string) => {
     setIsLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${storeToken}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data != null) {
-          setItemGroup(data.data);
-        } else {
-          setItemGroup([]);
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => toast.error(err.message, { position: "top-right" }));
+    // Simulating API call with sample data
+    setTimeout(() => {
+      setGenderList(sampleData);
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleSubmit = (
-    values: { code: string; gender: string; active: string },
+    values: { code: string; name: string },
     resetForm: () => void,
   ) => {
+    // Check for duplicate code
+    const duplicateCode = genderList.some(
+      (item) =>
+        item.code.toLowerCase() === values.code.toLowerCase() &&
+        (!isEditing || item.id !== editingGender?.id),
+    );
+
+    if (duplicateCode) {
+      toast.error("Gender code already exists", { position: "top-right" });
+      return;
+    }
+
+    // Check for duplicate name
+    const duplicateName = genderList.some(
+      (item) =>
+        item.name.toLowerCase() === values.name.toLowerCase() &&
+        (!isEditing || item.id !== editingGender?.id),
+    );
+
+    if (duplicateName) {
+      toast.error("Gender name already exists", { position: "top-right" });
+      return;
+    }
+
     setIsLoading(true);
 
-    const url = isEditing
-      ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${editingGroup?.id}/update`
-      : `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`;
+    // Simulate API call
+    setTimeout(() => {
+      if (isEditing && editingGender) {
+        // Update existing item
+        setGenderList((prev) =>
+          prev.map((item) =>
+            item.id === editingGender.id
+              ? {
+                  ...item,
+                  code: values.code,
+                  name: values.name,
+                }
+              : item,
+          ),
+        );
+      } else {
+        // Add new item
+        const newItem: GenderItem = {
+          id: Math.max(...genderList.map((item) => item.id)) + 1,
+          code: values.code,
+          name: values.name,
+          description: "", // Empty description as per requirements
+          is_active: true, // Default to active
+          created_at: new Date().toISOString(),
+        };
+        setGenderList((prev) => [...prev, newItem]);
+      }
 
-    const method = isEditing ? "POST" : "POST";
+      Swal.fire({
+        icon: "success",
+        title: isEditing
+          ? "Gender updated successfully"
+          : "Gender created successfully",
+        timer: 2000,
+        showConfirmButton: false,
+        position: "top-end",
+        toast: true,
+      });
 
-    fetch(url, {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    })
-      .then((res) => {
-        if (res.ok) {
-          Swal.fire({
-            icon: "success",
-            title: isEditing
-              ? "Calibration updated successfully"
-              : "Calibration created successfully",
-            timer: 2000,
-            showConfirmButton: false,
-            position: "top-end", // Adjust position if needed
-            toast: true,
-          });
-          return res.json();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error! Please try again",
-            timer: 2000,
-            showConfirmButton: false,
-            position: "top-end", // Adjust position if needed
-            toast: true,
-          }).then(() => {
-            router.push("master-management/calibration");
-          });
-          throw new Error("Failed to save service");
-        }
-      })
-      .then((response) => {
-        toast.success(response.messsage, {
-          position: "top-right",
-          autoClose: 1000,
-        });
-        if (token) {
-          loadItemGroup(token);
-        } else {
-          toast.error("Token is missing", { position: "top-right" });
-        }
-        toggleModal();
-        resetForm();
-      })
-      .catch((err) =>
-        toast.error(err.message, { position: "top-right", autoClose: 1000 }),
-      );
+      toggleModal();
+      resetForm();
+      setIsLoading(false);
+    }, 1000);
   };
 
-  const handleDelete = (itemGroup: CalibrationGroupItem) => {
+  const handleDelete = (genderItem: GenderItem) => {
     Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
@@ -140,79 +176,38 @@ const gender: React.FC = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${itemGroup.id}/delete`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const { data } = response;
-        if (data.statusCode == 200) {
-          toast.success(data.message, {
+        setIsLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+          setGenderList((prev) =>
+            prev.filter((item) => item.id !== genderItem.id),
+          );
+          toast.success("Gender deleted successfully", {
             position: "top-right",
             autoClose: 1000,
           });
-
-          setTimeout(() => {
-            if (token) {
-              loadItemGroup(token);
-            }
-          }, 2000);
-        } else {
-          toast.error(data.message, { position: "top-right", autoClose: 1000 });
-        }
+          setIsLoading(false);
+        }, 1000);
       }
     });
   };
 
-  const handleEdit = (service: CalibrationGroupItem) => {
-    console.log(service);
-    setEditingGroup(service);
+  const handleEdit = (genderItem: GenderItem) => {
+    setEditingGender(genderItem);
     setIsEditing(true);
     setShowModal("block");
   };
 
   useEffect(() => {
     setToken(localStorage.getItem("token"));
-
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data != null) {
-          const list = data.data;
-
-          const paramOptions = list?.map(
-            (param: { id: number; gender: string }) => ({
-              value: param.id.toString(), // Use string values for consistency
-              text: param.gender,
-            }),
-          );
-
-          setParameter([
-            { value: "Select Parameter", text: "Select Parameter" },
-            ...paramOptions,
-          ]);
-        } else {
-          setParameter([]);
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => toast.error(err.message, { position: "top-right" }));
-    loadItemGroup(localStorage.getItem("token") || "");
-  }, [isEditing]);
+    loadGenderList(localStorage.getItem("token") || "");
+  }, []);
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Gender" />
+      <Breadcrumb pageName="Gender Management" />
       <div className="flex flex-col gap-2">
         <ToastContainer />
         <div className="rounded-sm border bg-white p-5 shadow-sm">
@@ -241,23 +236,20 @@ const gender: React.FC = () => {
                   />
                 </svg>
               </button>
-              <div className="mb-6 border-b text-center ">
-                <h2>Add New Gender</h2>
-              </div>
+
               <Formik
                 enableReinitialize={true}
                 initialValues={{
-                  code: editingGroup?.code || "",
-                  gender: editingGroup?.gender || "",
-                  active: editingGroup?.active || "Y",
-                  calibration_service_id: editingGroup?.id || "",
+                  code: editingGender?.code || "",
+                  name: editingGender?.name || "",
                 }}
                 validationSchema={Yup.object({
-                  code: Yup.string().required("Code is required"),
-                  gender: Yup.string().required("Gender is required"),
-                  calibration_service_id: Yup.number().required(
-                    "Gender parameter is required",
-                  ),
+                  code: Yup.string()
+                    .required("Code is required")
+                    .max(10, "Code must be 10 characters or less"),
+                  name: Yup.string()
+                    .required("Gender name is required")
+                    .max(50, "Name must be 50 characters or less"),
                 })}
                 onSubmit={(values, { resetForm }) =>
                   handleSubmit(values, resetForm)
@@ -270,45 +262,50 @@ const gender: React.FC = () => {
                         label="Code"
                         name="code"
                         type="text"
-                        placeholder="Enter code"
+                        placeholder="Enter Code"
                         disabled={isEditing}
                       />
                     </div>
                     <div className="mb-4">
                       <Input
-                        label="Gender"
-                        name="gender"
+                        label="Gender Name"
+                        name="name"
                         type="text"
-                        placeholder="Enter Gender"
+                        placeholder="Enter gender name"
                       />
                     </div>
 
                     <div className="flex justify-between">
-                      <button
+                      <Button
                         type="submit"
                         disabled={isSubmitting}
                         className="rounded bg-red-700 px-4 py-2 text-white hover:bg-red-500"
                       >
                         {isSubmitting ? "Submitting..." : "Submit"}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={toggleModal}
                         className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   </Form>
                 )}
               </Formik>
             </div>
           </div>
-          <DataTable
-            columns={columns(handleEdit, handleDelete)}
-            data={itemGroup}
-            handleAdd={toggleModal}
-          />
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <DataTable
+              columns={columns(handleEdit, handleDelete)}
+              data={genderList}
+              handleAdd={toggleModal}
+              addButtonText="Add New Gender"
+            />
+          )}
         </div>
       </div>
     </DefaultLayout>

@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,29 +66,45 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Code..."
-          value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
+          placeholder="Search by Email ID"
+          value={(table.getColumn("emails")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("code")?.setFilterValue(event.target.value)
+            table.getColumn("emails")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px]"
         />
-        <Input
-          placeholder="Search by Gender"
-          value={(table.getColumn("gender")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("gender")?.setFilterValue(event.target.value)
-          }
-          className="ml-6 max-w-[250px]"
-        />
-        <Button
-          onClick={handleAdd}
-          className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2"
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
         >
-          <BiUserPlus size={20} />
-          Add New
-        </Button>
+          <option selected>Search by Category</option>
+          <option value="US">Category 1</option>
+          <option value="CA">Category 2</option>
+          <option value="FR">Category 3</option>
+          <option value="DE">Category 4</option>
+        </select>
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        >
+          <option selected>Search by Status</option>
+          <option value="US">Pending</option>
+          <option value="CA">Assigned</option>
+          <option value="FR">In-Progress 3</option>
+          <option value="DE">Completed</option>
+        </select>
+        <select
+          id="parent"
+          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        >
+          <option selected>Search by Agent</option>
+          <option value="US">Agent 1</option>
+          <option value="CA">Agent 2</option>
+          <option value="FR">Agent 3</option>
+          <option value="DE">Agent 4</option>
+        </select>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -111,7 +126,7 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {/* {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -136,7 +151,7 @@ export function DataTable<TData, TValue>({
                   No results.
                 </TableCell>
               </TableRow>
-            )} */}
+            )}
           </TableBody>
         </Table>
         <div className="mr-5 flex items-center justify-end space-x-2 py-4">
