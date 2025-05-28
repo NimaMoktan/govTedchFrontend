@@ -21,22 +21,25 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+// import { useLoading } from "@/context/LoadingContext";
+import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  handleAdd: () => void
+  catType: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  handleAdd
+  catType
 }: DataTableProps<TData, TValue>) {
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-
+  const router = useRouter();
   const table = useReactTable({
     data,
     columns,
@@ -50,36 +53,33 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters
     },
+    initialState: {
+      pagination: {
+        pageSize: 5, // Set the initial page size to 10
+      }
+    },
   })
 
   const totalPages = table.getCoreRowModel()?.rows?.length && table.getState()?.pagination?.pageSize
-  ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
-  : 0; // Default to 0 if data or pagination is not ready
+    ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
+    : 0; // Default to 0 if data or pagination is not ready
 
   return (
-    <div>
+    <>
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter Code..."
-          value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
+        
+         <Input
+          placeholder="Search by Name"
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("code")?.setFilterValue(event.target.value)
-          }
-          className="max-w-[250px]"
-        />
-        <Input
-          placeholder="Search by description"
-          value={(table.getColumn("description")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("description")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px] ml-6"
         />
-        {/* <button onClick={handleAdd}
-          className="ml-10 right-10 gap-2 bg-blue-500 text-white px-4 py-2 btn-sm rounded-lg hover:bg-blue-600"
-        >
-          Add New
-        </button> */}
+          <Button onClick={() => {router.push(`/master-management/${catType}/create`)}} className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
+            <BiUserPlus size={20} />
+            Add New 
+          </Button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -103,13 +103,14 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="p-1 text-sm">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -134,8 +135,8 @@ export function DataTable<TData, TValue>({
             Previous
           </Button>
           <span>
-          Page {table.getState().pagination.pageIndex + 1} of {totalPages}
-        </span>
+            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
+          </span>
           <Button
             variant="outline"
             size="sm"
@@ -146,6 +147,6 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

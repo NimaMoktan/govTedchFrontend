@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { useField } from "formik";
+import React, { useCallback } from "react";
+import { useField, useFormikContext } from "formik";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -8,8 +8,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectGroup
+  SelectGroup,
 } from "@/components/ui/select";
+// import debounce from "lodash.debounce";
 
 interface Option {
   value: any;
@@ -24,15 +25,21 @@ interface SelectDropDownProps {
   onValueChange?: (value: string) => void;
 }
 
-const SelectDropDown: React.FC<SelectDropDownProps> = ({ 
-  label, 
-  options, 
-  onValueChange, 
+const SelectDropDown: React.FC<SelectDropDownProps> = ({
+  label,
+  options,
+  onValueChange,
   name,
   id,
 }) => {
   const [field, meta, helpers] = useField(name);
-  
+  // const { validateField } = useFormikContext();
+
+  // Debounce validation to avoid rapid state changes
+  // const debouncedValidate = debounce((fieldName: string) => {
+  //   validateField(fieldName);
+  // }, 100);
+
   return (
     <div className="grid w-full items-center gap-1.5 mb-4">
       <Label htmlFor={id || name} className="text-sm font-medium">
@@ -43,11 +50,12 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
         onValueChange={(value) => {
           helpers.setValue(value);
           helpers.setTouched(true);
+          // debouncedValidate(name); // Validate with debounce
           onValueChange?.(value);
         }}
       >
-        <SelectTrigger 
-          id={id || name} 
+        <SelectTrigger
+          id={id || name}
           className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
         >
           <SelectValue placeholder="Select an option" />
