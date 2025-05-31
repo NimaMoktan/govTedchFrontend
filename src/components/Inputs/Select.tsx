@@ -12,14 +12,14 @@ import {
 } from "@/components/ui/select";
 // import debounce from "lodash.debounce";
 
-interface Option {
+interface Options {
   value: any;
   text: string;
 }
 
 interface SelectDropDownProps {
   label: string;
-  options: Option[];
+  options: Options[];
   name: string;
   id?: string;
   onValueChange?: (value: string) => void;
@@ -41,7 +41,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
   // }, 100);
 
   return (
-    <div className="grid w-full items-center gap-1.5 mb-4">
+    <div className="mb-4 grid w-full items-center gap-1.5">
       <Label htmlFor={id || name} className="text-sm font-medium">
         {label}
       </Label>
@@ -56,7 +56,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
       >
         <SelectTrigger
           id={id || name}
-          className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
+          className={`w-full ${meta.touched && meta.error ? "border-red-500" : ""}`}
         >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
@@ -71,7 +71,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
         </SelectContent>
       </Select>
       {meta.touched && meta.error ? (
-        <span className="text-red-500 text-xs ml-3">{meta.error}</span>
+        <span className="ml-3 text-xs text-red-500">{meta.error}</span>
       ) : null}
     </div>
   );

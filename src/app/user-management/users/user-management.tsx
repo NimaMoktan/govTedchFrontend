@@ -8,14 +8,16 @@ import { useRouter } from "next/navigation"; // Changed from 'next/router'
 import { deleteUser, getUsers } from "@/services/UserService";
 import { User } from "@/types/User";
 import { useLoading } from "@/context/LoadingContext";
+import { Options } from "@/interface/Options";
 
 const UserManagement = () => {
   const [usersList, setUsersList] = useState<User[]>([]);
+
   const router = useRouter();
   const { setIsLoading } = useLoading();
 
   const handleCreateUser = () => {
-    router.push("/user-management/users/create"); // Assuming you have a create route
+    router.push("/user-management/users/create");
   };
 
   const handleEditUser = (user: User) => {
@@ -26,17 +28,13 @@ const UserManagement = () => {
     setIsLoading(true);
     try {
       const response = await getUsers().finally(() => setIsLoading(false));
-      setUsersList(response.results);
+      setUsersList(response.data.results);
       console.log(response);
     } catch (error) {
       console.error("Error fetching users:", error);
       Swal.fire("Error!", "Failed to fetch users. Please try again.", "error");
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []); // Removed selectedUser from dependencies to prevent infinite loops
 
   const handleDelete = async (user: User) => {
     await Swal.fire({
@@ -53,6 +51,10 @@ const UserManagement = () => {
     });
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
     <Card className="w-full">
       <CardContent className="max-w-full overflow-x-auto">
@@ -67,3 +69,6 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+function users(type: any) {
+  throw new Error("Function not implemented.");
+}

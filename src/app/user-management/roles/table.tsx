@@ -74,11 +74,9 @@ export function DataTable<TData, TValue>({
             /> */}
         <Input
           placeholder="Search by role name"
-          value={
-            (table.getColumn("role_name")?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("role_name")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="ml-0 max-w-[250px]"
         />

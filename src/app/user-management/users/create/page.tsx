@@ -11,13 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { createUser } from "@/services/UserService";
-import { getRoles } from "@/services/RoleService";
+import { getRoleDropdowns } from "@/services/RoleService";
 import { User } from "@/types/User";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
 import api from "@/lib/axios";
 import { useLoading } from "@/context/LoadingContext";
+import { Options } from "@/interface/Options";
+import SelectDropDown from "@/components/Inputs/Select";
 
 interface RoleDropdown {
   value: string;
@@ -26,6 +28,7 @@ interface RoleDropdown {
 
 const UsersCreate = () => {
   const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([]);
+  const [roleList, setRoleList] = useState<Options[]>([]);
   const { setIsLoading, isLoading } = useLoading();
 
   const router = useRouter();
@@ -58,74 +61,18 @@ const UsersCreate = () => {
     }
   };
 
-  const formatFullName = (
-    firstName: string,
-    lastName: string,
-    middleName?: string | null,
-  ): string => {
-    const nameParts = [firstName];
-
-    if (middleName?.trim()) {
-      nameParts.push(middleName);
-    }
-
-    nameParts.push(lastName);
-
-    return nameParts.join(" ").trim();
-  };
-
-  const fetchUserByCid = debounce(async (cid: string, formik: any) => {
-    if (cid.length > 10) {
-      try {
-        api.get(`calibration/api/getCitizenDtls/${cid}`).then((response) => {
-          const fullName = formatFullName(
-            response.data.citizenDetailsResponse.citizenDetail[0].firstName,
-            response.data.citizenDetailsResponse.citizenDetail[0].middleName,
-            response.data.citizenDetailsResponse.citizenDetail[0].lastName,
-          );
-          formik.setFieldValue("fullName", fullName);
-        });
-      } catch (error) {
-        console.error("Error fetching user by CID:", error);
-      }
-    }
-  }, 500); // 500ms debounce delay
-
-  const handleCidChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    formik: any,
-  ) => {
-    const cid = e.target.value;
-    formik.setFieldValue("cidNumber", cid);
-    if (formik.values.fullName) {
-      formik.setFieldValue("fullName", "");
-    }
-    fetchUserByCid(cid, formik);
-  };
-
   useEffect(() => {
     const fetchRoles = async () => {
-      try {
-        await getRoles().then((response) => {
-          if (Array.isArray(response.data)) {
-            const roleOptions = response.data.map((role) => ({
-              value: String(role.id),
-              text: role.role_name,
-            }));
-            setRoleDropdown([
-              { value: "", text: "Select Role" },
-              ...roleOptions,
-            ]);
-          } else {
-            console.error("Roles data is not an array:", response.data);
-          }
-          // setIsLoading(false);
-        });
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-      }
+      getRoleDropdowns().then((response) => {
+        console.log(response.data);
+        const optionList = response.data.map((role: any) => ({
+          value: String(role.id),
+          text: role.name,
+        }));
+        console.log(optionList);
+        setRoleList(optionList);
+      });
     };
-
     fetchRoles();
   }, []);
 
@@ -139,120 +86,136 @@ const UsersCreate = () => {
               initialValues={{
                 id: null, // Add default id value
                 username: "",
-                // cidNumber: "",
-                firstName: "",
-                lastName: "",
+                cid: "",
+                first_name: "",
+                last_name: "",
                 email: "",
-                // mobileNumber: "",
-                role_ids: [1],
+                mobile_no: "",
+                role_ids: [3],
                 is_active: true,
               }}
               validationSchema={Yup.object({
                 username: Yup.string()
                   .required("Username is required")
                   .min(3, "Must be at least 3 characters"),
-                // cidNumber: Yup.string()
-                //   .required("CID is required")
-                //   .min(11, "Must be at least 11 characters"),
-                firstName: Yup.string()
+                cid: Yup.string()
+                  .required("CID is required")
+                  .min(11, "Must be at least 11 characters"),
+                first_name: Yup.string()
                   .required("Full name is required")
                   .min(3, "Must be at least 3 characters"),
-                lastName: Yup.string().optional(),
+                last_name: Yup.string().optional(),
                 email: Yup.string()
                   .required("Email address is required")
                   .email("Invalid email address"),
-                role_id: Yup.array().optional(),
-                // userRoles: Yup.array().min(
-                //   1,
-                //   "At least one userRole is required",
-                // ),
-                // mobileNumber: Yup.string()
-                //   .required("Mobile Number is required")
-                //   .min(8, "Enter at least 8 characters"),
+                role_ids: Yup.array().optional(),
+                mobile_no: Yup.string().min(8, "Enter at least 8 characters"),
               })}
               onSubmit={(values, { resetForm }) => {
                 handleSubmit(values, resetForm);
               }}
             >
-              {(formik) => (
-                <Form>
-                  <div className="-mt-2 space-y-4 p-4 md:p-5">
-                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                      <div className="w-full xl:w-1/2">
-                        <Input
-                          label="First Name"
-                          autoComplete="off"
-                          type="text"
-                          placeholder="Enter your full name"
-                          name="firstName"
-                        />
+              {({ errors }) => {
+                console.log(errors);
+                return (
+                  <Form>
+                    <div className="-mt-2 space-y-4 p-4 md:p-5">
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <SelectDropDown
+                            label="Select Role"
+                            name="role"
+                            options={roleList}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full xl:w-1/2">
-                        <Input
-                          label="Last Name"
-                          autoComplete="off"
-                          type="text"
-                          placeholder="Enter your last name"
-                          name="lastName"
-                        />
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="First Name"
+                            autoComplete="off"
+                            type="text"
+                            placeholder="Enter your full name"
+                            name="first_name"
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Last Name"
+                            autoComplete="off"
+                            type="text"
+                            placeholder="Enter your last name"
+                            name="last_name"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                      <div className="w-full xl:w-1/2">
-                        <Input
-                          label="Username"
-                          type="text"
-                          placeholder="Enter userName"
-                          name="username"
-                        />
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Username"
+                            type="text"
+                            placeholder="Enter userName"
+                            name="username"
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Email"
+                            type="email"
+                            placeholder="Enter email address"
+                            name="email"
+                          />
+                        </div>
                       </div>
-                      <div className="w-full xl:w-1/2">
-                        <Input
-                          label="Email"
-                          type="email"
-                          placeholder="Enter email address"
-                          name="email"
-                        />
-                      </div>
-                    </div>
 
-                    {/* <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                      <div className="w-full xl:w-1/2">
-                        <Input
-                          label="Phone Number"
-                          type="text"
-                          placeholder="Enter phone number"
-                          name="mobileNumber"
-                        />
-                      </div>
-                      <div className="w-full xl:w-1/2">
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Phone Number"
+                            type="text"
+                            placeholder="Enter phone number"
+                            name="mobile_no"
+                          />
+                        </div>
+
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="CID Number"
+                            type="text"
+                            placeholder="Enter CID number"
+                            name="cid"
+                          />
+                        </div>
+
+                        {/* <div className="w-full xl:w-1/2">
                         <MultiSelect
                           label="Role"
                           name="userRoles"
                           options={roleDropdown}
                         />
+                      </div> */}
                       </div>
-                    </div> */}
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="mx-2 rounded-full"
-                    >
-                      {isLoading ? "Submitting..." : "Submit"}
-                    </Button>
-                    <Link href="/user-management/users">
                       <Button
-                        type="reset"
-                        variant={`destructive`}
+                        type="submit"
+                        disabled={isLoading}
                         className="mx-2 rounded-full"
                       >
-                        Back
+                        {isLoading ? "Submitting..." : "Submit"}
                       </Button>
-                    </Link>
-                  </div>
-                </Form>
-              )}
+                      <Link href="/user-management/users">
+                        <Button
+                          type="reset"
+                          variant={`destructive`}
+                          className="mx-2 rounded-full"
+                        >
+                          Back
+                        </Button>
+                      </Link>
+                    </div>
+                  </Form>
+                );
+              }}
             </Formik>
           </div>
         </CardContent>

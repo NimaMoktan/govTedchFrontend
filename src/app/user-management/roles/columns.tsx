@@ -24,7 +24,7 @@ export const columns = (
     },
   },
   {
-    accessorKey: "role_name",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
@@ -37,11 +37,12 @@ export const columns = (
       );
     },
   },
+
   {
     accessorKey: "active",
     header: () => "Status",
     cell: ({ row }) => {
-      const status = row.original.active;
+      const status = row.original.is_active;
       return (
         <p
           className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${

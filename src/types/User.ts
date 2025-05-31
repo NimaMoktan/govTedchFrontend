@@ -1,12 +1,12 @@
 export type User = {
   id?: any; // Made optional
   username: string;
-  //   cid: string;
-  firstName: string;
-  lastName: string;
+  cid?: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  //   mobile: string;
-  //   roles: object[];
+  mobile_no?: string;
   is_active: boolean;
   role_ids: number[];
+  roles?: any[];
 };
