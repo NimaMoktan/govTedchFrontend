@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
+import { Badge } from "@/components/ui/badge";
 
 import {
   DropdownMenu,
@@ -66,20 +67,43 @@ export const columns = (
       );
     },
   },
-  // {
-  //     accessorKey: "mobileNumber",
-  //     header: ({ column }) => {
-  //         return (
-  //             <Button
-  //                 variant="ghost"
-  //                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //             >
-  //                 Mobile Number
-  //                 <ArrowUpDown className="ml-2 h-4 w-4" />
-  //             </Button>
-  //         )
-  //     }
-  // },
+  {
+    accessorKey: "roles",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Role
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <>
+          {row.original.roles?.map((role, index) => (
+            <Badge key={index}>{role.name}</Badge>
+          ))}
+        </>
+      );
+    },
+  },
+  {
+    accessorKey: "cid",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          CID Number
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
   {
     accessorKey: "active",
     header: () => "Status",
@@ -97,6 +121,7 @@ export const columns = (
     },
   },
   {
+    accessorKey: "Action",
     id: "actions",
     cell: ({ row }) => {
       return (

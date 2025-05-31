@@ -6,9 +6,9 @@
 // }
 
 export interface Role {
-    id?: number; // Add this line
-    role_name: string;
-    privileges: { id: number }[];
-    active: string;
-    code: string;
+  id?: number; // Add this line
+  name: string;
+  permission_ids?: any;
+  is_active?: string;
+  code?: string;
 }

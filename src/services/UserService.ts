@@ -1,10 +1,20 @@
 import api from "@/lib/axios";
 import { User } from "@/types/User";
 
-interface ApiResponse {
+interface ApiResponse<T> {
+  data: results;
+  message: string;
+  status: string;
+  statusCode: number;
+  timestamp: number;
+}
+
+interface results {
+  [x: string]: any;
   results: User[];
 }
-export const getUsers = async (): Promise<ApiResponse> => {
+
+export const getUsers = async (): Promise<ApiResponse<User[]>> => {
   const response = await api.get("user-management/users/");
   return response.data;
 };
