@@ -18,7 +18,16 @@ export type callGroup = {
   remarks: string;
   active: string;
 };
-
+export interface CallHistory {
+  id: number;
+  call_id: number;
+  changed_at: number;
+  changed_by: string;
+  query: string;
+  remarks: string;
+  category: string;
+  subcategory: string;
+}
 export const columns = (
   handleEdit: (callGroup: callGroup) => void,
   handleDelete: (id: callGroup) => void,
