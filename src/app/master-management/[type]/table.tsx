@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { BiUserPlus } from "react-icons/bi";
+import { debounce } from "lodash";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -66,9 +67,13 @@ export function DataTable<TData, TValue>({
     pageCount: Math.ceil(totalCount / pageSize),
   });
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
+  const debouncedSetSearch = debounce((value: string) => {
+    setSearch(value);
     setPage(1);
+  }, 300);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSetSearch(event.target.value);
   };
 
   return (
