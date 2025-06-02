@@ -67,7 +67,7 @@ const MasterPage = ({ params }: { params: Promise<{ type: string }> }) => {
     };
 
     getMasters();
-  }, [param.type, page, search, ordering, setIsLoading]);
+  }, [param.type, page, search, ordering, setIsLoading, pageSize]);
 
   return (
     <DefaultLayout>
