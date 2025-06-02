@@ -13,6 +13,8 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
+import SelectDropDown from "@/components/Inputs/Select";
+import { getRoleDropdowns } from "@/services/RoleService";
 
 interface FAQ {
   id: number;
@@ -37,6 +39,7 @@ const FAQPage: React.FC = () => {
   const [token, setToken] = useState<string | null>("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
+  const [roleList, setRoleList] = useState<Options[]>([]);
   const router = useRouter();
 
   // Temporary data for demonstration
@@ -206,6 +209,21 @@ const FAQPage: React.FC = () => {
     loadFaqs();
   }, []);
 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      getRoleDropdowns().then((response) => {
+        console.log(response.data);
+        const optionList = response.data.map((role: any) => ({
+          value: String(role.id),
+          text: role.name,
+        }));
+        console.log(optionList);
+        setRoleList(optionList);
+      });
+    };
+    fetchRoles();
+  }, []);
+
   if (isLoading) return <Loader />;
 
   return (
@@ -244,6 +262,13 @@ const FAQPage: React.FC = () => {
               >
                 {({ isSubmitting, values, handleChange, setFieldValue }) => (
                   <Form>
+                    <div className="w-full xl:w-1/2">
+                      <SelectDropDown
+                        label="Select Role"
+                        name="role"
+                        options={roleList}
+                      />
+                    </div>
                     <div className="mb-4">
                       <Input
                         label="Question"

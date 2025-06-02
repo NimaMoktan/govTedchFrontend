@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { deleteRole, getRoles } from "@/services/RoleService";
 import { Role } from "@/types/Role";
 import { useLoading } from "@/context/LoadingContext";
+import { User } from "@/types/User";
 
 const RoleManager: React.FC = () => {
   const [roles, setRoles] = useState<any[]>([]);
@@ -32,7 +33,11 @@ const RoleManager: React.FC = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         if (role?.id !== undefined) {
-          await deleteRole(role.id);
+          await deleteRole(role.id).then(() => {
+            setRoles((prevRoles) =>
+              prevRoles.filter((item) => item.id !== role.id),
+            );
+          });
         } else {
           toast.error("Role ID is undefined. Cannot delete the role.");
         }

@@ -19,21 +19,16 @@ export const getUsers = async (): Promise<ApiResponse<User[]>> => {
   return response.data;
 };
 export const createUser = async (data: User) => {
-  const modifiedPayload = {
-    ...data,
-    // userRoles: data.roles.map((roleId) => ({
-    //   id: parseInt(String(roleId)),
-    // })),
-  };
   return api.post("user-management/users/", data);
 };
-export const getUser = async (id: number) => api.get(`/core/user/${id}`);
+export const getUser = async (id: number) =>
+  api.get(`/user-management/users/${id}`);
 
 export const updateUser = async (id: number, data: User) => {
   const modifiedPayload = {
     ...data,
   };
-  return api.post(`/core/user/${id}/update`, modifiedPayload);
+  return api.post(`/user-management/users/${id}/`, modifiedPayload);
 };
 export const deleteUser = async (id: number) =>
   api.delete(`user-management/users/${id}/`);

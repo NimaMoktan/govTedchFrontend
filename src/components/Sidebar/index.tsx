@@ -141,6 +141,12 @@ const menuGroups = [
             route: "/information/noticeboard",
           },
           {
+            label: "G2C Information",
+            role: ["ADM"],
+            privilege: "can view roles",
+            route: "/information/g2c-information",
+          },
+          {
             label: "GovTech Helpdesk",
             role: ["ADM"],
             privilege: "can view roles",

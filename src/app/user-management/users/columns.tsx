@@ -4,13 +4,6 @@ import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ArrowUpDown } from "lucide-react";
 import { User } from "@/types/User";
 
@@ -39,34 +32,6 @@ export const columns = (
       );
     },
   },
-  // {
-  //     accessorKey: "fullName",
-  //     header: ({ column }) => {
-  //         return (
-  //             <Button
-  //                 variant="ghost"
-  //                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //             >
-  //                 Full Name
-  //                 <ArrowUpDown className="ml-2 h-4 w-4" />
-  //             </Button>
-  //         )
-  //     },
-  // },
-  {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
   {
     accessorKey: "roles",
     header: ({ column }) => {
@@ -90,20 +55,22 @@ export const columns = (
       );
     },
   },
+
   {
-    accessorKey: "cid",
+    accessorKey: "email",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          CID Number
+          Email
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
+
   {
     accessorKey: "active",
     header: () => "Status",
@@ -125,33 +92,23 @@ export const columns = (
     id: "actions",
     cell: ({ row }) => {
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDelete(row.original)}>
-              <BsTrash
-                className="fill-current"
-                color="red"
-                fill="red"
-                size={18}
-              />
-              Delete
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-              <BsPencil className="fill-current" color="blue" size={20} />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-              <BsArrowRepeat className="fill-current" color="red" size={20} />
-              {row.original.is_active ? "Deactivate" : "Activate"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleDelete(row.original)}
+            className="flex items-center gap-1 rounded border border-red-300 px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-50"
+          >
+            <BsTrash size={16} />
+            Delete
+          </button>
+
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
+          >
+            <BsPencil size={16} />
+            Edit
+          </button>
+        </div>
       );
     },
   },

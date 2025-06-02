@@ -8,15 +8,24 @@ import Input from "@/components/Inputs/Input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SelectDropDown from "@/components/Inputs/Select";
-import { getParentMastersByType, updateMaster } from "@/services/master/MasterService";
+import {
+  getParentMastersByType,
+  updateMaster,
+} from "@/services/master/MasterService";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
-const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => {
+const MasterUpdatePage = ({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}) => {
   const [parent, setParent] = useState<any>(null);
   const [editMaster, setEditMaster] = useState<any>(null);
   const param = React.use(params);
   const router = useRouter();
+  const [isActive, setIsActive] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchParentData = async () => {
@@ -27,7 +36,7 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
           res.map((item: any) => ({
             value: item.id,
             text: item.name,
-          }))
+          })),
         );
       } catch (error) {
         console.error("Error fetching parent data:", error);
@@ -48,13 +57,16 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
     try {
       const response = await updateMaster(editMaster.id, values);
       toast.success(response.data.message);
-        localStorage.removeItem("editMaster");
-        setTimeout(() => {
-            router.push(`/master-management/${param.type}`);
-        }, 1000);
+      localStorage.removeItem("editMaster");
+      setTimeout(() => {
+        router.push(`/master-management/${param.type}`);
+      }, 1000);
     } catch (error: any) {
       console.error("Error creating master:", error);
-      toast.error(error.response?.data?.message || "Failed to create master. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to create master. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -86,7 +98,7 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
             >
               {({ isSubmitting, setFieldValue, values }) => (
                 <Form>
-                  <div className="p-4 md:p-5 space-y-4 -mt-2">
+                  <div className="-mt-2 space-y-4 p-4 md:p-5">
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                       <div className="w-full xl:w-1/2">
                         <Input
@@ -95,23 +107,27 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
                           placeholder="Enter Name"
                           name="name"
                           onChange={(event: any) => {
-                            const value = event.target ? event.target.value : event;
+                            const value = event.target
+                              ? event.target.value
+                              : event;
                             setFieldValue("name", value);
                           }}
                         />
                       </div>
-                      <div className="w-full xl:w-1/2">
+                      {/* <div className="w-full xl:w-1/2">
                         <Input
                           label="Description"
                           type="text"
                           placeholder="Enter Description"
                           name="description"
                           onChange={(event: any) => {
-                            const value = event.target ? event.target.value : event;
+                            const value = event.target
+                              ? event.target.value
+                              : event;
                             setFieldValue("description", value);
                           }}
                         />
-                      </div>
+                      </div> */}
                       {param.type === "category" && (
                         <div className="w-full xl:w-1/2">
                           <SelectDropDown
@@ -125,6 +141,8 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
                         <SelectDropDown
                           label="Select Status"
                           name="is_active"
+                          value={isActive}
+                          onChange={(value) => setIsActive(value)}
                           options={[
                             { value: true, text: "Active" },
                             { value: false, text: "Inactive" },
@@ -132,7 +150,11 @@ const MasterUpdatePage = ({ params }: { params: Promise<{ type: string }> }) => 
                         />
                       </div>
                     </div>
-                    <Button type="submit" disabled={isSubmitting} className="rounded-full mx-2">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="mx-2 rounded-full"
+                    >
                       {isSubmitting ? "Updating..." : "Update"}
                     </Button>
                   </div>

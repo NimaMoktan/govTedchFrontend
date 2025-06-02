@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import * as React from "react";
 import {
   ColumnDef,
@@ -9,8 +9,8 @@ import {
   SortingState,
   getSortedRowModel,
   ColumnFiltersState,
-  getFilteredRowModel
-} from "@tanstack/react-table"
+  getFilteredRowModel,
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -26,19 +26,20 @@ import { useRouter } from "next/navigation";
 import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
   catType: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  catType
+  catType,
 }: DataTableProps<TData, TValue>) {
-
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
   const router = useRouter();
   const table = useReactTable({
     data,
@@ -51,35 +52,44 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
-      columnFilters
+      columnFilters,
     },
     initialState: {
       pagination: {
-        pageSize: 5, // Set the initial page size to 10
-      }
+        pageSize: 10, // Set the initial page size to 10
+      },
     },
-  })
+  });
 
-  const totalPages = table.getCoreRowModel()?.rows?.length && table.getState()?.pagination?.pageSize
-    ? Math.ceil(table.getCoreRowModel().rows.length / table.getState().pagination.pageSize)
-    : 0; // Default to 0 if data or pagination is not ready
+  const totalPages =
+    table.getCoreRowModel()?.rows?.length &&
+    table.getState()?.pagination?.pageSize
+      ? Math.ceil(
+          table.getCoreRowModel().rows.length /
+            table.getState().pagination.pageSize,
+        )
+      : 0; // Default to 0 if data or pagination is not ready
 
   return (
     <>
       <div className="flex items-center py-4">
-        
-         <Input
+        <Input
           placeholder="Search by Name"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-[250px] ml-6"
+          className="ml-6 max-w-[250px]"
         />
-          <Button onClick={() => {router.push(`/master-management/${catType}/create`)}} className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
-            <BiUserPlus size={20} />
-            Add New 
-          </Button>
+        <Button
+          onClick={() => {
+            router.push(`/master-management/${catType}/create`);
+          }}
+          className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2"
+        >
+          <BiUserPlus size={20} />
+          Add New
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -92,11 +102,11 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -107,25 +117,30 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-1 text-sm">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-end space-x-2 py-4 mr-5">
+        <div className="mr-5 flex items-center justify-end space-x-2 py-4">
           <Button
             variant="outline"
             size="sm"
@@ -148,5 +163,5 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
     </>
-  )
+  );
 }
