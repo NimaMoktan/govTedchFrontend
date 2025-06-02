@@ -2,22 +2,36 @@ import { Master } from "@/types/master/master";
 import api from "@/lib/axios";
 
 interface ApiResponse<T> {
-  data: results;
+  data: T;
   message: string;
   status: string;
   statusCode: number;
   timestamp: number;
 }
 
-interface results {
-  [x: string]: any;
+interface Results {
   results: Master[];
+  count: number;
+  next: number | null;
+  previous: number | null;
 }
 
 export const getMastersByType = async (
   type: string,
-): Promise<ApiResponse<Master[]>> => {
-  const response = await api.get(`master-management/?type=${type}`);
+  page: number = 1,
+  pageSize: number = 10,
+  search: string = "",
+  ordering: string = ""
+): Promise<ApiResponse<Results>> => {
+  const queryParams = new URLSearchParams({
+    type,
+    page: page.toString(),
+    page_size: pageSize.toString(),
+    ...(search && { search }),
+    ...(ordering && { ordering }),
+  });
+
+  const response = await api.get(`master-management/?${queryParams.toString()}`);
   return response.data;
 };
 

@@ -6,16 +6,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "./table";
 import { columns } from "./columns";
 import { Master } from "@/types/master/master";
-import {
-  deleteMaster,
-  getMastersByType,
-} from "@/services/master/MasterService";
+import { deleteMaster, getMastersByType } from "@/services/master/MasterService";
 import { useLoading } from "@/context/LoadingContext";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
 const MasterPage = ({ params }: { params: Promise<{ type: string }> }) => {
   const [masterList, setMasterList] = useState<Master[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10);
+  const [search, setSearch] = useState<string>("");
+  const [ordering, setOrdering] = useState<string>("");
   const { setIsLoading } = useLoading();
   const param = React.use(params);
   const router = useRouter();
@@ -35,7 +37,7 @@ const MasterPage = ({ params }: { params: Promise<{ type: string }> }) => {
           confirmButtonText: "OK",
         }).then(() => {
           setMasterList((prevMasters) =>
-            prevMasters.filter((m) => m.id !== master.id),
+            prevMasters.filter((m) => m.id !== master.id)
           );
         });
       })
@@ -47,15 +49,25 @@ const MasterPage = ({ params }: { params: Promise<{ type: string }> }) => {
   useEffect(() => {
     const getMasters = async () => {
       setIsLoading(true);
-      const response = await getMastersByType(param.type).finally(() =>
-        setIsLoading(false),
-      );
-      console.log(response.data.results);
-      setMasterList(response.data.results);
+      try {
+        const response = await getMastersByType(
+          param.type,
+          page,
+          pageSize,
+          search,
+          ordering
+        );
+        setMasterList(response.data.results);
+        setTotalCount(response.data.count);
+      } catch (error) {
+        console.error("Error fetching masters:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     getMasters();
-  }, [param.type, setIsLoading]);
+  }, [param.type, page, search, ordering, setIsLoading]);
 
   return (
     <DefaultLayout>
@@ -70,6 +82,12 @@ const MasterPage = ({ params }: { params: Promise<{ type: string }> }) => {
               columns={columns(handleEdit, handleDelete, param.type)}
               catType={param.type}
               data={masterList}
+              totalCount={totalCount}
+              page={page}
+              pageSize={pageSize}
+              setPage={setPage}
+              setSearch={setSearch}
+              setOrdering={setOrdering}
             />
           </CardContent>
         </Card>
