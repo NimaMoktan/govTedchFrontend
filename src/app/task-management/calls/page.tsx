@@ -28,12 +28,27 @@ interface callGroup {
   active: string;
 }
 
+interface CallHistory {
+  id: number;
+  call_id: number;
+  changed_at: number;
+  changed_by: string;
+  changes: {
+    field: string;
+    old_value: string;
+    new_value: string;
+  }[];
+}
+
 const Calls = () => {
   const [itemGroup, setItemGroup] = useState<callGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingGroup, setEditingGroup] = useState<callGroup | null>(null);
   const [showModal, setShowModal] = useState("hidden");
+  const [modalType, setModalType] = useState<"form" | "view">("form");
+  const [selectedCall, setSelectedCall] = useState<callGroup | null>(null);
+  const [callHistory, setCallHistory] = useState<CallHistory[]>([]);
   const router = useRouter();
 
   // Demo data
@@ -88,10 +103,48 @@ const Calls = () => {
     },
   ];
 
-  const toggleModal = () => {
+  // Demo call history data
+  const demoCallHistory: CallHistory[] = [
+    {
+      id: 1,
+      call_id: 1,
+      changed_at: Date.now() - 3600000,
+      changed_by: "Admin User",
+      changes: [
+        {
+          field: "status",
+          old_value: "Pending",
+          new_value: "In Progress",
+        },
+        {
+          field: "agent",
+          old_value: "",
+          new_value: "John Doe",
+        },
+      ],
+    },
+    {
+      id: 2,
+      call_id: 1,
+      changed_at: Date.now() - 7200000,
+      changed_by: "System",
+      changes: [
+        {
+          field: "status",
+          old_value: "",
+          new_value: "Pending",
+        },
+      ],
+    },
+  ];
+
+  const toggleModal = (type: "form" | "view" = "form") => {
     setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
-    setIsEditing(false);
-    setEditingGroup(null);
+    setModalType(type);
+    if (type === "form") {
+      setIsEditing(false);
+      setEditingGroup(null);
+    }
   };
 
   const loadItemGroup = () => {
@@ -100,6 +153,22 @@ const Calls = () => {
       setItemGroup(demoData);
       setIsLoading(false);
     }, 500);
+  };
+
+  const loadCallHistory = (callId: number) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setCallHistory(
+        demoCallHistory.filter((history) => history.call_id === callId),
+      );
+      setIsLoading(false);
+    }, 300);
+  };
+
+  const handleView = (call: callGroup) => {
+    setSelectedCall(call);
+    loadCallHistory(call.id);
+    toggleModal("view");
   };
 
   const handleSubmit = (values: callGroup, resetForm: () => void) => {
@@ -163,7 +232,8 @@ const Calls = () => {
   const handleEdit = (service: callGroup) => {
     setEditingGroup(service);
     setIsEditing(true);
-    setShowModal("block");
+    loadCallHistory(service.id);
+    toggleModal("form");
   };
 
   useEffect(() => {
@@ -176,141 +246,335 @@ const Calls = () => {
       <div className="flex flex-col gap-2">
         <ToastContainer />
         <div className="rounded-sm border bg-white p-5 shadow-sm">
-          <div
-            className={`fixed inset-0 z-9 flex h-[calc(100%-1rem)] max-h-full w-full items-center justify-center bg-black bg-opacity-50 md:inset-0 ${
-              showModal === "block" ? "block" : "hidden"
-            }`}
-          >
-            <div className="max-h-full w-full max-w-5xl rounded-md bg-white p-6 shadow-lg">
-              <Formik
-                enableReinitialize={true}
-                initialValues={{
-                  id: editingGroup?.id || 0,
-                  phone_no: editingGroup?.phone_no || 0,
-                  time_stamp: editingGroup?.time_stamp || Date.now(),
-                  query: editingGroup?.query || "",
-                  category: editingGroup?.category || "",
-                  subcategory: editingGroup?.subcategory || "",
-                  status: editingGroup?.status || "Pending",
-                  agent: editingGroup?.agent || "",
-                  remarks: editingGroup?.remarks || "",
-                  active: editingGroup?.active || "Y",
-                }}
-                validationSchema={Yup.object({
-                  phone_no: Yup.number().required("Phone number is required"),
-                  query: Yup.string().required("Query is required"),
-                  category: Yup.string().required("Category is required"),
-                  subcategory: Yup.string().required("Subcategory is required"),
-                })}
-                onSubmit={(values, { resetForm }) =>
-                  handleSubmit(values, resetForm)
-                }
-              >
-                {({ isSubmitting }) => (
-                  <Form className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {modalType === "form" ? (
+            <div
+              className={`fixed inset-0 z-9 flex h-[calc(100%-1rem)] max-h-full w-full items-center justify-center bg-black bg-opacity-50 md:inset-0 ${
+                showModal === "block" ? "block" : "hidden"
+              }`}
+            >
+              <div className="max-h-full w-full max-w-5xl rounded-md bg-white p-6 shadow-lg">
+                <Formik
+                  enableReinitialize={true}
+                  initialValues={{
+                    id: editingGroup?.id || 0,
+                    phone_no: editingGroup?.phone_no || 0,
+                    time_stamp: editingGroup?.time_stamp || Date.now(),
+                    query: editingGroup?.query || "",
+                    category: editingGroup?.category || "",
+                    subcategory: editingGroup?.subcategory || "",
+                    status: editingGroup?.status || "Pending",
+                    agent: editingGroup?.agent || "",
+                    remarks: editingGroup?.remarks || "",
+                    active: editingGroup?.active || "Y",
+                  }}
+                  validationSchema={Yup.object({
+                    phone_no: Yup.number().required("Phone number is required"),
+                    query: Yup.string().required("Query is required"),
+                    category: Yup.string().required("Category is required"),
+                    subcategory: Yup.string().required(
+                      "Subcategory is required",
+                    ),
+                  })}
+                  onSubmit={(values, { resetForm }) =>
+                    handleSubmit(values, resetForm)
+                  }
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <Input
+                          label="Phone Number"
+                          name="phone_no"
+                          type="number"
+                          placeholder="Enter phone number"
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Query"
+                          name="query"
+                          type="text"
+                          placeholder="Enter query"
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Category"
+                          name="category"
+                          type="text"
+                          placeholder="Enter category"
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          label="Subcategory"
+                          name="subcategory"
+                          type="text"
+                          placeholder="Enter subcategory"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-900">
+                          Status
+                        </label>
+                        <select
+                          name="status"
+                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Assigned">Assigned</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Input
+                          label="Agent"
+                          name="agent"
+                          type="text"
+                          placeholder="Enter agent name"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Input
+                          label="Remarks"
+                          name="remarks"
+                          type="text"
+                          placeholder="Enter remarks"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="mb-2 block text-sm font-medium text-gray-900">
+                          Active
+                        </label>
+                        <select
+                          name="active"
+                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                        >
+                          <option value="Y">Yes</option>
+                          <option value="N">No</option>
+                        </select>
+                      </div>
+
+                      {/* History Section */}
+                      {isEditing && (
+                        <div className="md:col-span-2">
+                          <h3 className="mb-2 text-lg font-semibold">
+                            Call History
+                          </h3>
+                          <div className="max-h-40 overflow-y-auto rounded border p-2">
+                            {callHistory.length > 0 ? (
+                              callHistory.map((history) => (
+                                <div
+                                  key={history.id}
+                                  className="mb-3 border-b pb-2"
+                                >
+                                  <div className="flex justify-between text-sm">
+                                    <span className="font-medium">
+                                      {new Date(
+                                        history.changed_at,
+                                      ).toLocaleString()}
+                                    </span>
+                                    <span className="text-gray-600">
+                                      Changed by: {history.changed_by}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1">
+                                    {history.changes.map((change, idx) => (
+                                      <div key={idx} className="text-sm">
+                                        <span className="font-medium">
+                                          {change.field}:
+                                        </span>{" "}
+                                        <span className="text-red-500 line-through">
+                                          {change.old_value || "empty"}
+                                        </span>{" "}
+                                        →{" "}
+                                        <span className="text-green-600">
+                                          {change.new_value}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                No history available
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between md:col-span-2">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        >
+                          {isSubmitting ? "Submitting..." : "Submit"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleModal("form")}
+                          className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`fixed inset-0 z-9 flex h-[calc(100%-1rem)] max-h-full w-full items-center justify-center bg-black bg-opacity-50 md:inset-0 ${
+                showModal === "block" ? "block" : "hidden"
+              }`}
+            >
+              <div className="max-h-full w-full max-w-5xl rounded-md bg-white p-6 shadow-lg">
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold">Call Details</h2>
+                  <button
+                    onClick={() => toggleModal("view")}
+                    className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {selectedCall && (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <Input
-                        label="Phone Number"
-                        name="phone_no"
-                        type="number"
-                        placeholder="Enter phone number"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Phone Number
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.phone_no}
+                      </p>
                     </div>
                     <div>
-                      <Input
-                        label="Query"
-                        name="query"
-                        type="text"
-                        placeholder="Enter query"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Timestamp
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(selectedCall.time_stamp).toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <Input
-                        label="Category"
-                        name="category"
-                        type="text"
-                        placeholder="Enter category"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Query
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.query}
+                      </p>
                     </div>
                     <div>
-                      <Input
-                        label="Subcategory"
-                        name="subcategory"
-                        type="text"
-                        placeholder="Enter subcategory"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Category
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.category}
+                      </p>
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-900">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Subcategory
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.subcategory}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
                         Status
                       </label>
-                      <select
-                        name="status"
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Assigned">Assigned</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                      </select>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.status}
+                      </p>
                     </div>
                     <div>
-                      <Input
-                        label="Agent"
-                        name="agent"
-                        type="text"
-                        placeholder="Enter agent name"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Input
-                        label="Remarks"
-                        name="remarks"
-                        type="text"
-                        placeholder="Enter remarks"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-gray-900">
-                        Active
+                      <label className="block text-sm font-medium text-gray-700">
+                        Agent
                       </label>
-                      <select
-                        name="active"
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value="Y">Yes</option>
-                        <option value="N">No</option>
-                      </select>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.agent}
+                      </p>
                     </div>
-
-                    <div className="flex justify-between md:col-span-2">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                      >
-                        {isSubmitting ? "Submitting..." : "Submit"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={toggleModal}
-                        className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-                      >
-                        Cancel
-                      </button>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Remarks
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCall.remarks}
+                      </p>
                     </div>
-                  </Form>
+                  </div>
                 )}
-              </Formik>
+
+                <div className="mt-6">
+                  <h3 className="mb-2 text-lg font-semibold">Call History</h3>
+                  <div className="max-h-60 overflow-y-auto rounded border p-2">
+                    {isLoading ? (
+                      <p className="text-center text-sm text-gray-500">
+                        Loading history...
+                      </p>
+                    ) : callHistory.length > 0 ? (
+                      callHistory.map((history) => (
+                        <div key={history.id} className="mb-3 border-b pb-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">
+                              {new Date(history.changed_at).toLocaleString()}
+                            </span>
+                            <span className="text-gray-600">
+                              Changed by: {history.changed_by}
+                            </span>
+                          </div>
+                          <div className="mt-1">
+                            {history.changes.map((change, idx) => (
+                              <div key={idx} className="text-sm">
+                                <span className="font-medium">
+                                  {change.field}:
+                                </span>{" "}
+                                <span className="text-red-500 line-through">
+                                  {change.old_value || "empty"}
+                                </span>{" "}
+                                →{" "}
+                                <span className="text-green-600">
+                                  {change.new_value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">
+                        No history available
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => toggleModal("view")}
+                    className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
           {isLoading ? (
             <Loader />
           ) : (
             <DataTable
-              columns={columns(handleEdit, handleDelete)}
+              columns={columns(handleEdit, handleDelete, handleView)}
               data={itemGroup}
-              handleAdd={toggleModal}
+              handleAdd={() => toggleModal("form")}
             />
           )}
         </div>
