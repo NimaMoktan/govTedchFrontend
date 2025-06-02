@@ -1,5 +1,4 @@
 import axios from "axios";
-// import { toast } from 'sonner';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL + "/api/",
@@ -24,7 +23,7 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       const status = error.response.status;
       const message =
@@ -35,6 +34,15 @@ api.interceptors.response.use(
           console.error("Unauthorized:", message);
           // toast.error('Session expired. Please log in again.');
           localStorage.removeItem("token");
+          try {
+            await axios.post("/api/logout"); // Hit Next.js backend logout endpoint
+          } catch (logoutError) {
+            if (logoutError instanceof Error) {
+              console.error("Logout Error:", logoutError.message);
+            } else {
+              console.error("Logout Error:", logoutError);
+            }
+          }
           // router.push('/'); // Redirect using router
           break;
 
