@@ -304,7 +304,7 @@ const Calls = () => {
                     <Form className="-mt-2 space-y-4 p-4 md:p-5">
                       <h2 className="h2">Editing Call Management </h2>
                       <div className="rounded border border-gray-300 p-5">
-                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
                           <div className="w-full xl:w-1/2">
                             <div className="mb-4">
                               <label className="block text-sm font-medium text-gray-700">
@@ -321,7 +321,7 @@ const Calls = () => {
                           </div>
                           <div className="w-full xl:w-1/2 ">
                             <label className="block text-sm font-medium text-gray-700">
-                              Timestamp
+                              Phone No
                             </label>
                             <div className="border-gray-300 bg-gray-100 text-sm text-black">
                               <Input
@@ -333,7 +333,42 @@ const Calls = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
+                          <div className="w-full xl:w-1/2">
+                            <SelectDropDown
+                              label="Select Agent"
+                              name="agent"
+                              options={[
+                                { value: "John Doe", text: "John Doe" },
+                                { value: "Jane Smith", text: "Jane Smith" },
+                                { value: "Mike Johnson", text: "Mike Johnson" },
+                                {
+                                  value: "Sarah Williams",
+                                  text: "Sarah Williams",
+                                },
+                              ]}
+                            />
+                          </div>
+                          <div className="w-full xl:w-1/2">
+                            <SelectDropDown
+                              label="Select Dzongkhag"
+                              name="dzongkhag"
+                              options={[
+                                { value: "Bumthang", text: "Bumthang" },
+                                {
+                                  value: "SamdrupJongkhar",
+                                  text: "SamdrupJongkhar",
+                                },
+                                { value: "Tsirang", text: "Tsirang" },
+                                {
+                                  value: "Thimphu ",
+                                  text: "Thimphu ",
+                                },
+                              ]}
+                            />
+                          </div>
+                        </div>
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
                           <div className="w-full xl:w-1/3">
                             <SelectDropDown
                               label="Select Category"
@@ -371,23 +406,8 @@ const Calls = () => {
                               ]}
                             />
                           </div>
-
-                          <div className="w-full xl:w-1/3">
-                            <SelectDropDown
-                              label="Select Agent"
-                              name="agent"
-                              options={[
-                                { value: "John Doe", text: "John Doe" },
-                                { value: "Jane Smith", text: "Jane Smith" },
-                                { value: "Mike Johnson", text: "Mike Johnson" },
-                                {
-                                  value: "Sarah Williams",
-                                  text: "Sarah Williams",
-                                },
-                              ]}
-                            />
-                          </div>
                         </div>
+
                         <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                           <div className="w-full xl:w-1/2">
                             <label htmlFor="query">Query</label>
