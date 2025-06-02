@@ -60,7 +60,6 @@ export const columns = (
     },
   ];
 
-  // Conditionally add parent column if type is 'category'
   if (type === "category") {
     baseColumns.splice(3, 0, {
       accessorKey: "parent_name",

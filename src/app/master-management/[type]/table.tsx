@@ -5,11 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
   SortingState,
-  getSortedRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -22,63 +18,65 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-// import { useLoading } from "@/context/LoadingContext";
 import { BiUserPlus } from "react-icons/bi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   catType: string;
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  setPage: (page: number) => void;
+  setSearch: (search: string) => void;
+  setOrdering: (ordering: string) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   catType,
+  totalCount,
+  page,
+  pageSize,
+  setPage,
+  setSearch,
+  setOrdering,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
   const router = useRouter();
+
   const table = useReactTable({
     data,
     columns,
-    getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: true,
+    manualSorting: true,
+    onSortingChange: (updater) => {
+      setSorting(updater);
+      const newSorting = typeof updater === "function" ? updater(sorting) : updater;
+      const sortField = newSorting[0]?.id;
+      const sortOrder = newSorting[0]?.desc ? `-${sortField}` : sortField;
+      setOrdering(sortOrder || "");
+    },
     state: {
       sorting,
-      columnFilters,
+      pagination: { pageIndex: page - 1, pageSize },
     },
-    initialState: {
-      pagination: {
-        pageSize: 10, // Set the initial page size to 10
-      },
-    },
+    pageCount: Math.ceil(totalCount / pageSize),
   });
 
-  const totalPages =
-    table.getCoreRowModel()?.rows?.length &&
-    table.getState()?.pagination?.pageSize
-      ? Math.ceil(
-          table.getCoreRowModel().rows.length /
-            table.getState().pagination.pageSize,
-        )
-      : 0; // Default to 0 if data or pagination is not ready
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(1);
+  };
 
   return (
     <>
       <div className="flex items-center py-4">
         <Input
           placeholder="Search by Name"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          onChange={handleSearch}
           className="ml-6 max-w-[250px]"
         />
         <Button
@@ -96,24 +94,22 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, index) => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -122,7 +118,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id} className="p-1 text-sm">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -144,19 +140,19 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
           >
             Previous
           </Button>
           <span>
-            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
+            Page {page} of {Math.ceil(totalCount / pageSize)}
           </span>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => setPage(page + 1)}
+            disabled={page >= Math.ceil(totalCount / pageSize)}
           >
             Next
           </Button>
