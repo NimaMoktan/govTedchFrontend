@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil } from "react-icons/bs";
 import { ArrowUpDown } from "lucide-react";
 import { IoMdEye } from "react-icons/io";
+import { useState } from "react";
 
 export type callGroup = {
   id: number;
@@ -21,6 +22,7 @@ export type callGroup = {
 export const columns = (
   handleEdit: (callGroup: callGroup) => void,
   handleDelete: (id: callGroup) => void,
+  handleView: (callGroup: callGroup) => void,
 ): ColumnDef<callGroup>[] => [
   {
     accessorKey: "id",
@@ -118,8 +120,10 @@ export const columns = (
           >
             <BsTrash size={16} />
           </button>
-
-          <button className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50">
+          <button
+            onClick={() => handleView(row.original)}
+            className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50"
+          >
             <IoMdEye size={16} />
           </button>
         </div>
