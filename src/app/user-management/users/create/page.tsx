@@ -3,9 +3,8 @@ import React from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useState, useEffect } from "react";
-import { Formik, Form, FormikState, FormikProps } from "formik";
+import { Formik, Form, FormikState } from "formik";
 import * as Yup from "yup";
-import MultiSelect from "@/components/Inputs/MultiSelect";
 import Input from "@/components/Inputs/Input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,19 +14,11 @@ import { getRoleDropdowns } from "@/services/RoleService";
 import { User } from "@/types/User";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { debounce } from "lodash";
-import api from "@/lib/axios";
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
 import SelectDropDown from "@/components/Inputs/Select";
 
-interface RoleDropdown {
-  value: string;
-  text: string;
-}
-
 const UsersCreate = () => {
-  const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([]);
   const [roleList, setRoleList] = useState<Options[]>([]);
   const { setIsLoading, isLoading } = useLoading();
 
@@ -39,12 +30,13 @@ const UsersCreate = () => {
   ) => {
     setIsLoading(true);
     try {
-      await createUser(values)
+      await createUser({ ...values, role_ids: [values.role] })
         .then((response) => {
           toast.success(response.data.message, {
             duration: 1500,
             position: "top-right",
           });
+          resetForm();
           setTimeout(() => {
             // setIsLoading(false)
             router.push("/user-management/users");
@@ -54,8 +46,6 @@ const UsersCreate = () => {
           toast.error("Error while creating user.");
         })
         .finally(() => setIsLoading(false));
-
-      resetForm();
     } catch (error) {
       console.error("ERROR", error);
     }
@@ -64,7 +54,6 @@ const UsersCreate = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       getRoleDropdowns().then((response) => {
-        console.log(response.data);
         const optionList = response.data.map((role: any) => ({
           value: String(role.id),
           text: role.name,
@@ -91,7 +80,7 @@ const UsersCreate = () => {
                 last_name: "",
                 email: "",
                 mobile_no: "",
-                role_ids: [3],
+                role: "",
                 is_active: true,
               }}
               validationSchema={Yup.object({
@@ -108,7 +97,7 @@ const UsersCreate = () => {
                 email: Yup.string()
                   .required("Email address is required")
                   .email("Invalid email address"),
-                role_ids: Yup.array().optional(),
+                role: Yup.string().required("Select Role"),
                 mobile_no: Yup.string().min(8, "Enter at least 8 characters"),
               })}
               onSubmit={(values, { resetForm }) => {

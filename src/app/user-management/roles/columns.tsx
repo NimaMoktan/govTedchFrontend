@@ -23,6 +23,21 @@ export const columns = (
       return <p>{row.index + 1}</p>;
     },
   },
+
+  {
+    accessorKey: "code",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Code
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -39,48 +54,31 @@ export const columns = (
   },
 
   {
-    accessorKey: "active",
-    header: () => "Status",
-    cell: ({ row }) => {
-      const status = row.original.is_active;
-      return (
-        <p
-          className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-            status === "Y" ? "bg-success text-success" : "bg-danger text-danger"
-          }`}
-        >
-          {status === "Y" ? "Active" : "Inactive"}
-        </p>
-      );
-    },
-  },
-  {
     id: "actions",
+
     cell: ({ row }) => {
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDelete(row.original)}>
-              <BsTrash
-                className="fill-current"
-                color="red"
-                fill="red"
-                size={18}
-              />
+        <>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => handleDelete(row.original)}
+              className="flex items-center gap-1 rounded border border-red-300 px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-50"
+              aria-label="Delete item"
+            >
+              <BsTrash size={16} />
               Delete
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-              <BsPencil className="fill-current" size={20} />
+            </button>
+
+            <button
+              onClick={() => handleEdit(row.original)}
+              className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
+              aria-label="Edit item"
+            >
+              <BsPencil size={16} />
               Edit
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </button>
+          </div>
+        </>
       );
     },
   },

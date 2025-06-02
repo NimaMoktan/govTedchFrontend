@@ -7,6 +7,7 @@ export type User = {
   email: string;
   mobile_no?: string;
   is_active: boolean;
-  role_ids: number[];
+  role_ids?: any[];
+  role?: string;
   roles?: any[];
 };

@@ -15,34 +15,78 @@ import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
 
-interface CalibrationGroupItem {
+interface callGroup {
   id: number;
-  code: string;
   phone_no: number;
   time_stamp: number;
-  calls: string;
-  parent: string;
+  query: string;
+  category: string;
+  subcategory: string;
+  status: string;
+  agent: string;
   remarks: string;
-  complain: string;
-  calibration_service_id: number;
+  active: string;
 }
 
-interface Parameters {
-  value: number;
-  text: string;
-}
-
-const calls: React.FC = () => {
-  const [itemGroup, setItemGroup] = useState<CalibrationGroupItem[]>([]);
+const Calls = () => {
+  const [itemGroup, setItemGroup] = useState<callGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState<"hidden" | "block">("hidden");
   const [isEditing, setIsEditing] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<CalibrationGroupItem | null>(
-    null,
-  );
-  const [token, setToken] = useState<string | null>("");
-  const [parameter, setParameter] = useState<Parameters[]>([]);
+  const [editingGroup, setEditingGroup] = useState<callGroup | null>(null);
+  const [showModal, setShowModal] = useState("hidden");
   const router = useRouter();
+
+  // Demo data
+  const demoData: callGroup[] = [
+    {
+      id: 1,
+      phone_no: 1234567890,
+      time_stamp: Date.now(),
+      query: "Product not working properly",
+      category: "Technical",
+      subcategory: "Hardware",
+      status: "Pending",
+      agent: "John Doe",
+      remarks: "Needs troubleshooting",
+      active: "Y",
+    },
+    {
+      id: 2,
+      phone_no: 9876543210,
+      time_stamp: Date.now() - 3600000,
+      query: "Billing discrepancy",
+      category: "Billing",
+      subcategory: "Overcharge",
+      status: "In Progress",
+      agent: "Jane Smith",
+      remarks: "Customer needs refund",
+      active: "Y",
+    },
+    {
+      id: 3,
+      phone_no: 5551234567,
+      time_stamp: Date.now() - 86400000,
+      query: "Software installation issue",
+      category: "Technical",
+      subcategory: "Software",
+      status: "Assigned",
+      agent: "Mike Johnson",
+      remarks: "Escalated to L2 support",
+      active: "Y",
+    },
+    {
+      id: 4,
+      phone_no: 8885551212,
+      time_stamp: Date.now() - 172800000,
+      query: "Account cancellation",
+      category: "Account",
+      subcategory: "Cancellation",
+      status: "Completed",
+      agent: "Sarah Williams",
+      remarks: "Retention offer made",
+      active: "N",
+    },
+  ];
 
   const toggleModal = () => {
     setShowModal((prev) => (prev === "hidden" ? "block" : "hidden"));
@@ -50,92 +94,49 @@ const calls: React.FC = () => {
     setEditingGroup(null);
   };
 
-  const loadItemGroup = (storeToken: string) => {
+  const loadItemGroup = () => {
     setIsLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${storeToken}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data != null) {
-          setItemGroup(data.data);
-        } else {
-          setItemGroup([]);
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => toast.error(err.message, { position: "top-right" }));
+    setTimeout(() => {
+      setItemGroup(demoData);
+      setIsLoading(false);
+    }, 500);
   };
 
-  const handleSubmit = (
-    values: { code: string; calls: string; active: string },
-    resetForm: () => void,
-  ) => {
+  const handleSubmit = (values: callGroup, resetForm: () => void) => {
     setIsLoading(true);
 
-    const url = isEditing
-      ? `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${editingGroup?.id}/update`
-      : `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/`;
+    setTimeout(() => {
+      if (isEditing && editingGroup) {
+        setItemGroup((prev) =>
+          prev.map((item) =>
+            item.id === editingGroup.id ? { ...item, ...values } : item,
+          ),
+        );
+        toast.success("Call updated successfully", { position: "top-right" });
+      } else {
+        const newItem = {
+          id: Math.max(...demoData.map((item) => item.id)) + 1,
+          phone_no: values.phone_no,
+          time_stamp: Date.now(),
+          query: values.query,
+          category: values.category,
+          subcategory: values.subcategory,
+          status: values.status,
+          agent: values.agent,
+          remarks: values.remarks,
+          active: values.active,
+        };
+        setItemGroup((prev) => [...prev, newItem]);
+        toast.success("Call created successfully", { position: "top-right" });
+      }
 
-    const method = isEditing ? "POST" : "POST";
-
-    fetch(url, {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    })
-      .then((res) => {
-        if (res.ok) {
-          Swal.fire({
-            icon: "success",
-            title: isEditing
-              ? "Calibration updated successfully"
-              : "Calibration created successfully",
-            timer: 2000,
-            showConfirmButton: false,
-            position: "top-end", // Adjust position if needed
-            toast: true,
-          });
-          return res.json();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error! Please try again",
-            timer: 2000,
-            showConfirmButton: false,
-            position: "top-end", // Adjust position if needed
-            toast: true,
-          }).then(() => {
-            router.push("master-management/calibration");
-          });
-          throw new Error("Failed to save service");
-        }
-      })
-      .then((response) => {
-        toast.success(response.messsage, {
-          position: "top-right",
-          autoClose: 1000,
-        });
-        if (token) {
-          loadItemGroup(token);
-        } else {
-          toast.error("Token is missing", { position: "top-right" });
-        }
-        toggleModal();
-        resetForm();
-      })
-      .catch((err) =>
-        toast.error(err.message, { position: "top-right", autoClose: 1000 }),
-      );
+      setIsLoading(false);
+      toggleModal();
+      resetForm();
+    }, 1000);
   };
 
-  const handleDelete = (itemGroup: CalibrationGroupItem) => {
+  const handleDelete = (itemGroup: callGroup) => {
     Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
@@ -144,75 +145,30 @@ const calls: React.FC = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/core/calibrationGroup/${itemGroup.id}/delete`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const { data } = response;
-        if (data.callsCode == 200) {
-          toast.success(data.message, {
+        setTimeout(() => {
+          setItemGroup((prev) =>
+            prev.filter((item) => item.id !== itemGroup.id),
+          );
+          toast.success("Call deleted successfully", {
             position: "top-right",
             autoClose: 1000,
           });
-
-          setTimeout(() => {
-            if (token) {
-              loadItemGroup(token);
-            }
-          }, 2000);
-        } else {
-          toast.error(data.message, { position: "top-right", autoClose: 1000 });
-        }
+        }, 500);
       }
     });
   };
 
-  const handleEdit = (service: CalibrationGroupItem) => {
-    console.log(service);
+  const handleEdit = (service: callGroup) => {
     setEditingGroup(service);
     setIsEditing(true);
     setShowModal("block");
   };
 
   useEffect(() => {
-    setToken(localStorage.getItem("token"));
-
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/core/calibrationService/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data != null) {
-          const list = data.data;
-
-          const paramOptions = list?.map(
-            (param: { id: number; calls: string }) => ({
-              value: param.id.toString(), // Use string values for consistency
-              text: param.calls,
-            }),
-          );
-
-          setParameter([
-            { value: "Select Parameter", text: "Select Parameter" },
-            ...paramOptions,
-          ]);
-        } else {
-          setParameter([]);
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => toast.error(err.message, { position: "top-right" }));
-    loadItemGroup(localStorage.getItem("token") || "");
-  }, [isEditing]);
+    loadItemGroup();
+  }, []);
 
   return (
     <DefaultLayout>
@@ -229,62 +185,109 @@ const calls: React.FC = () => {
               <Formik
                 enableReinitialize={true}
                 initialValues={{
-                  code: editingGroup?.code || "",
-                  calls: editingGroup?.calls || "",
+                  id: editingGroup?.id || 0,
+                  phone_no: editingGroup?.phone_no || 0,
+                  time_stamp: editingGroup?.time_stamp || Date.now(),
+                  query: editingGroup?.query || "",
+                  category: editingGroup?.category || "",
+                  subcategory: editingGroup?.subcategory || "",
+                  status: editingGroup?.status || "Pending",
+                  agent: editingGroup?.agent || "",
+                  remarks: editingGroup?.remarks || "",
                   active: editingGroup?.active || "Y",
-                  calibration_service_id: editingGroup?.id || "",
                 }}
                 validationSchema={Yup.object({
-                  code: Yup.string().required("Code is required"),
-                  calls: Yup.string().required("calls is required"),
-                  calibration_service_id: Yup.number().required(
-                    "calls parameter is required",
-                  ),
+                  phone_no: Yup.number().required("Phone number is required"),
+                  query: Yup.string().required("Query is required"),
+                  category: Yup.string().required("Category is required"),
+                  subcategory: Yup.string().required("Subcategory is required"),
                 })}
                 onSubmit={(values, { resetForm }) =>
                   handleSubmit(values, resetForm)
                 }
               >
                 {({ isSubmitting }) => (
-                  <Form>
-                    <div className="mb-4">
+                  <Form className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
                       <Input
-                        label="Code"
-                        name="code"
-                        type="text"
-                        placeholder="Enter code"
-                        disabled={isEditing}
+                        label="Phone Number"
+                        name="phone_no"
+                        type="number"
+                        placeholder="Enter phone number"
                       />
                     </div>
-                    <div className="mb-4">
+                    <div>
                       <Input
-                        label="calls"
-                        name="calls"
+                        label="Query"
+                        name="query"
                         type="text"
-                        placeholder="Enter calls"
+                        placeholder="Enter query"
                       />
                     </div>
-                    <div className="mb-4">
-                      <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                        Select Parent
+                    <div>
+                      <Input
+                        label="Category"
+                        name="category"
+                        type="text"
+                        placeholder="Enter category"
+                      />
+                    </div>
+                    <div>
+                      <Input
+                        label="Subcategory"
+                        name="subcategory"
+                        type="text"
+                        placeholder="Enter subcategory"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">
+                        Status
                       </label>
                       <select
-                        id="parent"
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        name="status"
+                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                       >
-                        <option selected>Choose a Parent</option>
-                        <option value="US">Parent 1</option>
-                        <option value="CA">Parent 2</option>
-                        <option value="FR">Parent 3</option>
-                        <option value="DE">Parent 4</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Input
+                        label="Agent"
+                        name="agent"
+                        type="text"
+                        placeholder="Enter agent name"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Input
+                        label="Remarks"
+                        name="remarks"
+                        type="text"
+                        placeholder="Enter remarks"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-sm font-medium text-gray-900">
+                        Active
+                      </label>
+                      <select
+                        name="active"
+                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                      >
+                        <option value="Y">Yes</option>
+                        <option value="N">No</option>
                       </select>
                     </div>
 
-                    <div className="flex justify-between">
+                    <div className="flex justify-between md:col-span-2">
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded bg-red-700 px-4 py-2 text-white hover:bg-red-500"
+                        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                       >
                         {isSubmitting ? "Submitting..." : "Submit"}
                       </button>
@@ -301,15 +304,19 @@ const calls: React.FC = () => {
               </Formik>
             </div>
           </div>
-          <DataTable
-            columns={columns(handleEdit, handleDelete)}
-            data={itemGroup}
-            handleAdd={toggleModal}
-          />
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <DataTable
+              columns={columns(handleEdit, handleDelete)}
+              data={itemGroup}
+              handleAdd={toggleModal}
+            />
+          )}
         </div>
       </div>
     </DefaultLayout>
   );
 };
 
-export default calls;
+export default Calls;

@@ -1,26 +1,17 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil } from "react-icons/bs";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ArrowUpDown } from "lucide-react";
+import { IoMdEye } from "react-icons/io";
 
-export type CalibrationGroup = {
+export type callGroup = {
   id: number;
-  code: string;
   phone_no: number;
   time_stamp: number;
-  calls: string;
-  Query: string;
-  query_Category: string;
-  query_SubCategory: string;
+  query: string;
+  category: string;
+  subcategory: string;
   status: string;
   agent: string;
   remarks: string;
@@ -28,14 +19,14 @@ export type CalibrationGroup = {
 };
 
 export const columns = (
-  handleEdit: (calibrationGroup: CalibrationGroup) => void,
-  handleDelete: (id: CalibrationGroup) => void,
-): ColumnDef<CalibrationGroup>[] => [
+  handleEdit: (callGroup: callGroup) => void,
+  handleDelete: (id: callGroup) => void,
+): ColumnDef<callGroup>[] => [
   {
     accessorKey: "id",
     header: "Sl No",
     cell: ({ row }) => {
-      return <p>{row.index + 1}</p>;
+      return <span className="font-medium">{row.index + 1}</span>;
     },
   },
   {
@@ -45,78 +36,92 @@ export const columns = (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 hover:bg-transparent"
         >
-          Phone No
+          Phone Number
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const phoneNo = row.getValue("phone_no") as number;
+      return <span className="font-medium">{phoneNo}</span>;
     },
   },
   {
-    accessorKey: "Category",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Category
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+    accessorKey: "time_stamp",
+    header: "Timestamp",
+    cell: ({ row }) => {
+      const timestamp = row.getValue("time_stamp") as number;
+      return <span>{new Date(timestamp).toLocaleString()}</span>;
     },
   },
+  {
+    accessorKey: "query",
+    header: "Query",
+    cell: ({ row }) => {
+      const query = row.getValue("query") as string;
+      return <span className="line-clamp-1">{query}</span>;
+    },
+  },
+
   {
     accessorKey: "status",
-    header: ({ column }) => {
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      let statusClass = "";
+      switch (status) {
+        case "Pending":
+          statusClass = "bg-yellow-100 text-yellow-800";
+          break;
+        case "Assigned":
+          statusClass = "bg-blue-100 text-blue-800";
+          break;
+        case "In Progress":
+          statusClass = "bg-purple-100 text-purple-800";
+          break;
+        case "Completed":
+          statusClass = "bg-green-100 text-green-800";
+          break;
+        default:
+          statusClass = "bg-gray-100 text-gray-800";
+      }
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass}`}
         >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+          {status}
+        </span>
       );
     },
   },
   {
-    accessorKey: "Agent",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Agent
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "agent",
+    header: "Agent",
   },
   {
-    accessorKey: "Action",
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
+        <div className="flex items-center gap-2">
+          <button
             onClick={() => handleEdit(row.original)}
-            aria-label="Edit"
+            className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
           >
-            <BsPencil className="h-20 w-20" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
+            <BsPencil size={16} />
+          </button>
+          <button
             onClick={() => handleDelete(row.original)}
-            aria-label="Delete"
-            className="p-4 font-bold hover:bg-red-50"
+            className="flex items-center gap-1 rounded border border-red-300 px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-50"
           >
-            <BsTrash className="h-24 w-24 text-red-600 hover:text-red-700" />
-          </Button>
+            <BsTrash size={16} />
+          </button>
+
+          <button className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50">
+            <IoMdEye size={16} />
+          </button>
         </div>
       );
     },

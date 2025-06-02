@@ -19,14 +19,17 @@ export const getRoles = async (): Promise<ApiResponse<any[]>> => {
   return response.data;
 };
 export const getRole = async (id: number) => {
-  const response = await api.get(`/core/roles/id/${id}`);
+  const response = await api.get(`/user-management/roles/${id}`);
   return response.data;
 };
 export const createRole = async (data: Role) =>
   api.post("/user-management/roles/", data);
+
 export const updateRole = async (id: number, data: Role) =>
-  api.post(`/core/roles/${id}/update`, data);
-export const deleteRole = async (id: number) => api.delete(`/core/roles/${id}`);
+  api.put(`/user-management/roles/${id}/`, data);
+
+export const deleteRole = async (id: number) =>
+  api.delete(`/user-management/roles/${id}/`);
 
 export const getRoleDropdowns = async () => {
   const response = await api.get(`/user-management/roles-dropdown/`);
