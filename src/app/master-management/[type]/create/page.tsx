@@ -36,7 +36,7 @@ const MasterCreatePage = ({
         .finally(() => setSubmitting(false))
         .catch((error) => {
           console.error("Error creating master:", error);
-          toast.error("Failed to create master. Please try again.");
+          // toast.error("Failed to create master. Please try again.");
         });
     } catch (error) {
       console.error("Error creating master:", error);
@@ -49,7 +49,6 @@ const MasterCreatePage = ({
     const fetchParentData = async () => {
       try {
         await getParentMastersByType(param.type).then((response) => {
-          console.log(response.data);
           const res = response.data;
           setParent(
             res.map((item: any) => ({
@@ -80,7 +79,7 @@ const MasterCreatePage = ({
                 name: "",
                 description: "",
                 code: "CODE",
-                is_active: "Y",
+                // is_active: "",
                 parent_id: null,
               }}
               validationSchema={Yup.object({

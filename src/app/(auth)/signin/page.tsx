@@ -13,12 +13,9 @@ import Input from "@/components/Inputs/Input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import applestore from "/public/images/logo/appstore.png";
-import logo from "/public/images/logo/logo.png";
 import googleplay from "/public/images/logo/googleplay.png";
 import { Button } from "@/components/ui/button";
-import { User, Lock, Loader2 } from "lucide-react";
-import { FaUser } from "react-icons/fa";
-import { RiLockPasswordFill } from "react-icons/ri";
+import { Loader2 } from "lucide-react";
 import { FaEnvelope } from "react-icons/fa";
 import { FaPhoneVolume } from "react-icons/fa6";
 
@@ -63,7 +60,7 @@ export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [, setAuthenticated] = useState(false);
+  // const [, setAuthenticated] = useState(false);
   const [, setOs] = useState("");
 
   const router = useRouter();
@@ -375,7 +372,7 @@ export default function Login() {
               </div>
               <div className="mb-5 mt-7.5 flex flex-col items-center text-center">
                 <span className="text-[#A1A0A0]">
-                  Don't Have the Bhutan NDI Wallet?
+                  Don&apos;t Have the Bhutan NDI Wallet?
                 </span>
                 <a
                   href="https://kiwhp.app.link/?t="
