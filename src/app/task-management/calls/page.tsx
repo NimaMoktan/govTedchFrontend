@@ -33,11 +33,10 @@ interface CallHistory {
   call_id: number;
   changed_at: number;
   changed_by: string;
-  changes: {
-    field: string;
-    old_value: string;
-    new_value: string;
-  }[];
+  query: string;
+  remarks: string;
+  category: string;
+  subcategory: string;
 }
 
 const Calls = () => {
@@ -110,31 +109,20 @@ const Calls = () => {
       call_id: 1,
       changed_at: Date.now() - 3600000,
       changed_by: "Admin User",
-      changes: [
-        {
-          field: "status",
-          old_value: "Pending",
-          new_value: "In Progress",
-        },
-        {
-          field: "agent",
-          old_value: "",
-          new_value: "John Doe",
-        },
-      ],
+      query: "Product not working properly",
+      remarks: "Needs troubleshooting",
+      category: "Technical",
+      subcategory: "Hardware",
     },
     {
       id: 2,
       call_id: 1,
       changed_at: Date.now() - 7200000,
       changed_by: "System",
-      changes: [
-        {
-          field: "status",
-          old_value: "",
-          new_value: "Pending",
-        },
-      ],
+      query: "Initial query submitted",
+      remarks: "Waiting for assignment",
+      category: "Technical",
+      subcategory: "Hardware",
     },
   ];
 
@@ -359,41 +347,70 @@ const Calls = () => {
                       {/* History Section */}
                       {isEditing && (
                         <div className="md:col-span-2">
-                          <h3 className="mb-2 text-lg font-semibold">
+                          <h3 className="mb-4 text-lg font-semibold text-gray-800">
                             Call History
                           </h3>
-                          <div className="max-h-40 overflow-y-auto rounded border p-2">
+                          <div className="space-y-4">
                             {callHistory.length > 0 ? (
                               callHistory.map((history) => (
-                                <div
-                                  key={history.id}
-                                  className="mb-3 border-b pb-2"
-                                >
-                                  <div className="flex justify-between text-sm">
-                                    <span className="font-medium">
-                                      {new Date(
-                                        history.changed_at,
-                                      ).toLocaleString()}
-                                    </span>
-                                    <span className="text-gray-600">
-                                      Changed by: {history.changed_by}
-                                    </span>
-                                  </div>
-                                  <div className="mt-1">
-                                    {history.changes.map((change, idx) => (
-                                      <div key={idx} className="text-sm">
-                                        <span className="font-medium">
-                                          {change.field}:
-                                        </span>{" "}
-                                        <span className="text-red-500 line-through">
-                                          {change.old_value || "empty"}
-                                        </span>{" "}
-                                        →{" "}
-                                        <span className="text-green-600">
-                                          {change.new_value}
-                                        </span>
+                                <div key={history.id} className="relative pl-6">
+                                  {/* Timeline dot */}
+                                  <div className="absolute left-0 top-4 h-3 w-3 rounded-full bg-blue-500"></div>
+                                  {/* Timeline line */}
+                                  <div className="absolute left-[5px] top-7 h-full w-0.5 bg-gray-200"></div>
+
+                                  <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {new Date(
+                                          history.changed_at,
+                                        ).toLocaleDateString()}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        {new Date(
+                                          history.changed_at,
+                                        ).toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                    <div className="mt-2 text-sm text-gray-600">
+                                      <p className="font-medium">
+                                        Updated by: {history.changed_by}
+                                      </p>
+                                    </div>
+                                    <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
+                                      <div>
+                                        <p className="font-medium text-gray-700">
+                                          Query:
+                                        </p>
+                                        <p className="text-gray-600">
+                                          {history.query}
+                                        </p>
                                       </div>
-                                    ))}
+                                      <div>
+                                        <p className="font-medium text-gray-700">
+                                          Remarks:
+                                        </p>
+                                        <p className="text-gray-600">
+                                          {history.remarks}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-gray-700">
+                                          Category:
+                                        </p>
+                                        <p className="text-gray-600">
+                                          {history.category}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-gray-700">
+                                          Subcategory:
+                                        </p>
+                                        <p className="text-gray-600">
+                                          {history.subcategory}
+                                        </p>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               ))
