@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
   const debouncedSetSearch = debounce((value: string) => {
     setSearch(value);
     setPage(1);
-  }, 300);
+  }, 500);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     debouncedSetSearch(event.target.value);

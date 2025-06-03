@@ -21,16 +21,16 @@ export const getNoticeboards = async (): Promise<
   return response.data;
 };
 export const createNoticeboard = async (data: Noticeboard) => {
-  return api.post("notice-management/noticeboard/", data);
+  return api.post("notice-management/", data);
 };
 export const getNoticeboard = async (id: number) =>
-  api.get(`/notice-management/noticeboard/${id}/`);
+  api.get(`/notice-management/${id}/`);
 
 export const updateNoticeboard = async (id: number, data: Noticeboard) => {
   const modifiedPayload = {
     ...data,
   };
-  return api.post(`/notice-management/noticeboard/${id}/`, modifiedPayload);
+  return api.post(`/notice-management/${id}/`, modifiedPayload);
 };
 export const deleteNoticeboard = async (id: number) =>
-  api.delete(`notice-management/noticeboard/${id}/`);
+  api.delete(`notice-management/${id}/`);
