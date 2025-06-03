@@ -33,7 +33,7 @@ const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
     answer: "",
     category_id: "",
     sub_categories: "",
-    is_active: true,
+   
   });
   const [roleList, setRoleList] = useState<RoleDropdown[]>([]);
   const router = useRouter();
@@ -78,11 +78,11 @@ const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
       priority: noticeboardData.priority ?? "",
       category_id: noticeboardData.category_id ?? "",
       sub_categories: noticeboardData.sub_categories ?? "",
-    });
-  }
+   
+  
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Failed to load user data");
+        toast.error("Failed to load Noticeboard data");
       } finally {
         setIsLoading(false);
       }
