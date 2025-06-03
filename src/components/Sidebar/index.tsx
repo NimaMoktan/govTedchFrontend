@@ -130,7 +130,7 @@ const menuGroups = [
             color="#46cfef"
           />
         ),
-        label: "Information",
+        label: "Notice Management",
         route: "#",
         role: ["ADM"],
         children: [
@@ -138,19 +138,19 @@ const menuGroups = [
             label: "Noticeboard",
             role: ["ADM"],
             privilege: "can view users",
-            route: "/information/noticeboard",
+            route: "/notice-management/noticeboard",
           },
           {
             label: "G2C Information",
             role: ["ADM"],
             privilege: "can view roles",
-            route: "/information/g2c-information",
+            route: "/notice-management/g2c-information",
           },
           {
             label: "GovTech Helpdesk",
             role: ["ADM"],
             privilege: "can view roles",
-            route: "/information/govtech-helpdesk",
+            route: "/notice-management/govtech-helpdesk",
           },
         ],
       },

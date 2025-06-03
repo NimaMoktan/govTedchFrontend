@@ -84,15 +84,6 @@ export const columns = (
           <BsPencil size={16} />
           Edit
         </button>
-
-        <Link
-          href={`/verification/application-detail?id=${row.original.id}`}
-          className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50"
-          aria-label="View"
-        >
-          <BsEyeFill size={16} />
-          View
-        </Link>
       </div>
     ),
   });

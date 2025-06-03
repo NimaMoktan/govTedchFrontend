@@ -3,17 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import Input from "@/components/Inputs/Input";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
-import Select from "@/components/Inputs/Select";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import Loader from "@/components/common/Loader";
 import { useRouter } from "next/navigation";
+import SelectDropDown from "@/components/Inputs/Select";
 
 interface callGroup {
   id: number;
@@ -33,11 +32,10 @@ interface CallHistory {
   call_id: number;
   changed_at: number;
   changed_by: string;
-  changes: {
-    field: string;
-    old_value: string;
-    new_value: string;
-  }[];
+  query: string;
+  remarks: string;
+  category: string;
+  subcategory: string;
 }
 
 const Calls = () => {
@@ -110,31 +108,53 @@ const Calls = () => {
       call_id: 1,
       changed_at: Date.now() - 3600000,
       changed_by: "Admin User",
-      changes: [
-        {
-          field: "status",
-          old_value: "Pending",
-          new_value: "In Progress",
-        },
-        {
-          field: "agent",
-          old_value: "",
-          new_value: "John Doe",
-        },
-      ],
+      query: "Product not working properly",
+      remarks: "Needs troubleshooting",
+      category: "Technical",
+      subcategory: "Hardware",
     },
     {
       id: 2,
       call_id: 1,
       changed_at: Date.now() - 7200000,
       changed_by: "System",
-      changes: [
-        {
-          field: "status",
-          old_value: "",
-          new_value: "Pending",
-        },
-      ],
+      query: "Initial query submitted",
+      remarks: "Waiting for assignment",
+      category: "Technical",
+      subcategory: "Hardware",
+    },
+
+    {
+      id: 3,
+      call_id: 1,
+      changed_at: Date.now() - 7200000,
+      changed_by: "System",
+      query: "Initial query submitted",
+      remarks: "Waiting for assignment",
+      category: "Technical",
+      subcategory: "Hardware",
+    },
+
+    {
+      id: 4,
+      call_id: 1,
+      changed_at: Date.now() - 7200000,
+      changed_by: "System",
+      query: "Initial query submitted",
+      remarks: "Waiting for assignment",
+      category: "Technical",
+      subcategory: "Hardware",
+    },
+
+    {
+      id: 5,
+      call_id: 1,
+      changed_at: Date.now() - 7200000,
+      changed_by: "System",
+      query: "Initial query submitted",
+      remarks: "Waiting for assignment",
+      category: "Technical",
+      subcategory: "Hardware",
     },
   ];
 
@@ -232,8 +252,9 @@ const Calls = () => {
   const handleEdit = (service: callGroup) => {
     setEditingGroup(service);
     setIsEditing(true);
-    loadCallHistory(service.id);
-    toggleModal("form");
+    setModalType("form"); // Set modal type first
+    setShowModal("block"); // Then show modal
+    // Remove toggleModal("form") since we're manually setting states
   };
 
   useEffect(() => {
@@ -280,147 +301,155 @@ const Calls = () => {
                   }
                 >
                   {({ isSubmitting }) => (
-                    <Form className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <Input
-                          label="Phone Number"
-                          name="phone_no"
-                          type="number"
-                          placeholder="Enter phone number"
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Query"
-                          name="query"
-                          type="text"
-                          placeholder="Enter query"
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Category"
-                          name="category"
-                          type="text"
-                          placeholder="Enter category"
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Subcategory"
-                          name="subcategory"
-                          type="text"
-                          placeholder="Enter subcategory"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-900">
-                          Status
-                        </label>
-                        <select
-                          name="status"
-                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Assigned">Assigned</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                        </select>
-                      </div>
-                      <div>
-                        <Input
-                          label="Agent"
-                          name="agent"
-                          type="text"
-                          placeholder="Enter agent name"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Input
-                          label="Remarks"
-                          name="remarks"
-                          type="text"
-                          placeholder="Enter remarks"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="mb-2 block text-sm font-medium text-gray-900">
-                          Active
-                        </label>
-                        <select
-                          name="active"
-                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                        >
-                          <option value="Y">Yes</option>
-                          <option value="N">No</option>
-                        </select>
-                      </div>
-
-                      {/* History Section */}
-                      {isEditing && (
-                        <div className="md:col-span-2">
-                          <h3 className="mb-2 text-lg font-semibold">
-                            Call History
-                          </h3>
-                          <div className="max-h-40 overflow-y-auto rounded border p-2">
-                            {callHistory.length > 0 ? (
-                              callHistory.map((history) => (
-                                <div
-                                  key={history.id}
-                                  className="mb-3 border-b pb-2"
-                                >
-                                  <div className="flex justify-between text-sm">
-                                    <span className="font-medium">
-                                      {new Date(
-                                        history.changed_at,
-                                      ).toLocaleString()}
-                                    </span>
-                                    <span className="text-gray-600">
-                                      Changed by: {history.changed_by}
-                                    </span>
-                                  </div>
-                                  <div className="mt-1">
-                                    {history.changes.map((change, idx) => (
-                                      <div key={idx} className="text-sm">
-                                        <span className="font-medium">
-                                          {change.field}:
-                                        </span>{" "}
-                                        <span className="text-red-500 line-through">
-                                          {change.old_value || "empty"}
-                                        </span>{" "}
-                                        →{" "}
-                                        <span className="text-green-600">
-                                          {change.new_value}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-gray-500">
-                                No history available
-                              </p>
-                            )}
+                    <Form className="-mt-2 space-y-4 p-4 md:p-5">
+                      <h2 className="h2">Editing Call Management </h2>
+                      <div className="rounded border border-gray-300 p-5">
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
+                          <div className="w-full xl:w-1/2">
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Timestamp
+                              </label>
+                              <div className="mt-1 rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
+                                {editingGroup
+                                  ? new Date(
+                                      editingGroup.time_stamp,
+                                    ).toLocaleString()
+                                  : "New call (will be timestamped on save)"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-full xl:w-1/2 ">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Phone No
+                            </label>
+                            <div className="border-gray-300 bg-gray-100 text-sm text-black">
+                              <Input
+                                name="phone_no"
+                                type="number"
+                                placeholder="Enter phone number"
+                                disabled={isEditing}
+                              />
+                            </div>
                           </div>
                         </div>
-                      )}
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
+                          <div className="w-full xl:w-1/2">
+                            <SelectDropDown
+                              label="Select Agent"
+                              name="agent"
+                              options={[
+                                { value: "John Doe", text: "John Doe" },
+                                { value: "Jane Smith", text: "Jane Smith" },
+                                { value: "Mike Johnson", text: "Mike Johnson" },
+                                {
+                                  value: "Sarah Williams",
+                                  text: "Sarah Williams",
+                                },
+                              ]}
+                            />
+                          </div>
+                          <div className="w-full xl:w-1/2">
+                            <SelectDropDown
+                              label="Select Dzongkhag"
+                              name="dzongkhag"
+                              options={[
+                                { value: "Bumthang", text: "Bumthang" },
+                                {
+                                  value: "SamdrupJongkhar",
+                                  text: "SamdrupJongkhar",
+                                },
+                                { value: "Tsirang", text: "Tsirang" },
+                                {
+                                  value: "Thimphu ",
+                                  text: "Thimphu ",
+                                },
+                              ]}
+                            />
+                          </div>
+                        </div>
+                        <div className="mb-2 flex flex-col gap-6 xl:flex-row">
+                          <div className="w-full xl:w-1/3">
+                            <SelectDropDown
+                              label="Select Category"
+                              name="category" // Changed from "subcategory" to "category"
+                              options={[
+                                { value: "Technical", text: "Technical" },
+                                { value: "Billing", text: "Billing" },
+                                { value: "Account", text: "Account" },
+                              ]}
+                            />
+                          </div>
 
-                      <div className="flex justify-between md:col-span-2">
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                        >
-                          {isSubmitting ? "Submitting..." : "Submit"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleModal("form")}
-                          className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-                        >
-                          Cancel
-                        </button>
+                          <div className="w-full xl:w-1/3">
+                            <SelectDropDown
+                              label="Select Sub-Category"
+                              name="subcategory" // Changed from "category" to "subcategory"
+                              options={[
+                                { value: "Hardware", text: "Hardware" },
+                                { value: "Software", text: "Software" },
+                                { value: "Overcharge", text: "Overcharge" },
+                                { value: "Cancellation", text: "Cancellation" },
+                              ]}
+                            />
+                          </div>
+
+                          <div className="w-full xl:w-1/3">
+                            <SelectDropDown
+                              label="Select Status"
+                              name="status"
+                              options={[
+                                { value: "Pending", text: "Pending" },
+                                { value: "In Progress", text: "In-progress" },
+                                { value: "on-Hold", text: "on-Hold" },
+                                { value: "Completed", text: "Completed" },
+                              ]}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                          <div className="w-full xl:w-1/2">
+                            <label htmlFor="query">Query</label>
+                            <Field
+                              as="textarea"
+                              className="focus:gray-300 w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1"
+                              placeholder="Enter your message..."
+                              rows={4}
+                              name="query"
+                              id="query"
+                            />
+                          </div>
+
+                          <div className="w-full xl:w-1/2">
+                            <label htmlFor="remarks">Remarks</label>
+                            <Field
+                              as="textarea"
+                              className="focus:gray-300 w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1"
+                              placeholder="Enter your message..."
+                              rows={4}
+                              name="remarks"
+                              id="remarks"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between md:col-span-2">
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="hover:bg-black-700 rounded bg-red-700 px-4 py-2 text-white"
+                          >
+                            {isSubmitting ? "Submitting..." : "Submit"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleModal("form")}
+                            className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     </Form>
                   )}
@@ -433,137 +462,101 @@ const Calls = () => {
                 showModal === "block" ? "block" : "hidden"
               }`}
             >
-              <div className="max-h-full w-full max-w-5xl rounded-md bg-white p-6 shadow-lg">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold">Call Details</h2>
+              <div className="w-full max-w-5xl rounded-md bg-white shadow-lg">
+                {/* Header with title and close button */}
+                <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-4 sm:p-6">
+                  <h3 className="text-base font-semibold text-gray-800 sm:text-lg">
+                    Call History Timeline
+                  </h3>
                   <button
                     onClick={() => toggleModal("view")}
-                    className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {selectedCall && (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Phone Number
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.phone_no}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Timestamp
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {new Date(selectedCall.time_stamp).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Query
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.query}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Category
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.category}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Subcategory
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.subcategory}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Status
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.status}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Agent
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.agent}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Remarks
-                      </label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {selectedCall.remarks}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6">
-                  <h3 className="mb-2 text-lg font-semibold">Call History</h3>
-                  <div className="max-h-60 overflow-y-auto rounded border p-2">
-                    {isLoading ? (
-                      <p className="text-center text-sm text-gray-500">
-                        Loading history...
-                      </p>
-                    ) : callHistory.length > 0 ? (
-                      callHistory.map((history) => (
-                        <div key={history.id} className="mb-3 border-b pb-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="font-medium">
-                              {new Date(history.changed_at).toLocaleString()}
-                            </span>
-                            <span className="text-gray-600">
-                              Changed by: {history.changed_by}
-                            </span>
-                          </div>
-                          <div className="mt-1">
-                            {history.changes.map((change, idx) => (
-                              <div key={idx} className="text-sm">
-                                <span className="font-medium">
-                                  {change.field}:
-                                </span>{" "}
-                                <span className="text-red-500 line-through">
-                                  {change.old_value || "empty"}
-                                </span>{" "}
-                                →{" "}
-                                <span className="text-green-600">
-                                  {change.new_value}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-500">
-                        No history available
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={() => toggleModal("view")}
-                    className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                    className="rounded bg-gray-500 px-3 py-1 text-xs text-white hover:bg-gray-600 sm:px-4 sm:py-1.5 sm:text-sm"
                   >
                     Close
                   </button>
+                </div>
+
+                {/* Scrollable content area */}
+                <div className="max-h-[70vh] overflow-y-auto p-4 sm:p-6">
+                  {isLoading ? (
+                    <p className="text-center text-xs text-gray-500 sm:text-sm">
+                      Loading history...
+                    </p>
+                  ) : callHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      {callHistory.map((history) => (
+                        <div key={history.id} className="relative pl-4 sm:pl-6">
+                          {/* Timeline dot */}
+                          <div className="absolute left-0 top-3 h-2 w-2 rounded-full bg-blue-500 sm:top-4 sm:h-3 sm:w-3"></div>
+                          {/* Timeline line */}
+                          <div className="absolute left-[3px] top-5 h-full w-0.5 bg-gray-200 sm:left-[5px] sm:top-7"></div>
+
+                          <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
+                            {/* Timestamp row */}
+                            <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center sm:gap-0">
+                              <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                {new Date(
+                                  history.changed_at,
+                                ).toLocaleDateString()}
+                                <span className="ml-2 text-gray-500">
+                                  {new Date(
+                                    history.changed_at,
+                                  ).toLocaleTimeString()}
+                                </span>
+                              </span>
+                              <span className="text-xs font-medium text-gray-700 sm:text-sm">
+                                Updated by: {history.changed_by}
+                              </span>
+                            </div>
+
+                            {/* Category/Subcategory row */}
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm">
+                              <div>
+                                <span className="font-medium text-gray-700">
+                                  Category:{" "}
+                                </span>
+                                <span className="text-gray-600">
+                                  {history.category}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">
+                                  Subcategory:{" "}
+                                </span>
+                                <span className="text-gray-600">
+                                  {history.subcategory}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Query/Remarks section */}
+                            <div className="mt-3 space-y-2 text-xs sm:text-sm">
+                              <div>
+                                <p className="font-medium text-gray-700">
+                                  Query
+                                </p>
+                                <p className="line-clamp-3 text-gray-600">
+                                  {history.query}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-700">
+                                  Remarks
+                                </p>
+                                <p className="line-clamp-3 text-gray-600">
+                                  {history.remarks}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-xs text-gray-500 sm:text-sm">
+                      No history available
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
