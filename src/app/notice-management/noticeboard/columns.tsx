@@ -59,6 +59,11 @@ export const columns = (
         </Button>
       );
     },
+    cell: ({row})=>{
+      return (
+        <>{row.original.category?.name}</>
+      )
+    }
   },
   {
     accessorKey: "sub-categories",

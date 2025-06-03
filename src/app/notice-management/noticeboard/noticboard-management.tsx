@@ -15,6 +15,8 @@ import { Noticeboard } from "@/types/Noticeboard";
 
 const NoticeboardManagement = () => {
   const [noticeboardList, setNoticeboardList] = useState<Noticeboard[]>([]);
+  const [category, setCategory] = useState<Options[]>([]);
+  const [subCategory, setSubCategory] = useState<Options[]>([]);
 
   const router = useRouter();
   const { setIsLoading } = useLoading();
@@ -58,6 +60,7 @@ const NoticeboardManagement = () => {
 
   useEffect(() => {
     fetchNoticeboards();
+
   }, []);
 
   return (
