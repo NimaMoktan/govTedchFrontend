@@ -1,3 +1,4 @@
+// app/task-management/emails/table.tsx
 "use client";
 import * as React from "react";
 import {
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BiUserPlus } from "react-icons/bi";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,58 +56,18 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const totalPages =
-    table.getCoreRowModel()?.rows?.length &&
-    table.getState()?.pagination?.pageSize
-      ? Math.ceil(
-          table.getCoreRowModel().rows.length /
-            table.getState().pagination.pageSize,
-        )
-      : 0; // Default to 0 if data or pagination is not ready
-
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search by Email ID"
-          value={(table.getColumn("emails")?.getFilterValue() as string) ?? ""}
+          placeholder="Search by email..."
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("emails")?.setFilterValue(event.target.value)
+            table.getColumn("email")?.setFilterValue(event.target.value)
           }
-          className="max-w-[250px]"
+          className="max-w-sm"
         />
-        <select
-          id="parent"
-          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-        >
-          <option selected>Search by Category</option>
-          <option value="US">Category 1</option>
-          <option value="CA">Category 2</option>
-          <option value="FR">Category 3</option>
-          <option value="DE">Category 4</option>
-        </select>
-        <select
-          id="parent"
-          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-        >
-          <option selected>Search by Status</option>
-          <option value="US">Pending</option>
-          <option value="CA">Assigned</option>
-          <option value="FR">In-Progress 3</option>
-          <option value="DE">Completed</option>
-        </select>
-        <select
-          id="parent"
-          className=" ml-6 block w-full max-w-[250px] rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-        >
-          <option selected>Search by Agent</option>
-          <option value="US">Agent 1</option>
-          <option value="CA">Agent 2</option>
-          <option value="FR">Agent 3</option>
-          <option value="DE">Agent 4</option>
-        </select>
       </div>
-
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -154,27 +117,24 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        <div className="mr-5 flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
