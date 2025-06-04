@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import Input from "@/components/Inputs/Input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import SelectDropDown from "@/components/Inputs/Select";
+import Select from "@/components/Inputs/Select";
 import {
   getParentMastersByType,
   createMaster,
@@ -109,7 +109,7 @@ const MasterCreatePage = ({
                       </div> */}
                       {param.type === "category" && (
                         <div className="w-full xl:w-1/2">
-                          <SelectDropDown
+                          <Select
                             label="Select Parent"
                             name="parent_id"
                             options={parent}
@@ -117,7 +117,7 @@ const MasterCreatePage = ({
                         </div>
                       )}
                       <div className="w-full xl:w-1/2">
-                        <SelectDropDown
+                        <Select
                           label="Select Satus"
                           name="is_active"
                           options={[

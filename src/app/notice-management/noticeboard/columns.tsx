@@ -18,28 +18,28 @@ export const columns = (
     },
   },
   {
-    accessorKey: "question",
+    accessorKey: "topic",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Question
+          Topic
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "answer",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Answer
+          Description/Body
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -76,6 +76,14 @@ export const columns = (
         </Button>
       );
     },
+    cell: ({row}) => {
+      const sub_categories = row.original.sub_categories;
+      return (
+        <>
+          {sub_categories?.map((sub, index)=>(<Badge variant={`outline`} key={index}>{sub.name}</Badge>))}
+        </>
+      );
+    }
   },
 
   {

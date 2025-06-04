@@ -1,4 +1,4 @@
 export interface Options {
-    value: number;
+    value: any;
     text: string;
   }
