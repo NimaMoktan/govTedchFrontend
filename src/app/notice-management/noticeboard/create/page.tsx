@@ -192,7 +192,7 @@ const NoticeboardsCreate = () => {
                       >
                         {isLoading ? "Submitting..." : "Submit"}
                       </Button>
-                      <Link href="/user-management/users">
+                      <Link href="/notice-management/noticeboard">
                         <Button
                           type="reset"
                           variant={`destructive`}

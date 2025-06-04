@@ -114,85 +114,44 @@ const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
               })}
               onSubmit={handleSubmit}
             >
-            <Form>
-            <div className="-mt-2 space-y-4 p-4 md:p-5">
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                  <InputTextArea
-                    name="question"
-                    label="Question"
-                    placeholder="Write your question here....."
-                  />
-                </div>
-                <div className="w-full xl:w-1/2">
-                  <InputTextArea
-                    label="Answer"
-                    placeholder="Enter your answer"
-                    name="answer"
-                  />
-                </div>
-              </div>
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                  <SelectDropDown
-                    label="Category"
-                    name="category_id"
-                    options={category}
-                    onValueChange={(value: string) =>
-                      loadSubCategory(Number(value))
-                    }
-                    //  onValueChange={(value: string) => setFieldValue("organizationId", value)}
-                  />
-                </div>
-                {subCategory.length > 0 && (
-                  <div className="w-full xl:w-1/2">
-                    <SelectDropDown
-                      label="Sub Category"
-                      name="sub_categories"
-                      options={subCategory}
-                    />
+              <Form>
+                <div className="-mt-2 space-y-4 p-4 md:p-5">
+                  <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Question"
+                            autoComplete="off"
+                            type="text"
+                            placeholder="Enter your question"
+                            name="question"
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Answer"
+                            autoComplete="off"
+                            type="text"
+                            placeholder="Enter your answer"
+                            name="answer"
+                          />
+                        </div>
+                      </div>
+                                   <div className="flex items-center gap-4 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="rounded-full"
+                    >
+                      {isLoading ? "Updating..." : "Update"}
+                    </Button>
+                    <Link href="/notice-management/noticebard">
+                      <Button variant="destructive" className="rounded-full">
+                        Back
+                      </Button>
+                    </Link>
                   </div>
-                )}
-                <div className="w-full xl:w-1/2">
-                  <SelectDropDown
-                    label="Priority"
-                    name="priority"
-                    options={[
-                      {
-                        value: "LOW",
-                        text: "Low",
-                      },
-                      {
-                        value: "MEDIUM",
-                        text: "Medium",
-                      },
-                      {
-                        value: "HIGH",
-                        text: "High",
-                      },
-                    ]}
-                  />
                 </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="mx-2 rounded-full"
-              >
-                {isLoading ? "Updating..." : "Update"}
-              </Button>
-              <Link href="/notice-management/noticeboard">
-                <Button
-                  type="reset"
-                  variant={`destructive`}
-                  className="mx-2 rounded-full"
-                >
-                  Back
-                </Button>
-              </Link>
-            </div>
-          </Form>
+              </Form>
             </Formik>
           </div>
         </CardContent>

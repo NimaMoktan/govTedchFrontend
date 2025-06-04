@@ -9,6 +9,7 @@ import { deleteUser, getUsers } from "@/services/UserService";
 import { User } from "@/types/User";
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
+import { toast } from "react-toastify";
 
 const UserManagement = () => {
   const [usersList, setUsersList] = useState<User[]>([]);
@@ -36,18 +37,47 @@ const UserManagement = () => {
     }
   };
 
-  const handleDelete = async (user: User) => {
-    await Swal.fire({
+  // const handleDelete = async (user: User) => {
+  //   await Swal.fire({
+  //     title: "Are you sure?",
+  //     text: "You won't be able to revert this!",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#3085d6",
+  //     cancelButtonColor: "#d33",
+  //     confirmButtonText: "Yes, delete it!",
+  //     width: 450,
+  //   }).then(() => {
+  //     deleteUser(user.id);
+  //   });
+  // };
+
+  const handleDelete = (user: User) => {
+    Swal.fire({
       title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-      width: 450,
-    }).then(() => {
-      deleteUser(user.id);
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        if (user?.id !== undefined) {
+          await deleteUser(user.id).then(() => {
+            setUsersList((prevRoles) =>
+              prevRoles.filter((item) => item.id !== user.id),
+            );
+          });
+        } else {
+          toast.error("User ID is undefined. Cannot delete the role.");
+        }
+        Swal.fire("Deleted!", "The User has been deleted.", "success").then(
+          () => {
+            router.push("/user-management/users");
+          },
+        );
+      }
     });
   };
 
