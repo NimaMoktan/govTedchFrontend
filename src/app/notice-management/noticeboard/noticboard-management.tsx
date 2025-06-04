@@ -15,32 +15,17 @@ import { Noticeboard } from "@/types/Noticeboard";
 
 const NoticeboardManagement = () => {
   const [noticeboardList, setNoticeboardList] = useState<Noticeboard[]>([]);
-  const [category, setCategory] = useState<Options[]>([]);
-  const [subCategory, setSubCategory] = useState<Options[]>([]);
 
   const router = useRouter();
-  const { setIsLoading } = useLoading();
+  const { isLoading, setIsLoading } = useLoading();
 
   const handleCreateNoticeboard = () => {
+    setIsLoading(true)
     router.push("/notice-management/noticeboard/create");
   };
 
   const handleEditNoticeboard = (noticeboard: Noticeboard) => {
     router.push(`/user-management/users/${noticeboard.id}`);
-  };
-
-  const fetchNoticeboards = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getNoticeboards().finally(() =>
-        setIsLoading(false),
-      );
-      setNoticeboardList(response.data.results);
-      console.log(response);
-    } catch (error) {
-      console.error("Error fetching Notice:", error);
-      Swal.fire("Error!", "Failed to fetch Notice. Please try again.", "error");
-    }
   };
 
   const handleDelete = async (noticeboard: Noticeboard) => {
@@ -54,11 +39,26 @@ const NoticeboardManagement = () => {
       confirmButtonText: "Yes, delete it!",
       width: 450,
     }).then(() => {
-      deleteNoticeboard(noticeboard.id);
+      setIsLoading(true)
+      deleteNoticeboard(noticeboard.id).finally(()=>setIsLoading(false));
     });
   };
 
   useEffect(() => {
+    const fetchNoticeboards = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getNoticeboards().finally(() =>
+        setIsLoading(false),
+      );
+      setNoticeboardList(response.data.results);
+      console.log(response);
+    } catch (error) {
+      console.error("Error fetching Notice:", error);
+      Swal.fire("Error!", "Failed to fetch Notice. Please try again.", "error");
+    }
+  };
+
     fetchNoticeboards();
 
   }, []);
