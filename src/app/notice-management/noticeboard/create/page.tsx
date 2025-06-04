@@ -48,6 +48,11 @@ const NoticeboardsCreate = () => {
     }
   };
 
+  const priorityStyles = {
+    LOW: { color: "green" },
+    MEDIUM: { color: "goldenrod" },
+    HIGH: { color: "red" },
+  };
   const loadSubCategory = (main_category_id: number) => {
     const sub_list = originalCategory.filter(
       (list) => list.parent !== null && list.parent.id === main_category_id

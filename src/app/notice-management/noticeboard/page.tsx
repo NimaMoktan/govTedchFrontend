@@ -8,7 +8,7 @@ import NoticeboardManagement from "./noticboard-management";
 const UsersPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="List of Users" />
+      <Breadcrumb pageName="List of Notices" />
       <div className="flex flex-col gap-2 ">
         <NoticeboardManagement />
       </div>
