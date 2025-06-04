@@ -29,8 +29,7 @@ const NoticeboardsCreate = () => {
 
   const router = useRouter();
 
-  const handleSubmit = async (
-    values: Noticeboard) => {
+  const handleSubmit = async (values: Noticeboard) => {
     setIsLoading(true);
     try {
       await createNoticeboard({ ...values })
@@ -53,39 +52,45 @@ const NoticeboardsCreate = () => {
     }
   };
 
+  const priorityStyles = {
+    LOW: { color: "green" },
+    MEDIUM: { color: "goldenrod" },
+    HIGH: { color: "red" },
+  };
   const loadSubCategory = (main_category_id: number) => {
+    console.log(main_category_id);
 
-    console.log(main_category_id)
+    const sub_list = originalCategory.filter(
+      (list) => list.parent !== null && list.parent.id === main_category_id,
+    );
 
-    const sub_list = originalCategory.filter((list) => list.parent !== null && list.parent.id === main_category_id);
-
-    console.log(sub_list)
-    setSubCategory(sub_list.map((param: { id: number; name: string }) => ({
-      value: param.id,  // Use string values for consistency
-      text: param.name,
-    })));
-
-
-  }
+    console.log(sub_list);
+    setSubCategory(
+      sub_list.map((param: { id: number; name: string }) => ({
+        value: param.id, // Use string values for consistency
+        text: param.name,
+      })),
+    );
+  };
 
   useEffect(() => {
-
     const fetchCategories = async () => {
-      await getParentMastersByType('category').then((res) => {
+      await getParentMastersByType("category").then((res) => {
         const { data } = res;
         setOriginalCategory(data);
         const categories = data.filter((item) => item.parent == null);
 
-        const paramOptions = categories?.map((param: { id: number; name: string }) => ({
-          value: param.id,  // Use string values for consistency
-          text: param.name,
-        }));
-        setCategory(paramOptions)
-      })
-    }
+        const paramOptions = categories?.map(
+          (param: { id: number; name: string }) => ({
+            value: param.id, // Use string values for consistency
+            text: param.name,
+          }),
+        );
+        setCategory(paramOptions);
+      });
+    };
 
     fetchCategories();
-
   }, [subCategory]);
 
   return (
@@ -126,8 +131,8 @@ const NoticeboardsCreate = () => {
                           <InputTextArea
                             name="question"
                             label="Question"
-                            placeholder="Write your question here....." />
-
+                            placeholder="Write your question here....."
+                          />
                         </div>
                         <div className="w-full xl:w-1/2">
                           <InputTextArea
@@ -136,8 +141,6 @@ const NoticeboardsCreate = () => {
                             name="answer"
                           />
                         </div>
-                        
-
                       </div>
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
@@ -145,11 +148,13 @@ const NoticeboardsCreate = () => {
                             label="Category"
                             name="category_id"
                             options={category}
-                            onValueChange={(value: string) => loadSubCategory(Number(value))}
-                          //  onValueChange={(value: string) => setFieldValue("organizationId", value)}
+                            onValueChange={(value: string) =>
+                              loadSubCategory(Number(value))
+                            }
+                            //  onValueChange={(value: string) => setFieldValue("organizationId", value)}
                           />
                         </div>
-                        {subCategory.length > 0 &&
+                        {subCategory.length > 0 && (
                           <div className="w-full xl:w-1/2">
                             <SelectDropDown
                               label="Sub Category"
@@ -157,26 +162,27 @@ const NoticeboardsCreate = () => {
                               options={subCategory}
                             />
                           </div>
-                        }
+                        )}
                         <div className="w-full xl:w-1/2">
                           <SelectDropDown
                             label="Priority"
                             name="priority"
-                            options={[{
-                              value: "LOW",
-                              text: "Low"
-                            },
-                            {
-                              value: "MEDIUM",
-                              text: "Medium"
-                            },
-                            {
-                              value: "HIGH",
-                              text: "High"
-                            }]}
+                            options={[
+                              {
+                                value: "LOW",
+                                text: "Low",
+                              },
+                              {
+                                value: "MEDIUM",
+                                text: "Medium",
+                              },
+                              {
+                                value: "HIGH",
+                                text: "High",
+                              },
+                            ]}
                           />
                         </div>
-
                       </div>
 
                       <Button

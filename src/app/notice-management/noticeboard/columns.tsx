@@ -59,11 +59,9 @@ export const columns = (
         </Button>
       );
     },
-    cell: ({row})=>{
-      return (
-        <>{row.original.category?.name}</>
-      )
-    }
+    cell: ({ row }) => {
+      return <>{row.original.category?.name}</>;
+    },
   },
   {
     accessorKey: "sub-categories",
@@ -93,24 +91,29 @@ export const columns = (
         </Button>
       );
     },
-  },
-
-  {
-    accessorKey: "active",
-    header: () => "Status",
     cell: ({ row }) => {
-      const status = row.original.is_active;
+      const priority = row.getValue("priority") as string;
+      let priorityClass = "";
+      switch (priority) {
+        case "HIGH":
+          priorityClass = "bg-red-100 text-red-800"; // Lighter background with darker text
+          break;
+        case "MEDIUM":
+          priorityClass = "bg-yellow-100 text-yellow-800";
+          break;
+        default:
+          priorityClass = "bg-green-100 text-green-800";
+      }
       return (
-        <p
-          className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-            status ? "bg-success text-success" : "bg-danger text-danger"
-          }`}
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${priorityClass}`}
         >
-          {status ? "Active" : "Inactive"}
-        </p>
+          {priority}
+        </span>
       );
     },
   },
+
   {
     accessorKey: "Action",
     id: "actions",
