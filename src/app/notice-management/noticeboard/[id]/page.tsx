@@ -1,100 +1,109 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { Formik, Form, FormikState } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import InputTextArea from "@/components/Inputs/InputTextArea";
+import Select from "@/components/Inputs/Select";
 import MultiSelect from "@/components/Inputs/MultiSelect";
-import Input from "@/components/Inputs/Input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { getUser, updateUser } from "@/services/UserService";
-import { getRoleDropdowns } from "@/services/RoleService";
-import { User } from "@/types/User";
+import {
+  getNoticeboard,
+  updateNoticeboard,
+} from "@/services/NoticeboardService";
+import { getParentMastersByType } from "@/services/master/MasterService";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
-import SelectDropDown from "@/components/Inputs/Select";
+import { Options } from "@/interface/Options";
 import { Noticeboard } from "@/types/Noticeboard";
-import { getNoticeboard } from "@/services/NoticeboardService";
 
-interface RoleDropdown {
-  value: string;
-  text: string;
-}
-
-const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
-  const { setIsLoading, isLoading } = useLoading();
-  const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([]);
-  const [initialValues, setInitialValues] = useState<Noticeboard>({
-    id: 0,
-    question: "",
-    answer: "",
-    category_id: "",
-    sub_categories: "",
-   
-  });
-  const [roleList, setRoleList] = useState<RoleDropdown[]>([]);
+const NoticeboardEditPage = () => {
+  const { id } = useParams();
   const router = useRouter();
+  const { setIsLoading, isLoading } = useLoading();
+  const [initialValues, setInitialValues] = useState<Noticeboard | null>(null);
+  const [category, setCategory] = useState<Options[]>([]);
+  const [subCategory, setSubCategory] = useState<Options[]>([]);
+  const [originalCategory, setOriginalCategory] = useState<any[]>([]);
 
-  const handleSubmit = async (
-    values: Noticeboard,
-    {
-      resetForm,
-    }: { resetForm: (nextState?: Partial<FormikState<Noticeboard>>) => void },
-  ) => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const noticeRes = await getNoticeboard(id as string);
+        const noticeData = noticeRes.data.data;
+        setInitialValues({
+          ...noticeData,
+          category_id: noticeData.category?.id || "",
+          sub_categories:
+            noticeData.sub_categories?.map((sc: any) => sc.id) || [],
+        });
+
+        const categoryRes = await getParentMastersByType("category");
+        const catData = categoryRes.data;
+        setOriginalCategory(catData);
+
+        const mainCategories = catData.filter(
+          (item: any) => item.parent == null,
+        );
+        setCategory(
+          mainCategories.map((cat: any) => ({ value: cat.id, text: cat.name })),
+        );
+
+        const subCategories = catData.filter(
+          (item: any) =>
+            item.parent && item.parent.id === noticeData.category?.id,
+        );
+        setSubCategory(
+          subCategories.map((sub: any) => ({ value: sub.id, text: sub.name })),
+        );
+      } catch (error) {
+        toast.error("Error loading noticeboard data.");
+      }
+    };
+    loadData();
+  }, [id]);
+
+  const handleSubmit = async (values: Noticeboard) => {
     setIsLoading(true);
     try {
-      const response = await updateUser(values.id, values);
-      toast.success(response.data.message, {
-        duration: 1500,
-        position: "top-right",
-      });
-      setTimeout(() => {
-        router.push("/notice-management/noticeboard");
-      }, 2000);
-      resetForm();
+      const payload = {
+        ...values,
+        category_id: Number(values.category_id),
+        sub_categories: values.sub_categories, // already an array of IDs
+      };
+
+      await updateNoticeboard(id as string, payload);
+      toast.success("Noticeboard updated successfully");
+      router.push("/notice-management/noticeboard");
     } catch (error) {
-      console.error("ERROR", error);
-      toast.error("Failed to update Notice");
+      toast.error("Failed to update noticeboard");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const loadSubCategory = (main_category_id: number) => {
+    const sub_list = originalCategory.filter(
+      (list) => list.parent !== null && list.parent.id === main_category_id,
+    );
+    setSubCategory(
+      sub_list.map((param: { id: number; name: string }) => ({
+        value: param.id,
+        text: param.name,
+      })),
+    );
+  };
 
-  if (params.id) {
-    const noticeboardResponse = await getNoticeboard(Number(params.id));
-    console.log("Fetched Noticeboard data:", noticeboardResponse.data);
-
-    const noticeboardData = noticeboardResponse.data;
-    if (!noticeboardData) throw new Error("Noticeboard data not found");
-
-    setInitialValues({
-      id: noticeboardData?.id,
-      question: noticeboardData.question ?? "",
-      answer: noticeboardData.answer ?? "",
-      priority: noticeboardData.priority ?? "",
-      category_id: noticeboardData.category_id ?? "",
-      sub_categories: noticeboardData.sub_categories ?? "",
-   
-  
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load Noticeboard data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  if (!initialValues) return <div>Loading...</div>;
 
   return (
     <DefaultLayout>
-      <Breadcrumb parentPage="Notice Management" pageName="Edit Noticeboard" />
+      <Breadcrumb parentPage="Notice Management" pageName="Edit Notice" />
       <Card className="min-h-screen w-full">
         <CardContent className="min-h-screen max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2">
@@ -102,56 +111,88 @@ const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
               initialValues={initialValues}
               enableReinitialize
               validationSchema={Yup.object({
-       question: Yup.string()
-                        .required("Question is required")
-                        .min(3, "Must be at least 3 characters"),
-                      asnwer: Yup.string()
-                        .required("Answer is required")
-                        .min(3, "Must be at least 3 characters"),
-                      category_id: Yup.string().required("Select Category"),
-                      sub_categories: Yup.string().required("Select Sub-Categories"),
-                      priority: Yup.string().required("Select Priority"),
+                topic: Yup.string().required("Topic is required").min(3),
+                description: Yup.string()
+                  .required("Description is required")
+                  .min(3),
+                category_id: Yup.string().required("Select Category"),
+                priority: Yup.string().required("Select Priority"),
               })}
               onSubmit={handleSubmit}
             >
-              <Form>
-                <div className="-mt-2 space-y-4 p-4 md:p-5">
-                  <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                        <div className="w-full xl:w-1/2">
-                          <Input
-                            label="Question"
-                            autoComplete="off"
-                            type="text"
-                            placeholder="Enter your question"
-                            name="question"
-                          />
-                        </div>
-                        <div className="w-full xl:w-1/2">
-                          <Input
-                            label="Answer"
-                            autoComplete="off"
-                            type="text"
-                            placeholder="Enter your answer"
-                            name="answer"
-                          />
-                        </div>
+              {({ errors, setFieldValue }) => (
+                <Form>
+                  <div className="-mt-2 space-y-4 p-4 md:p-5">
+                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                      <div className="w-full xl:w-1/2">
+                        <InputTextArea
+                          name="topic"
+                          label="Topic"
+                          placeholder="Write your question here..."
+                        />
                       </div>
-                                   <div className="flex items-center gap-4 pt-2">
+                      <div className="w-full xl:w-1/2">
+                        <InputTextArea
+                          name="description"
+                          label="Description/Body"
+                          placeholder="Enter your answer"
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                      <div className="w-full xl:w-1/2">
+                        <Select
+                          searchable={true}
+                          name="category_id"
+                          label="Category"
+                          options={category}
+                          onValueChange={(value: string) => {
+                            loadSubCategory(Number(value));
+                            setFieldValue("category_id", value);
+                          }}
+                        />
+                      </div>
+                      {subCategory.length > 0 && (
+                        <div className="w-full xl:w-1/2">
+                          <MultiSelect
+                            label="Sub Category"
+                            name="sub_categories"
+                            options={subCategory}
+                          />
+                        </div>
+                      )}
+                      <div className="w-full xl:w-1/2">
+                        <Select
+                          name="priority"
+                          label="Priority"
+                          options={[
+                            { value: "LOW", text: "Low" },
+                            { value: "MEDIUM", text: "Medium" },
+                            { value: "HIGH", text: "High" },
+                          ]}
+                        />
+                      </div>
+                    </div>
+
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="rounded-full"
+                      className="mx-2 rounded-full"
                     >
-                      {isLoading ? "Updating..." : "Update"}
+                      {isLoading ? "Saving..." : "Update"}
                     </Button>
-                    <Link href="/notice-management/noticebard">
-                      <Button variant="destructive" className="rounded-full">
-                        Back
+                    <Link href="/notice-management/noticeboard">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        className="mx-2 rounded-full"
+                      >
+                        Cancel
                       </Button>
                     </Link>
                   </div>
-                </div>
-              </Form>
+                </Form>
+              )}
             </Formik>
           </div>
         </CardContent>
@@ -160,4 +201,4 @@ const NoticeboardEdit = ({ params }: { params: { id: string } }) => {
   );
 };
 
-export default NoticeboardEdit;
+export default NoticeboardEditPage;
