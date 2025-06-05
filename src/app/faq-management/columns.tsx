@@ -5,11 +5,12 @@ import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 import { Noticeboard } from "@/types/Noticeboard";
+import { FAQ } from "@/types/FAQ";
 
 export const columns = (
-  handleEdit: (noticeboard: Noticeboard) => void,
-  handleDelete: (id: Noticeboard) => void,
-): ColumnDef<Noticeboard>[] => [
+  handleEdit: (faq: FAQ) => void,
+  handleDelete: (id: FAQ) => void,
+): ColumnDef<FAQ>[] => [
   {
     accessorKey: "id",
     header: "SL No",
@@ -19,43 +20,14 @@ export const columns = (
   },
 
   {
-    header: "Topic & Description",
+    header: "Question & Answer",
     cell: ({ row }) => (
       <div>
-        <p className="text-base font-medium">{row.original.topic}</p>
-        <p className="text-sm text-gray-500">{row.original.description}</p>
+        <p className="text-base font-medium">{row.original.question}</p>
+        <p className="text-sm text-gray-500">{row.original.answer}</p>
       </div>
     ),
   },
-
-  // {
-  //   accessorKey: "topic",
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button
-  //         variant="ghost"
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //       >
-  //         Topic
-  //         <ArrowUpDown className="ml-2 h-4 w-4" />
-  //       </Button>
-  //     );
-  //   },
-  // },
-  // {
-  //   accessorKey: "description",
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button
-  //         variant="ghost"
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //       >
-  //         Description/Body
-  //         <ArrowUpDown className="ml-2 h-4 w-4" />
-  //       </Button>
-  //     );
-  //   },
-  // },
 
   {
     accessorKey: "category",
@@ -97,42 +69,6 @@ export const columns = (
             </Badge>
           ))}
         </>
-      );
-    },
-  },
-
-  {
-    accessorKey: "priority",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Priority
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const priority = row.getValue("priority") as string;
-      let priorityClass = "";
-      switch (priority) {
-        case "HIGH":
-          priorityClass = "bg-red-100 text-red-800"; // Lighter background with darker text
-          break;
-        case "MEDIUM":
-          priorityClass = "bg-yellow-100 text-yellow-800";
-          break;
-        default:
-          priorityClass = "bg-green-100 text-green-800";
-      }
-      return (
-        <span
-          className={`rounded-full px-2 py-1 text-xs font-medium ${priorityClass}`}
-        >
-          {priority}
-        </span>
       );
     },
   },
