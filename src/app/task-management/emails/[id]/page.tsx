@@ -15,6 +15,8 @@ import TextInput from "@/components/Inputs/Input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format } from "date-fns";
+import { Options } from "@/interface/Options";
+import { getParentMastersByType } from "@/services/master/MasterService";
 
 const statusOptions = [
   { value: "pending", label: "Pending" },
@@ -26,6 +28,11 @@ export default function EmailEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [initialValues, setInitialValues] = useState<Email | null>(null);
   const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState<Options[]>([]);
+  const [subCategory, setSubCategory] = useState<Options[]>([]);
+  const [gender, setGender] = useState<Options[]>([]);
+  const [dzongkhag, setDzongkhag] = useState<Options[]>([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,6 +59,26 @@ export default function EmailEditPage({ params }: { params: { id: string } }) {
     }
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const res = await getParentMastersByType("category");
+        const { data } = res;
+        const filteredCategories = data?.filter(
+          (item: { type: string }) => item.type === "category",
+        );
+        setCategory(filteredCategories || []);
+      } catch (err) {
+        setError(err.message || "Failed to fetch categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (!initialValues)
     return <div className="p-8 text-center">Email not found</div>;
@@ -69,6 +96,7 @@ export default function EmailEditPage({ params }: { params: { id: string } }) {
               query: Yup.string().required("Required"),
               status: Yup.string().required("Required"),
               agent: Yup.string().required("Required"),
+              category_id: Yup.string().required("Required"),
             })}
             onSubmit={handleSubmit}
           >
@@ -107,7 +135,11 @@ export default function EmailEditPage({ params }: { params: { id: string } }) {
                     <Input label="Agent" name="agent" />
                   </div>
                   <div className="w-full xl:w-1/2">
-                    <Input label="Category" name="category" />
+                    <SelectDropDown
+                      label="Category"
+                      name="category_id"
+                      options={category}
+                    />
                   </div>
                 </div>
                 <TextInput label="Query" name="query" rows={4} />

@@ -8,7 +8,7 @@ import { ArrowUpDown } from "lucide-react";
 import { User } from "@/types/User";
 
 export const columns = (
-  handleEdit: (user: User) => void,
+  handleEdit: (testType: User) => void,
   handleDelete: (id: User) => void,
 ): ColumnDef<User>[] => [
   {

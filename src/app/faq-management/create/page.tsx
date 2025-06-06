@@ -9,8 +9,6 @@ import InputTextArea from "@/components/Inputs/InputTextArea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { createNoticeboard } from "@/services/NoticeboardService";
-import { Noticeboard } from "@/types/Noticeboard";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
@@ -18,25 +16,31 @@ import { Options } from "@/interface/Options";
 import { getParentMastersByType } from "@/services/master/MasterService";
 import Select from "@/components/Inputs/Select";
 import MultiSelect from "@/components/Inputs/MultiSelect";
+import Input from "@/components/Inputs/Input";
+import { createFaq } from "@/services/FAQService";
+import { FAQ } from "@/types/FAQ";
 
-const NoticeboardsCreate = () => {
+const FaqCreate = () => {
   const [category, setCategory] = useState<Options[]>([]);
   const [subCategory, setSubCategory] = useState<Options[]>([]);
   const [originalCategory, setOriginalCategory] = useState<any[]>([]);
   const { setIsLoading, isLoading } = useLoading();
   const router = useRouter();
 
-  const handleSubmit = async (values: Noticeboard) => {
+  const handleSubmit = async (values: FAQ) => {
     setIsLoading(true);
     try {
-      await createNoticeboard({ ...values, category_id: Number(values.category_id) })
+      await createFaq({
+        ...values,
+        category_id: Number(values.category_id),
+      })
         .then((response) => {
           toast.success(response.data.message, {
             duration: 1500,
             position: "top-right",
           });
           setTimeout(() => {
-            router.push("/notice-management/noticeboard");
+            router.push("/faq");
           }, 2000);
         })
         .catch((e) => {
@@ -55,13 +59,13 @@ const NoticeboardsCreate = () => {
   };
   const loadSubCategory = (main_category_id: number) => {
     const sub_list = originalCategory.filter(
-      (list) => list.parent !== null && list.parent.id === main_category_id
+      (list) => list.parent !== null && list.parent.id === main_category_id,
     );
     setSubCategory(
       sub_list.map((param: { id: number; name: string }) => ({
         value: param.id,
         text: param.name,
-      }))
+      })),
     );
   };
 
@@ -75,7 +79,7 @@ const NoticeboardsCreate = () => {
           (param: { id: string; name: string }) => ({
             value: param.id,
             text: param.name,
-          })
+          }),
         );
         setCategory(paramOptions);
       });
@@ -85,28 +89,27 @@ const NoticeboardsCreate = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb parentPage="Notice Management" pageName="Create Notice" />
+      <Breadcrumb parentPage="FAQ Management" pageName="Create FAQ" />
       <Card className="min-h-screen w-full">
         <CardContent className="min-h-screen max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2">
             <Formik
               initialValues={{
-                topic: "",
-                description: "",
+                question: "",
+                answer: "",
                 category_id: "",
                 sub_categories: [],
                 priority: "",
                 is_active: true,
               }}
               validationSchema={Yup.object({
-                topic: Yup.string()
+                question: Yup.string()
                   .required("Question is required")
                   .min(3, "Must be at least 3 characters"),
-                description: Yup.string()
+                answer: Yup.string()
                   .required("Answer is required")
                   .min(3, "Must be at least 3 characters"),
                 category_id: Yup.string().required("Select Category"),
-                priority: Yup.string().required("Select Priority"),
               })}
               validateOnChange={true} // Enable validation on change
               validateOnBlur={true} // Optional: Enable validation on blur as well
@@ -115,27 +118,11 @@ const NoticeboardsCreate = () => {
               {({ errors, setFieldValue, setFieldTouched, validateForm }) => {
                 return (
                   <Form>
-                    <div className="-mt-2 space-y-4 p-4 md:p-5">
-                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                        <div className="w-full xl:w-1/2">
-                          <InputTextArea
-                            name="topic"
-                            label="Topic"
-                            placeholder="Write your question here....."
-                          />
-                        </div>
-                        <div className="w-full xl:w-1/2">
-                          <InputTextArea
-                            label="Description/Body"
-                            placeholder="Enter your answer"
-                            name="description"
-                          />
-                        </div>
-                      </div>
+                    <div className="mt-2 space-y-4 p-4 md:p-5">
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
                           <Select
-                          searchable={true}
+                            searchable={true}
                             label="Category"
                             name="category_id"
                             options={category}
@@ -150,22 +137,27 @@ const NoticeboardsCreate = () => {
                               label="Sub Category"
                               name="sub_categories"
                               options={subCategory}
-                              
 
                               // onValueChange={(value: string) => {}}
                             />
                           </div>
                         )}
-                        <div className="w-full xl:w-1/2">
-                          <Select
-                            label="Priority"
-                            name="priority"
-                            options={[
-                              { value: "LOW", text: "Low" },
-                              { value: "MEDIUM", text: "Medium" },
-                              { value: "HIGH", text: "High" },
-                            ]}
-                            onValueChange={(value: string) => {}}
+                      </div>
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full ">
+                          <Input
+                            name="question"
+                            label="Question"
+                            placeholder="Write your question here....."
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full ">
+                          <InputTextArea
+                            label="Answer"
+                            placeholder="Enter your answer"
+                            name="answer"
                           />
                         </div>
                       </div>
@@ -177,7 +169,7 @@ const NoticeboardsCreate = () => {
                       >
                         {isLoading ? "Submitting..." : "Submit"}
                       </Button>
-                      <Link href="/notice-management/noticeboard">
+                      <Link href="/faq-management">
                         <Button
                           type="reset"
                           variant={`destructive`}
@@ -198,4 +190,4 @@ const NoticeboardsCreate = () => {
   );
 };
 
-export default NoticeboardsCreate;
+export default FaqCreate;

@@ -12,21 +12,19 @@ import MultiSelect from "@/components/Inputs/MultiSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import {
-  getNoticeboard,
-  updateNoticeboard,
-} from "@/services/NoticeboardService";
+import { getFaq, updateFaq } from "@/services/FAQService";
 import { getParentMastersByType } from "@/services/master/MasterService";
 import { toast } from "sonner";
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
-import { Noticeboard } from "@/types/Noticeboard";
+import { FAQ } from "@/types/FAQ";
+import Input from "@/components/Inputs/Input";
 
-const NoticeboardEditPage = () => {
+const FAQEditPage = () => {
   const { id } = useParams();
   const router = useRouter();
   const { setIsLoading, isLoading } = useLoading();
-  const [initialValues, setInitialValues] = useState<Noticeboard | null>(null);
+  const [initialValues, setInitialValues] = useState<FAQ | null>(null);
   const [category, setCategory] = useState<Options[]>([]);
   const [subCategory, setSubCategory] = useState<Options[]>([]);
   const [originalCategory, setOriginalCategory] = useState<any[]>([]);
@@ -34,13 +32,12 @@ const NoticeboardEditPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const noticeRes = await getNoticeboard(id as string);
-        const noticeData = noticeRes.data.data;
+        const faqRes = await getFaq(Number(id));
+        const faqData = faqRes.data.data;
         setInitialValues({
-          ...noticeData,
-          category_id: noticeData.category?.id || "",
-          sub_categories:
-            noticeData.sub_categories?.map((sc: any) => sc.id) || [],
+          ...faqData,
+          category_id: faqData.category?.id || "",
+          sub_categories: faqData.sub_categories?.map((sc: any) => sc.id) || [],
         });
 
         const categoryRes = await getParentMastersByType("category");
@@ -55,20 +52,19 @@ const NoticeboardEditPage = () => {
         );
 
         const subCategories = catData.filter(
-          (item: any) =>
-            item.parent && item.parent.id === noticeData.category?.id,
+          (item: any) => item.parent && item.parent.id === faqData.category?.id,
         );
         setSubCategory(
           subCategories.map((sub: any) => ({ value: sub.id, text: sub.name })),
         );
       } catch (error) {
-        toast.error("Error loading noticeboard data.");
+        toast.error("Error loading FAQ data.");
       }
     };
     loadData();
   }, [id]);
 
-  const handleSubmit = async (values: Noticeboard) => {
+  const handleSubmit = async (values: FAQ) => {
     setIsLoading(true);
     try {
       const payload = {
@@ -77,11 +73,11 @@ const NoticeboardEditPage = () => {
         sub_categories: values.sub_categories, // already an array of IDs
       };
 
-      await updateNoticeboard(id as string, payload);
-      toast.success("Noticeboard updated successfully");
-      router.push("/notice-management/noticeboard");
+      await updateFaq(Number(id), payload);
+      toast.success("FAQ updated successfully");
+      router.push("/faq-management");
     } catch (error) {
-      toast.error("Failed to update noticeboard");
+      toast.error("Failed to update FAQ");
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +99,7 @@ const NoticeboardEditPage = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb parentPage="Notice Management" pageName="Edit Notice" />
+      <Breadcrumb parentPage="FAQ Management" pageName="Edit FAQ" />
       <Card className="min-h-screen w-full">
         <CardContent className="min-h-screen max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2">
@@ -111,12 +107,9 @@ const NoticeboardEditPage = () => {
               initialValues={initialValues}
               enableReinitialize
               validationSchema={Yup.object({
-                topic: Yup.string().required("Topic is required").min(3),
-                description: Yup.string()
-                  .required("Description is required")
-                  .min(3),
+                question: Yup.string().required("Question is required").min(3),
+                answer: Yup.string().required("Answer is required").min(3),
                 category_id: Yup.string().required("Select Category"),
-                priority: Yup.string().required("Select Priority"),
               })}
               onSubmit={handleSubmit}
             >
@@ -125,16 +118,16 @@ const NoticeboardEditPage = () => {
                   <div className="-mt-2 space-y-4 p-4 md:p-5">
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                       <div className="w-full xl:w-1/2">
-                        <InputTextArea
-                          name="topic"
-                          label="Topic"
+                        <Input
+                          name="question"
+                          label="Question"
                           placeholder="Write your question here..."
                         />
                       </div>
                       <div className="w-full xl:w-1/2">
                         <InputTextArea
-                          name="description"
-                          label="Description/Body"
+                          name="answer"
+                          label="Answer"
                           placeholder="Enter your answer"
                         />
                       </div>
@@ -161,17 +154,6 @@ const NoticeboardEditPage = () => {
                           />
                         </div>
                       )}
-                      <div className="w-full xl:w-1/2">
-                        <Select
-                          name="priority"
-                          label="Priority"
-                          options={[
-                            { value: "LOW", text: "Low" },
-                            { value: "MEDIUM", text: "Medium" },
-                            { value: "HIGH", text: "High" },
-                          ]}
-                        />
-                      </div>
                     </div>
 
                     <Button
@@ -181,7 +163,7 @@ const NoticeboardEditPage = () => {
                     >
                       {isLoading ? "Saving..." : "Update"}
                     </Button>
-                    <Link href="/notice-management/noticeboard">
+                    <Link href="/faq-management">
                       <Button
                         type="button"
                         variant="destructive"
@@ -201,4 +183,4 @@ const NoticeboardEditPage = () => {
   );
 };
 
-export default NoticeboardEditPage;
+export default FAQEditPage;

@@ -4,15 +4,14 @@ import Swal from "sweetalert2";
 import { DataTable } from "./table";
 import { columns } from "./columns";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation"; // Changed from 'next/router'
+import { useRouter } from "next/navigation";
 import { deleteUser, getUsers } from "@/services/UserService";
 import { User } from "@/types/User";
 import { useLoading } from "@/context/LoadingContext";
-import { Options } from "@/interface/Options";
+import { toast } from "sonner";
 
 const UserManagement = () => {
   const [usersList, setUsersList] = useState<User[]>([]);
-
   const router = useRouter();
   const { setIsLoading } = useLoading();
 
@@ -27,17 +26,18 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await getUsers().finally(() => setIsLoading(false));
+      const response = await getUsers();
       setUsersList(response.data.results);
-      console.log(response);
     } catch (error) {
       console.error("Error fetching users:", error);
-      Swal.fire("Error!", "Failed to fetch users. Please try again.", "error");
+      toast.error("Failed to fetch users. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (user: User) => {
-    await Swal.fire({
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
@@ -46,9 +46,21 @@ const UserManagement = () => {
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
       width: 450,
-    }).then(() => {
-      deleteUser(user.id);
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setIsLoading(true);
+      await deleteUser(user.id);
+      toast.success("User deleted successfully");
+      // Fetch fresh data from server after deletion
+      await fetchUsers();
+    } catch (error) {
+      toast.error("Failed to delete user");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -69,6 +81,3 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
-function users(type: any) {
-  throw new Error("Function not implemented.");
-}

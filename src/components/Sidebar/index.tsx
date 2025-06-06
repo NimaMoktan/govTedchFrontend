@@ -163,7 +163,7 @@ const menuGroups = [
           />
         ),
         label: "FAQ",
-        route: "/faq",
+        route: "/faq-management",
         role: ["ADM"],
       },
     ],

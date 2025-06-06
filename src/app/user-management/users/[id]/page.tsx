@@ -40,25 +40,38 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
 
   const handleSubmit = async (
-    values: User,
+    values: Partial<User>,
     {
       resetForm,
     }: { resetForm: (nextState?: Partial<FormikState<User>>) => void },
   ) => {
     setIsLoading(true);
     try {
+      // Add validation to ensure id exists before making the request
+      if (!values.id) {
+        throw new Error("User ID is required for update");
+      }
+
       const response = await updateUser(values.id, values);
-      toast.success(response.data.message, {
+
+      toast.success(response.data.message ?? "User updated successfully", {
         duration: 1500,
         position: "top-right",
       });
+
       setTimeout(() => {
         router.push("/user-management/users");
       }, 2000);
+
       resetForm();
     } catch (error) {
       console.error("ERROR", error);
-      toast.error("Failed to update user");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update user",
+        {
+          position: "top-right",
+        },
+      );
     } finally {
       setIsLoading(false);
     }
