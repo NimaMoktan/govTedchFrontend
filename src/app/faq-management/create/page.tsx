@@ -40,7 +40,7 @@ const FaqCreate = () => {
             position: "top-right",
           });
           setTimeout(() => {
-            router.push("/faq");
+            router.push("/faq-management");
           }, 2000);
         })
         .catch((e) => {

@@ -40,19 +40,30 @@ export const getEmail = async (id: string) => {
   return { data: email };
 };
 
-export const updateEmail = async (id: string, data: Email) => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const index = mockEmails.findIndex((e) => e.id === id);
-  if (index === -1) throw new Error("Email not found");
-  mockEmails[index] = { ...mockEmails[index], ...data };
-  return { data: mockEmails[index] };
+export const createEmail = async (data: Email) => {
+  return api.post("task-management/", data);
 };
+
+// export const updateEmail = async (id: string, data: Email) => {
+//   await new Promise((resolve) => setTimeout(resolve, 500));
+//   const index = mockEmails.findIndex((e) => e.id === id);
+//   if (index === -1) throw new Error("Email not found");
+//   mockEmails[index] = { ...mockEmails[index], ...data };
+//   return { data: mockEmails[index] };
+// };
 
 export const deleteEmail = async (id: string) => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const index = mockEmails.findIndex((e) => e.id === id);
   if (index === -1) throw new Error("Email not found");
   mockEmails.splice(index, 1);
+};
+
+export const updateEmail = async (id: number, data: Email) => {
+  const modifiedPayload = {
+    ...data,
+  };
+  return api.post(`/task-management/${id}/`, modifiedPayload);
 };
 
 export const getEmailHistory = async (id: string) => {

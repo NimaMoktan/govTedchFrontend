@@ -30,6 +30,37 @@ interface DataTableProps<TData, TValue> {
   handleAdd: () => void;
 }
 
+// Component to handle text truncation and read more functionality
+const TruncatedText = ({
+  text,
+  maxWords = 10,
+}: {
+  text: string;
+  maxWords?: number;
+}) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  const words = text.split(" ");
+  const shouldTruncate = words.length > maxWords;
+  const truncatedText = shouldTruncate
+    ? words.slice(0, maxWords).join(" ") + "..."
+    : text;
+
+  return (
+    <div>
+      {isExpanded ? text : truncatedText}
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="ml-1 text-blue-500 hover:underline"
+        >
+          {isExpanded ? "Read less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+};
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -40,9 +71,28 @@ export function DataTable<TData, TValue>({
     [],
   );
 
+  // Modify columns to use TruncatedText for text content
+  const modifiedColumns = React.useMemo(() => {
+    return columns.map((column) => {
+      if (
+        column.accessorKey === "description" ||
+        column.accessorKey === "topic"
+      ) {
+        return {
+          ...column,
+          cell: ({ row }) => {
+            const value = row.getValue(column.accessorKey as string);
+            return <TruncatedText text={String(value)} />;
+          },
+        };
+      }
+      return column;
+    });
+  }, [columns]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: modifiedColumns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -111,6 +161,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="transition-all duration-100 hover:scale-[1.01] hover:bg-gray-100 hover:shadow-md"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

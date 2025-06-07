@@ -20,7 +20,10 @@ export default function DefaultLayout({
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === "A" && target.getAttribute("href")?.startsWith("/")) {
+      if (
+        target.tagName === "A" &&
+        target.getAttribute("href")?.startsWith("/")
+      ) {
         setIsLoading(true);
       }
     };
@@ -38,12 +41,12 @@ export default function DefaultLayout({
     <>
       <div className="flex">
         <Toaster />
-        <ToastContainer/>
+        <ToastContainer />
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <div className="relative flex flex-1 flex-col lg:ml-72.5 overflow-x-hidden">
+        <div className="relative flex flex-1 flex-col overflow-x-hidden lg:ml-72.5">
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <main>
-            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-5 dark:bg-gray-500 min-h-screen">
+            <div className="mx-auto min-h-screen max-w-screen-2xl p-4 dark:bg-gray-500 md:p-6 2xl:p-5">
               {children}
             </div>
           </main>

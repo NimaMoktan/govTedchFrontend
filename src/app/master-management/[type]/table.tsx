@@ -55,7 +55,8 @@ export function DataTable<TData, TValue>({
     manualSorting: true,
     onSortingChange: (updater) => {
       setSorting(updater);
-      const newSorting = typeof updater === "function" ? updater(sorting) : updater;
+      const newSorting =
+        typeof updater === "function" ? updater(sorting) : updater;
       const sortField = newSorting[0]?.id;
       const sortOrder = newSorting[0]?.desc ? `-${sortField}` : sortField;
       setOrdering(sortOrder || "");
@@ -78,6 +79,18 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
+      <style jsx>{`
+        .hover-effect {
+          transition: all 0.2s ease;
+        }
+        .hover-effect:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          background-color: #f8fafc;
+        }
+      `}</style>
       <div className="flex items-center py-4">
         <Input
           placeholder="Search by Name"
@@ -105,7 +118,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -118,12 +131,13 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="hover-effect"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-1 text-sm">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

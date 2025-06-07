@@ -12,6 +12,7 @@ export interface EmailHistory {
 }
 
 export interface Email {
+  data: any;
   id: string;
   email: string;
   query: string;

@@ -13,12 +13,11 @@ import Input from "@/components/Inputs/Input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import applestore from "/public/images/logo/appstore.png";
-import logo from "/public/images/logo/logo.png";
 import googleplay from "/public/images/logo/googleplay.png";
 import { Button } from "@/components/ui/button";
-import { User, Lock, Loader2 } from "lucide-react";
-import { FaUser } from "react-icons/fa";
-import { RiLockPasswordFill } from "react-icons/ri";
+import { Loader2 } from "lucide-react";
+import { FaEnvelope } from "react-icons/fa";
+import { FaPhoneVolume } from "react-icons/fa6";
 
 type Role = {
   id: number;
@@ -61,7 +60,7 @@ export default function Login() {
   const [proofRequestURL, setProofRequestURL] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [, setAuthenticated] = useState(false);
+  // const [, setAuthenticated] = useState(false);
   const [, setOs] = useState("");
 
   const router = useRouter();
@@ -224,12 +223,12 @@ export default function Login() {
   }, [handleLoginWithNdi]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gray-300 p-4">
+    <div className="bg-white-300 flex min-h-screen w-full items-center justify-center">
       <div className="relative w-full max-w-5xl">
         <div className="flex flex-col items-center md:flex-row">
           {/* Left Column - overlaps right by 5% on md+ screens */}
           <div className="relative z-10 w-full  md:w-[45%] lg:w-[43%]">
-            <div className="w-full rounded-lg bg-white p-6 shadow-xl  md:pr-[5%]">
+            <div className="w-full rounded-lg border border-gray bg-white  p-6 shadow-xl md:pr-[5%]">
               <div className="flex flex-col  justify-center">
                 <div className="mb-4 flex  items-center gap-2 py-3">
                   <Image
@@ -310,7 +309,7 @@ export default function Login() {
 
           {/* Right Column - overlaps left by 5% on md+ screens */}
           <div className="relative w-full md:left-[-5%] md:w-[60%] lg:w-[57%]">
-            <div className="w-full rounded-lg bg-red-100 p-6  md:pl-[15%] ">
+            <div className="w-full rounded bg-gray-100 p-5  md:pl-[15%] ">
               <div className="form-group text-center">
                 <span className="font-bold text-gray-400">
                   Scan with <span className="text-green-500">Bhutan NDI</span>{" "}
@@ -318,17 +317,19 @@ export default function Login() {
                 </span>
               </div>
 
-              <div className="flex justify-center rounded-2xl border-2 border-green-500 p-2.5">
-                <QRCodeSVG
-                  value={proofRequestURL}
-                  size={200}
-                  imageSettings={{
-                    src: "/images/logo/NDIlogobg.png",
-                    excavate: true,
-                    height: 30,
-                    width: 30,
-                  }}
-                />
+              <div className="flex justify-center">
+                <div className="rounded-2xl border border-2 border-green-500 p-2 ">
+                  <QRCodeSVG
+                    value={proofRequestURL}
+                    size={200}
+                    imageSettings={{
+                      src: "/images/logo/NDIlogobg.png",
+                      excavate: true,
+                      height: 30,
+                      width: 30,
+                    }}
+                  />
+                </div>
               </div>
               <div className="form-group mt-8">
                 <div className="flex justify-center">
@@ -358,28 +359,29 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="mt-7.5 flex justify-center">
+              <div className="mt-7.5 flex justify-center ">
                 <a
                   href="https://www.youtube.com/@BhutanNDI"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn flex items-center space-x-2 rounded-full bg-[#5ac994] px-4 py-2 text-white"
+                  className="btn flex items-center space-x-2 rounded-full border border-2 border-green-500 px-4 py-2 text-green-500"
                 >
                   <span>Watch video guide</span>
-                  <BiPlayCircle size={24} />
+                  <BiPlayCircle size={24} color="#64c799" />
                 </a>
               </div>
-              <div className="mt-7.5 flex justify-center">
-                <span>
-                  <a
-                    href="https://kiwhp.app.link/?t="
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#A1A0A0] no-underline"
-                  >
-                    Download Now!
-                  </a>
+              <div className="mb-5 mt-7.5 flex flex-col items-center text-center">
+                <span className="text-[#A1A0A0]">
+                  Don&apos;t Have the Bhutan NDI Wallet?
                 </span>
+                <a
+                  href="https://kiwhp.app.link/?t="
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 text-green-500 no-underline"
+                >
+                  Download Now!
+                </a>
               </div>
               <div className="mb-4 mt-2.5 flex justify-center">
                 <a
@@ -409,6 +411,30 @@ export default function Login() {
                     height={100}
                   />
                 </a>
+              </div>
+
+              <div className=" flex flex-col items-center text-center">
+                <a
+                  href="https://kiwhp.app.link/?t="
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 text-lg font-semibold text-green-500 no-underline "
+                >
+                  Get Support
+                </a>
+              </div>
+
+              <div className="flex items-center justify-center space-x-4 bg-gray-100 p-2">
+                <div className="flex items-center space-x-2">
+                  <FaEnvelope color="#69c69a" />
+                  <span className="text-sm text-gray-700">
+                    ndifeedback@dhi.bt
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <FaPhoneVolume color="#69c69a" />
+                  <span className="text-sm text-gray-700">1199</span>
+                </div>
               </div>
             </div>
           </div>
