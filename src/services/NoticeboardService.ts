@@ -28,10 +28,7 @@ export const getNoticeboard = async (id: number) =>
   api.get(`/notice-management/${id}/`);
 
 export const updateNoticeboard = async (id: number, data: Noticeboard) => {
-  const modifiedPayload = {
-    ...data,
-  };
-  return api.post(`/notice-management/${id}/`, modifiedPayload);
+  return api.put(`/notice-management/${id}/`, data);
 };
 
 // export const updateNoticeboard = async (id: number, data: Noticeboard) =>

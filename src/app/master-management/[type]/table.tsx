@@ -79,23 +79,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <style jsx>{`
-        .hover-effect {
-          transition: all 0.2s ease;
-        }
-        .hover-effect:hover {
-          transform: translateY(-2px);
-          box-shadow:
-            0 4px 6px -1px rgba(0, 0, 0, 0.1),
-            0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          background-color: #f8fafc;
-        }
-      `}</style>
       <div className="flex items-center py-4">
         <Input
           placeholder="Search by Name"
           onChange={handleSearch}
-          className="ml-6 max-w-[250px]"
+          className="max-w-[250px]"
         />
         <Button
           onClick={() => {
@@ -107,13 +95,16 @@ export function DataTable<TData, TValue>({
           Add New
         </Button>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="table-container rounded-md border">
+        <Table className="table-root">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="table-header-cell text-center"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -131,10 +122,13 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover-effect"
+                  className="origin-center transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100 hover:shadow-md"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-1 text-sm">
+                    <TableCell
+                      key={cell.id}
+                      className="table-body-cell p-1 text-center text-sm"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -147,7 +141,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="table-body-cell h-24 text-center"
                 >
                   No results.
                 </TableCell>

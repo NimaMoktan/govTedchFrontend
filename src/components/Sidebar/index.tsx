@@ -104,10 +104,10 @@ const menuGroups = [
           },
           {
             icon: <RiShapeFill size={16} className="mr-2" />,
-            label: "Privileges",
+            label: "Permission",
             role: ["ADM"],
-            privilege: "can view privileges",
-            route: "/user-management/privileges",
+            privilege: "can view Permission",
+            route: "/user-management/permission",
           },
         ],
       },

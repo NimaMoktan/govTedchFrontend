@@ -64,14 +64,6 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center py-4">
-        {/* <Input
-            placeholder="Filter Code..."
-            value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-                table.getColumn("code")?.setFilterValue(event.target.value)
-            }
-            className="max-w-[250px]"
-            /> */}
         <Input
           placeholder="Search by role name"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -115,6 +107,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100 hover:shadow-sm"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

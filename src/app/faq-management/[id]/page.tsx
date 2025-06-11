@@ -12,7 +12,7 @@ import MultiSelect from "@/components/Inputs/MultiSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { getFaq, updateFaq } from "@/services/FAQService";
+import { getFaq, updateFaq } from "@/services/FaqService";
 import { getParentMastersByType } from "@/services/master/MasterService";
 import { toast } from "sonner";
 import { useLoading } from "@/context/LoadingContext";
@@ -36,7 +36,7 @@ const FAQEditPage = () => {
         const faqData = faqRes.data.data;
         setInitialValues({
           ...faqData,
-          category_id: faqData.category?.id || "",
+          category_id: String(faqData.category?.id) || "",
           sub_categories: faqData.sub_categories?.map((sc: any) => sc.id) || [],
         });
 
@@ -72,7 +72,6 @@ const FAQEditPage = () => {
         category_id: Number(values.category_id),
         sub_categories: values.sub_categories, // already an array of IDs
       };
-
       await updateFaq(Number(id), payload);
       toast.success("FAQ updated successfully");
       router.push("/faq-management");
@@ -118,22 +117,6 @@ const FAQEditPage = () => {
                   <div className="-mt-2 space-y-4 p-4 md:p-5">
                     <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                       <div className="w-full xl:w-1/2">
-                        <Input
-                          name="question"
-                          label="Question"
-                          placeholder="Write your question here..."
-                        />
-                      </div>
-                      <div className="w-full xl:w-1/2">
-                        <InputTextArea
-                          name="answer"
-                          label="Answer"
-                          placeholder="Enter your answer"
-                        />
-                      </div>
-                    </div>
-                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                      <div className="w-full xl:w-1/2">
                         <Select
                           searchable={true}
                           name="category_id"
@@ -154,6 +137,25 @@ const FAQEditPage = () => {
                           />
                         </div>
                       )}
+                    </div>
+
+                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                      <div className="w-full">
+                        <Input
+                          name="question"
+                          label="Question"
+                          placeholder="Write your question here..."
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                      <div className="w-full">
+                        <InputTextArea
+                          name="answer"
+                          label="Answer"
+                          placeholder="Enter your answer"
+                        />
+                      </div>
                     </div>
 
                     <Button

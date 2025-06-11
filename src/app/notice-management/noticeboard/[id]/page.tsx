@@ -33,15 +33,19 @@ const NoticeboardEditPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const noticeRes = await getNoticeboard(id as string);
+        if (id === undefined) {
+          toast.error("Invalid noticeboard ID.");
+          return;
+        }
+        const noticeRes = await getNoticeboard(Number(id));
         const noticeData = noticeRes.data.data;
         setInitialValues({
           ...noticeData,
-          category_id: noticeData.category?.id || "",
+          category_id: String(noticeData.category?.id) || "",
           sub_categories:
             noticeData.sub_categories?.map((sc: any) => sc.id) || [],
         });
-
+        console.log(noticeData.category?.id, "valueers here");
         const categoryRes = await getParentMastersByType("category");
         const catData = categoryRes.data;
         setOriginalCategory(catData);
@@ -76,7 +80,7 @@ const NoticeboardEditPage = () => {
         sub_categories: values.sub_categories,
       };
 
-      await updateNoticeboard(id as string, payload);
+      await updateNoticeboard(Number(id), payload);
       toast.success("Noticeboard updated successfully");
       router.push("/notice-management/noticeboard");
     } catch (error) {

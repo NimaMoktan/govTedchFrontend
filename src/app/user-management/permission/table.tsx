@@ -30,41 +30,6 @@ interface DataTableProps<TData, TValue> {
   handleAdd: () => void;
 }
 
-// Component to handle text truncation and read more functionality
-const TruncatedText = ({
-  text,
-  maxWords = 10,
-  isRowExpanded = false,
-}: {
-  text: string;
-  maxWords?: number;
-  isRowExpanded?: boolean;
-}) => {
-  const [isButtonExpanded, setIsButtonExpanded] = React.useState(false);
-  const words = text.split(" ");
-  const shouldTruncate = words.length > maxWords;
-  const truncatedText = shouldTruncate
-    ? words.slice(0, maxWords).join(" ") + "..."
-    : text;
-
-  // Display full text if either the row is expanded or the button is clicked
-  const isExpanded = isRowExpanded || isButtonExpanded;
-
-  return (
-    <div>
-      {isExpanded ? text : truncatedText}
-      {shouldTruncate && (
-        <button
-          onClick={() => setIsButtonExpanded(!isButtonExpanded)}
-          className="ml-1 text-blue-500 hover:underline"
-        >
-          {isButtonExpanded ? "Read less" : "Read more"}
-        </button>
-      )}
-    </div>
-  );
-};
-
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -74,39 +39,10 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
-  const [expandedRows, setExpandedRows] = React.useState<{
-    [key: string]: boolean;
-  }>({});
-
-  // Modify columns to use TruncatedText for text content
-  const modifiedColumns = React.useMemo(() => {
-    return columns.map((column) => {
-      const columnId = (column as { id?: string }).id;
-      if (columnId === "answer" || columnId === "question") {
-        return {
-          ...column,
-          cell: ({
-            row,
-          }: {
-            row: import("@tanstack/react-table").Row<TData>;
-          }) => {
-            const value = row.getValue(columnId as string);
-            return (
-              <TruncatedText
-                text={String(value)}
-                isRowExpanded={expandedRows[row.id] || false}
-              />
-            );
-          },
-        };
-      }
-      return column;
-    });
-  }, [columns, expandedRows]);
 
   const table = useReactTable({
     data,
-    columns: modifiedColumns,
+    columns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -126,31 +62,38 @@ export function DataTable<TData, TValue>({
           table.getCoreRowModel().rows.length /
             table.getState().pagination.pageSize,
         )
-      : 0;
-
-  // Toggle expansion state for a row
-  const toggleRowExpansion = (rowId: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [rowId]: !prev[rowId],
-    }));
-  };
+      : 0; // Default to 0 if data or pagination is not ready
 
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search by question"
+          placeholder="Search by Username"
           value={
-            (table.getColumn("question")?.getFilterValue() as string) ?? ""
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("question")?.setFilterValue(event.target.value)
+            table.getColumn("username")?.setFilterValue(event.target.value)
           }
           className="max-w-[250px]"
         />
-
-        <Link href="/faq-management/create">
+        <Input
+          placeholder="Search by Email"
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="ml-6 max-w-[250px]"
+        />
+        {/* <Input
+          placeholder="Search by Mobile Number"
+          value={(table.getColumn("mobile")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("mobile")?.setFilterValue(event.target.value)
+          }
+          className="ml-6 max-w-[250px]"
+        /> */}
+        <Link href="/user-management/users/create">
           <Button className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
             <BiUserPlus size={20} />
             Add New
@@ -158,7 +101,69 @@ export function DataTable<TData, TValue>({
         </Link>
       </div>
       <div className="rounded-md border">
-        <Table>
+        <table className="min-w-full border border-gray-200 bg-white">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border-b px-4 py-2">Sl No</th>
+              <th className="border-b px-4 py-2">Descriptions</th>
+              <th className="border-b px-4 py-2">Admin</th>
+              <th className="border-b px-4 py-2">Supervisor</th>
+              <th className="border-b px-4 py-2">Agent</th>
+              <th className="border-b px-4 py-2">Customer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {permissions.map((permission) => (
+              <tr key={permission.id} className="hover:bg-gray-50">
+                <td className="border-b px-4 py-2 text-center">
+                  {permission.id}
+                </td>
+                <td className="border-b px-4 py-2">{permission.description}</td>
+                <td className="border-b px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={permission.admin}
+                    onChange={() =>
+                      handleCheckboxChange(permission.id, "admin")
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </td>
+                <td className="border-b px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={permission.supervisor}
+                    onChange={() =>
+                      handleCheckboxChange(permission.id, "supervisor")
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </td>
+                <td className="border-b px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={permission.agent}
+                    onChange={() =>
+                      handleCheckboxChange(permission.id, "agent")
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </td>
+                <td className="border-b px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={permission.customer}
+                    onChange={() =>
+                      handleCheckboxChange(permission.id, "customer")
+                    }
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -183,8 +188,6 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer transition-all duration-100 hover:scale-[1.01] hover:bg-gray-100 hover:shadow-md"
-                  onClick={() => toggleRowExpansion(row.id)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -207,7 +210,7 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </Table> */}
         <div className="mr-5 flex items-center justify-end space-x-2 py-4">
           <Button
             variant="outline"

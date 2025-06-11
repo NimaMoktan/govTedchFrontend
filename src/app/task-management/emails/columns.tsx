@@ -6,30 +6,17 @@ import { ArrowUpDown } from "lucide-react";
 import { Email } from "@/types/Email";
 import { Badge } from "@/components/ui/badge";
 import { IoMdEye } from "react-icons/io";
-import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 
 export const columns = (
   handleEdit: (email: Email) => void,
   handleDelete: (email: Email) => void,
+  handleView: (email: Email) => void,
 ): ColumnDef<Email>[] => [
   {
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => <span className="font-mono">{row.getValue("id")}</span>,
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created Date",
-    cell: ({ row }) => {
-      const dateString: string = row.getValue("created_at");
-      const date = new Date(dateString);
-      return (
-        <div className="whitespace-nowrap">
-          {format(date, "MMM dd, yyyy h:mm a")}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "email",
@@ -66,9 +53,9 @@ export const columns = (
       return (
         <Badge
           variant={
-            status === "completed"
+            status === "Completed"
               ? "default"
-              : status === "in_progress"
+              : status === "In-Progress"
                 ? "secondary"
                 : "outline"
           }
@@ -93,16 +80,18 @@ export const columns = (
       const email = row.original;
       const router = useRouter();
 
-      const handleView = (email: Email) => {
-        router.push(`/task-management/emails/${email.id}/history`);
-      };
-
       return (
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleEdit(email)}
+            onClick={() => {
+              const startTime = new Date().toISOString();
+              handleEdit({ ...email, start_time: startTime });
+              router.push(
+                `/task-management/emails/${email.id}?start_time=${startTime}`,
+              );
+            }}
             className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-500"
           >
             <BsPencil className="h-4 w-4" />

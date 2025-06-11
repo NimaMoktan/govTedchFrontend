@@ -9,16 +9,16 @@ import InputTextArea from "@/components/Inputs/InputTextArea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { createNoticeboard } from "@/services/NoticeboardService";
+import { createEmail } from "@/services/EmailService";
 import { Noticeboard } from "@/types/Noticeboard";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
 import { getParentMastersByType } from "@/services/master/MasterService";
 import Select from "@/components/Inputs/Select";
 import MultiSelect from "@/components/Inputs/MultiSelect";
-import { createEmail } from "@/services/EmailService";
+import Input from "@/components/Inputs/Input";
 
 const EmailEditPage = () => {
   const [category, setCategory] = useState<Options[]>([]);
@@ -26,25 +26,32 @@ const EmailEditPage = () => {
   const [originalCategory, setOriginalCategory] = useState<any[]>([]);
   const { setIsLoading, isLoading } = useLoading();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const startTimeFromParams = searchParams.get("start_time");
 
   const handleSubmit = async (values: Noticeboard) => {
     setIsLoading(true);
     try {
-      await createEmail({
+      const updatedValues = {
         ...values,
         category: Number(values.category_id),
-      })
+        end_time:
+          values.status === "Completed" && !values.end_time
+            ? new Date().toISOString()
+            : values.end_time,
+      };
+      await createEmail(updatedValues)
         .then((response) => {
           toast.success(response.data.message, {
             duration: 1500,
             position: "top-right",
           });
           setTimeout(() => {
-            router.push("/task-management/email");
+            router.push("/task-management/emails");
           }, 2000);
         })
         .catch((e) => {
-          toast.error("Error while Email Notice.");
+          toast.error("Error while updating Email.");
         })
         .finally(() => setIsLoading(false));
     } catch (error) {
@@ -90,25 +97,27 @@ const EmailEditPage = () => {
           <div className="flex flex-col gap-2">
             <Formik
               initialValues={{
-                topic: "",
-                description: "",
+                email: "",
+                query: "",
+                status: "",
+                agent: "",
                 category_id: "",
                 sub_categories: [],
-                priority: "",
+                start_time: startTimeFromParams || new Date().toISOString(),
+                end_time: "",
+                remarks: "",
                 is_active: true,
               }}
               validationSchema={Yup.object({
-                topic: Yup.string()
-                  .required("Question is required")
-                  .min(3, "Must be at least 3 characters"),
-                description: Yup.string()
+                query: Yup.string().min(3, "Must be at least 3 characters"),
+                remarks: Yup.string()
                   .required("Answer is required")
                   .min(3, "Must be at least 3 characters"),
                 category_id: Yup.string().required("Select Category"),
-                priority: Yup.string().required("Select Priority"),
+                status: Yup.string().required("Select Priority"),
               })}
-              validateOnChange={true} // Enable validation on change
-              validateOnBlur={true} // Optional: Enable validation on blur as well
+              validateOnChange={true}
+              validateOnBlur={true}
               onSubmit={(values) => handleSubmit(values)}
             >
               {({ errors, setFieldValue, setFieldTouched, validateForm }) => {
@@ -117,21 +126,63 @@ const EmailEditPage = () => {
                     <div className="-mt-2 space-y-4 p-4 md:p-5">
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
-                          <InputTextArea
-                            name="topic"
-                            label="Topic"
-                            placeholder="Write your question here....."
+                          <Input
+                            name="email"
+                            label="Email"
+                            placeholder="Enter your Email here...."
+                            disabled={true}
                           />
                         </div>
                         <div className="w-full xl:w-1/2">
-                          <InputTextArea
-                            label="Description/Body"
-                            placeholder="Enter your answer"
-                            name="description"
+                          <Input
+                            name="date"
+                            label="Date"
+                            placeholder="Email Date will be here"
+                            disabled={true}
                           />
                         </div>
                       </div>
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full">
+                          <InputTextArea
+                            name="query"
+                            label="Query"
+                            placeholder="Your question will be here....."
+                            disabled={true}
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full">
+                          <InputTextArea
+                            label="Remarks"
+                            placeholder="Enter your Remarks here...."
+                            name="remarks"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                        <div className="w-full xl:w-1/2">
+                          <Select
+                            label="Status"
+                            name="status"
+                            options={[
+                              { value: "Pending", text: "Pending" },
+                              { value: "In-Progress", text: "In-Progress" },
+                              { value: "On-Hold", text: "On-Hold" },
+                              { value: "Completed", text: "Completed" },
+                            ]}
+                            onValueChange={(value: string) => {
+                              setFieldValue("status", value);
+                              if (value === "Completed") {
+                                setFieldValue(
+                                  "end_time",
+                                  new Date().toISOString(),
+                                );
+                              }
+                            }}
+                          />
+                        </div>
                         <div className="w-full xl:w-1/2">
                           <Select
                             searchable={true}
@@ -139,6 +190,7 @@ const EmailEditPage = () => {
                             name="category_id"
                             options={category}
                             onValueChange={(value: string) => {
+                              setFieldValue("category_id", value);
                               loadSubCategory(Number(value));
                             }}
                           />
@@ -149,36 +201,49 @@ const EmailEditPage = () => {
                               label="Sub Category"
                               name="sub_categories"
                               options={subCategory}
-
-                              // onValueChange={(value: string) => {}}
                             />
                           </div>
                         )}
-                        <div className="w-full xl:w-1/2">
-                          <Select
-                            label="Priority"
-                            name="priority"
-                            options={[
-                              { value: "LOW", text: "Low" },
-                              { value: "MEDIUM", text: "Medium" },
-                              { value: "HIGH", text: "High" },
-                            ]}
-                            onValueChange={(value: string) => {}}
+                      </div>
+                      <div className="mb-5 flex flex-col gap-6 pb-5 xl:flex-row">
+                        <div className="w-full xl:w-1/3">
+                          <Input
+                            name="agent"
+                            label="Agent"
+                            placeholder="Agent 1"
+                            disabled={true}
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/3">
+                          <Input
+                            name="start_time"
+                            label="Start Time"
+                            value={
+                              startTimeFromParams || new Date().toISOString()
+                            }
+                            disabled={true}
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/3">
+                          <Input
+                            name="end_time"
+                            label="End Time"
+                            placeholder="End time will be set on completion"
+                            disabled={true}
                           />
                         </div>
                       </div>
-
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="mx-2 rounded-full"
+                        className="mt-4.5 rounded-full"
                       >
                         {isLoading ? "Submitting..." : "Submit"}
                       </Button>
-                      <Link href="/notice-management/noticeboard">
+                      <Link href="/task-management/emails">
                         <Button
                           type="reset"
-                          variant={`destructive`}
+                          variant="destructive"
                           className="mx-2 rounded-full"
                         >
                           Back

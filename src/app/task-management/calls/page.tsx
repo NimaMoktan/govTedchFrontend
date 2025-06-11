@@ -254,7 +254,7 @@ const Calls = () => {
     setIsEditing(true);
     setModalType("form"); // Set modal type first
     setShowModal("block"); // Then show modal
-    // Remove toggleModal("form") since we're manually setting states
+    // toggleModal("form");
   };
 
   useEffect(() => {
@@ -273,7 +273,7 @@ const Calls = () => {
                 showModal === "block" ? "block" : "hidden"
               }`}
             >
-              <div className="max-h-full w-full max-w-5xl rounded-md bg-white p-6 shadow-lg">
+              <div className="max-h-full w-full rounded-md bg-white p-6 shadow-lg">
                 <Formik
                   enableReinitialize={true}
                   initialValues={{
@@ -325,6 +325,7 @@ const Calls = () => {
                             </label>
                             <div className="border-gray-300 bg-gray-100 text-sm text-black">
                               <Input
+                                label={`Phone number`}
                                 name="phone_no"
                                 type="number"
                                 placeholder="Enter phone number"

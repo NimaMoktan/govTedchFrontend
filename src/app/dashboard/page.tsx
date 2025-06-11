@@ -1,41 +1,50 @@
-"use client"
+"use client";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useState, useEffect } from "react";
+import Dashboard from "./report";
 
 type UserDetails = {
   fullName: string;
   email: string;
   imageUrl: string;
-  roles: string[];  
+  roles: string[];
 };
 
-export default function Home () {
+export default function Home() {
   const [userDetails, setUserDetails] = useState<UserDetails>({
-      fullName: "Loading...",
-      email: "Loading...",
-      imageUrl: "/images/user/default.jpg",
-      roles: [],  
-    });
+    fullName: "Loading...",
+    email: "Loading...",
+    imageUrl: "/images/user/default.jpg",
+    roles: [],
+  });
 
   useEffect(() => {
-      const storedUser = localStorage.getItem("userDetails");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        const userRoles = parsedUser.userRole?.map((role: { roles: { code: string } }) => role.roles.code) || [];
-        console.log("These are the details for the currently logged in user: ", parsedUser);
-        setUserDetails({
-          fullName: parsedUser.fullName,
-          email: parsedUser.email,
-          imageUrl: "/images/user/jigme.jpg",
-          roles: userRoles,  
-        });
-      }
-    }, []);
+    const storedUser = localStorage.getItem("userDetails");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      const userRoles =
+        parsedUser.userRole?.map(
+          (role: { roles: { code: string } }) => role.roles.code,
+        ) || [];
+      console.log(
+        "These are the details for the currently logged in user: ",
+        parsedUser,
+      );
+      setUserDetails({
+        fullName: parsedUser.fullName,
+        email: parsedUser.email,
+        imageUrl: "/images/user/jigme.jpg",
+        roles: userRoles,
+      });
+    }
+  }, []);
 
   return (
     <DefaultLayout>
       <h3>
-        Welcome To {userDetails.roles.slice(0, 3)
+        Welcome To{" "}
+        {userDetails.roles
+          .slice(0, 3)
           .map((role) => {
             const roleMap: Record<string, string> = {
               ADM: "Superadmin",
@@ -54,9 +63,10 @@ export default function Home () {
 
             return roleMap[role] || "Unknown";
           })
-          .join(" & ")} Dashboard
+          .join(" & ")}{" "}
+        Dashboard
       </h3>
+      <Dashboard />
     </DefaultLayout>
-
   );
 }

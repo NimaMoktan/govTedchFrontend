@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
-import { Noticeboard } from "@/types/Noticeboard";
+import ExpandCell from "@/components/common/ExpandCell";
 import { FAQ } from "@/types/FAQ";
 
 export const columns = (
@@ -20,11 +20,11 @@ export const columns = (
   },
 
   {
-    header: "Question & Answer",
+    header: "question",
     cell: ({ row }) => (
       <div>
         <p className="text-base font-medium">{row.original.question}</p>
-        <p className="text-sm text-gray-500">{row.original.answer}</p>
+        <ExpandCell answer={row.original.answer} />
       </div>
     ),
   },

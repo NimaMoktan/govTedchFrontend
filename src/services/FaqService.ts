@@ -24,10 +24,7 @@ export const createFaq = async (data: FAQ) => {
 export const getFaq = async (id: number) => api.get(`/faq-management/${id}/`);
 
 export const updateFaq = async (id: number, data: FAQ) => {
-  const modifiedPayload = {
-    ...data,
-  };
-  return api.post(`/faq-management/${id}/`, modifiedPayload);
+  return api.patch(`/faq-management/${id}/`, data);
 };
 export const deleteFaq = async (id: number) =>
   api.delete(`faq-management/${id}/`);

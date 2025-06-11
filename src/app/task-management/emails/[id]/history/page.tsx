@@ -1,134 +1,154 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Email, EmailHistory } from "@/types/Email";
-import { getEmailHistory } from "@/services/EmailService";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+import { useLoading } from "@/context/LoadingContext";
+import { Email } from "@/types/Email";
+import { getEmailById } from "@/services/EmailService";
+import { getParentMastersByType } from "@/services/master/MasterService";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { format } from "date-fns";
 
-export default function EmailHistoryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const router = useRouter();
+interface Category {
+  id: number;
+  name: string;
+  parent: { id: number } | null;
+}
+
+const EmailHistoryPage = () => {
   const [email, setEmail] = useState<Email | null>(null);
-  const [history, setHistory] = useState<EmailHistory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const { setIsLoading } = useLoading();
+  const router = useRouter();
+  const params = useParams();
+  const emailId = params.id as string;
 
   useEffect(() => {
-    const loadData = async () => {
+    const fetchEmailAndCategories = async () => {
+      setIsLoading(true);
       try {
-        const [emailResponse, historyResponse] = await Promise.all([
-          getEmail(params.id),
-          getEmailHistory(params.id),
-        ]);
+        // Fetch email details
+        const emailResponse = await getEmailById(Number(emailId));
         setEmail(emailResponse.data);
-        setHistory(historyResponse.data);
+
+        // Fetch categories
+        const categoryResponse = await getParentMastersByType("category");
+        setCategories(categoryResponse.data);
       } catch (error) {
-        toast.error("Failed to load email history");
-        router.push("/task-management/emails");
+        console.error("Error fetching data:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    loadData();
-  }, [params.id]);
+    fetchEmailAndCategories();
+  }, [emailId, setIsLoading]);
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (!email) return <div className="p-8 text-center">Email not found</div>;
+  const getCategoryName = (categoryId: number) => {
+    const category = categories.find((cat) => cat.id === categoryId);
+    return category ? category.name : "N/A";
+  };
+
+  const getSubCategoryNames = (subCategoryIds: number[]) => {
+    return (
+      subCategoryIds
+        .map((id) => {
+          const subCategory = categories.find((cat) => cat.id === id);
+          return subCategory ? subCategory.name : null;
+        })
+        .filter((name) => name !== null)
+        .join(", ") || "N/A"
+    );
+  };
+
+  const calculateTotalTime = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return "N/A";
+    try {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      const diffMs = end.getTime() - start.getTime();
+      if (diffMs < 0) return "Invalid";
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      return `${hours}h ${minutes}m`;
+    } catch {
+      return "Invalid";
+    }
+  };
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Email History" />
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <h3 className="text-lg font-medium">Current Details</h3>
-                <Link href={`/task-management/emails/${email.id}`}>
-                  <Button variant="outline">Edit Email</Button>
-                </Link>
+      <Breadcrumb parentPage="Email Management" pageName="Email History" />
+      <Card className="min-h-screen w-full">
+        <CardContent className="min-h-screen max-w-full overflow-x-auto">
+          <div className="flex flex-col gap-2">
+            <h2 className="mb-4 text-xl font-semibold">
+              Email History for ID: {emailId}
+            </h2>
+            {email ? (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Total Time Taken</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Sub-Category</TableHead>
+                      <TableHead>Query</TableHead>
+                      <TableHead>Remarks</TableHead>
+                      <TableHead>Agent</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        {email.created_at
+                          ? format(new Date(email.created_at), "PPp")
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {calculateTotalTime(email.start_time, email.end_time)}
+                      </TableCell>
+                      <TableCell>
+                        {getCategoryName(email.category_id)}
+                      </TableCell>
+                      <TableCell>
+                        {getSubCategoryNames(email.sub_categories)}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {email.query || "N/A"}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {email.remarks || "N/A"}
+                      </TableCell>
+                      <TableCell>{email.agent || "Unassigned"}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{email.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  <p className="font-medium">{email.status}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Agent</p>
-                  <p className="font-medium">{email.agent}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Created At</p>
-                  <p className="font-medium">
-                    {format(new Date(email.created_at), "MMM dd, yyyy h:mm a")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="mb-4 text-lg font-medium">History</h3>
-            <div className="space-y-4">
-              {history.length === 0 ? (
-                <p className="text-center text-gray-500">
-                  No history available
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {history.map((item) => (
-                    <div key={item.id} className="rounded border p-4">
-                      <div className="flex justify-between">
-                        <p className="font-medium">
-                          {format(
-                            new Date(item.changed_at),
-                            "MMM dd, yyyy h:mm a",
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Changed by: {item.changed_by || "System"}
-                        </p>
-                      </div>
-                      <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {Object.entries(item.changes).map(([field, change]) => (
-                          <div key={field}>
-                            <p className="text-sm font-medium capitalize">
-                              {field.replace("_", " ")}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm text-red-500 line-through">
-                                {change.old}
-                              </p>
-                              <span>→</span>
-                              <p className="text-sm text-green-500">
-                                {change.new}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            ) : (
+              <p>No email data available.</p>
+            )}
+            <Link href="/task-management/emails">
+              <Button variant="destructive" className="mt-4 rounded-full">
+                Back
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </DefaultLayout>
   );
-}
+};
+
+export default EmailHistoryPage;

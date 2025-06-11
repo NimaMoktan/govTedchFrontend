@@ -1,4 +1,3 @@
-// app/task-management/emails/table.tsx
 "use client";
 import * as React from "react";
 import {
@@ -67,6 +66,17 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Link href="/task-management/emails/create">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAdd}
+            className="ml-4 flex items-center gap-1"
+          >
+            <BiUserPlus className="h-4 w-4" />
+            Add Email
+          </Button>
+        </Link>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -94,6 +104,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

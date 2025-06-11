@@ -5,6 +5,7 @@ import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 import { Noticeboard } from "@/types/Noticeboard";
+import ExpandCell from "@/components/common/ExpandCell";
 
 export const columns = (
   handleEdit: (noticeboard: Noticeboard) => void,
@@ -19,15 +20,13 @@ export const columns = (
   },
 
   {
-    header: "Topic & Description",
+    header: "topic",
     cell: ({ row }) => (
       <div className="group">
         <p className="text-base font-medium transition-all duration-200 group-hover:text-blue-600">
           {row.original.topic}
         </p>
-        <p className="text-sm text-gray-500 transition-all duration-200 group-hover:text-gray-700">
-          {row.original.description}
-        </p>
+        <ExpandCell answer={row.original.description} />
       </div>
     ),
   },

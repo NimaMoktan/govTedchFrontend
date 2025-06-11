@@ -1,5 +1,6 @@
 import { Email } from "@/types/Email";
 import api from "@/lib/axios";
+import axios from "axios";
 
 const mockEmails: Email[] = [
   {
@@ -27,7 +28,9 @@ const mockEmails: Email[] = [
     created_at: "2023-05-16T14:30:00Z",
   },
 ];
-
+export const getEmailById = async (id: number) => {
+  return await axios.get(`/api/emails/${id}`);
+};
 export const getEmails = async () => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return { data: mockEmails };
@@ -40,10 +43,13 @@ export const getEmail = async (id: string) => {
   return { data: email };
 };
 
-export const createEmail = async (data: Email) => {
-  return api.post("task-management/", data);
-};
+// export const createEmail = async (data: Email) => {
+//   return api.post("task-management/", data);
+// };
 
+export const createEmail = async (emailData: Email) => {
+  return await axios.post("/api/emails", emailData);
+};
 // export const updateEmail = async (id: string, data: Email) => {
 //   await new Promise((resolve) => setTimeout(resolve, 500));
 //   const index = mockEmails.findIndex((e) => e.id === id);
