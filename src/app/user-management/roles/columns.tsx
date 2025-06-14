@@ -25,20 +25,6 @@ export const columns = (
   },
 
   {
-    accessorKey: "code",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Code
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -55,11 +41,11 @@ export const columns = (
 
   {
     id: "actions",
-
+    header: "Actions",
     cell: ({ row }) => {
       return (
         <>
-          <div className="flex justify-end gap-2">
+          <div className="flex  gap-2">
             <button
               onClick={() => handleDelete(row.original)}
               className="flex items-center gap-1 rounded border border-red-300 px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-50"

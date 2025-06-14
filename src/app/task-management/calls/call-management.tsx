@@ -6,9 +6,8 @@ import { columns } from "./columns";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
-import { Email, History } from "@/types/Email";
-import { getEmails, deleteEmail } from "@/services/EmailService";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { Call, History } from "@/types/Call";
+import { getCalls, deleteCall } from "@/services/CallService";
 import {
   Dialog,
   DialogContent,
@@ -18,18 +17,18 @@ import {
 import { format } from "date-fns";
 import { Calendar, Clock, User, Tag, MessageSquare } from "lucide-react";
 
-const EmailManagement = () => {
-  const [emailList, setEmailList] = useState<Email[]>([]);
-  const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+const CallManagement = () => {
+  const [callList, setCallList] = useState<Call[]>([]);
+  const [selectedCall, setSelectedCall] = useState<Call | null>(null);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const router = useRouter();
   const { setIsLoading } = useLoading();
 
   // Enhanced demo data with proper assignment tracking
-  const demoEmails: Email[] = [
+  const democalls: Call[] = [
     {
       id: 1,
-      email: "customer1@example.com",
+      phone_number: "1760981245",
       query: "Issue with payment processing",
       status: "In-Progress",
       agent: "Agent B",
@@ -73,7 +72,7 @@ const EmailManagement = () => {
     },
     {
       id: 2,
-      email: "customer2@example.com",
+      phone_number: "17856245892",
       query: "Product delivery status",
       status: "Completed",
       agent: "Agent B",
@@ -104,7 +103,7 @@ const EmailManagement = () => {
     },
     {
       id: 3,
-      email: "customer3@example.com",
+      phone_number: "1758654555",
       query: "Technical support needed",
       status: "Pending",
       agent: "Agent D",
@@ -148,74 +147,68 @@ const EmailManagement = () => {
     },
   ];
 
-  const handleEditEmail = (email: Email) => {
-    router.push(`/task-management/emails/${email.id}`);
+  const handleEditCall = (call: call) => {
+    router.push(`/task-management/calls/${call.id}`);
   };
 
-  const handleViewEmail = (email: Email) => {
+  const handleViewCall = (call: call) => {
     // Process the history to ensure proper assignment chain is displayed
-    const processedEmail = {
-      ...email,
+    const processedCall = {
+      ...call,
       history:
-        email.history?.map((entry, index) => ({
+        call.history?.map((entry, index) => ({
           ...entry,
           assigned_by:
-            index === 0 ? "System" : email.history[index - 1].agent || "System",
-          previous_agent: index > 0 ? email.history[index - 1].agent : null,
+            index === 0 ? "System" : call.history[index - 1].agent || "System",
+          previous_agent: index > 0 ? call.history[index - 1].agent : null,
           assignment_chain:
             index === 0
               ? ["System"]
               : [
-                  ...(email.history[index - 1].assignment_chain || ["System"]),
-                  email.history[index - 1].agent,
+                  ...(call.history[index - 1].assignment_chain || ["System"]),
+                  call.history[index - 1].agent,
                 ],
         })) || [],
     };
-    setSelectedEmail(processedEmail);
+    setSelectedCall(processedCall);
     setIsHistoryDialogOpen(true);
   };
 
-  const fetchEmails = async () => {
+  const fetchCalls = async () => {
     setIsLoading(true);
     try {
-      const response = await getEmails();
+      const response = await getCalls();
       // Process the API response to ensure proper assignment tracking
-      const processedEmails = response.data.map((email: Email) => ({
-        ...email,
+      const processedCalls = response.data.map((call: Call) => ({
+        ...call,
         history:
-          email.history?.map((entry, index) => ({
+          call.history?.map((entry, index) => ({
             ...entry,
             assigned_by:
               index === 0
                 ? "System"
-                : email.history[index - 1].agent || "System",
-            previous_agent: index > 0 ? email.history[index - 1].agent : null,
+                : call.history[index - 1].agent || "System",
+            previous_agent: index > 0 ? call.history[index - 1].agent : null,
             assignment_chain:
               index === 0
                 ? ["System"]
                 : [
-                    ...(email.history[index - 1].assignment_chain || [
-                      "System",
-                    ]),
-                    email.history[index - 1].agent,
+                    ...(call.history[index - 1].assignment_chain || ["System"]),
+                    call.history[index - 1].agent,
                   ],
           })) || [],
       }));
-      setEmailList([...demoEmails, ...processedEmails]);
+      setCallList([...demoCalls, ...processedCalls]);
     } catch (error) {
-      console.error("Error fetching emails:", error);
-      setEmailList(demoEmails);
-      Swal.fire(
-        "Error!",
-        "Failed to fetch emails. Showing demo data.",
-        "error",
-      );
+      console.error("Error fetching calls:", error);
+      setCallList(democalls);
+      Swal.fire("Error!", "Failed to fetch calls. Showing demo data.", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (email: Email) => {
+  const handleDelete = async (call: Call) => {
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -228,17 +221,17 @@ const EmailManagement = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteEmail(email.id);
-        await Swal.fire("Deleted!", "The email has been deleted.", "success");
-        fetchEmails();
+        await deleteCall(call.id);
+        await Swal.fire("Deleted!", "The call has been deleted.", "success");
+        fetchCalls();
       } catch (error) {
-        Swal.fire("Error!", "Failed to delete email.", "error");
+        Swal.fire("Error!", "Failed to delete Calls.", "error");
       }
     }
   };
 
   useEffect(() => {
-    fetchEmails();
+    fetchCalls();
   }, []);
 
   return (
@@ -246,30 +239,30 @@ const EmailManagement = () => {
       <Card className="w-full">
         <CardContent className="max-w-full overflow-x-auto p-4">
           <DataTable
-            columns={columns(handleEditEmail, handleDelete, handleViewEmail)}
-            data={emailList}
-            handleAdd={() => router.push("/task-management/emails/create")}
+            columns={columns(handleEditCall, handleDelete, handleViewCall)}
+            data={callList}
+            handleAdd={() => router.push("/call-management/calls/create")}
           />
         </CardContent>
       </Card>
-      {selectedEmail && (
+      {selectedCall && (
         <Dialog
           open={isHistoryDialogOpen}
           onOpenChange={(open) => {
             setIsHistoryDialogOpen(open);
-            if (!open) setSelectedEmail(null);
+            if (!open) setSelectedCall(null);
           }}
         >
           <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-gray-800">
-                Email History for {selectedEmail.email} (ID: {selectedEmail.id})
+                Call History for {selectedCall.call} (ID: {selectedCall.id})
               </DialogTitle>
             </DialogHeader>
             <div className="mt-6">
-              {selectedEmail.history && selectedEmail.history.length > 0 ? (
+              {selectedCall.history && selectedCall.history.length > 0 ? (
                 <div className="space-y-4">
-                  {selectedEmail.history.map((entry, index) => (
+                  {selectedCall.history.map((entry, index) => (
                     <div
                       key={entry.id || index}
                       className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
@@ -309,8 +302,8 @@ const EmailManagement = () => {
                             <Tag className="mr-1 h-4 w-4 text-gray-500" />
                             <span className="text-sm text-gray-600">
                               <strong>Status:</strong>{" "}
-                              {index === selectedEmail.history.length - 1
-                                ? selectedEmail.status
+                              {index === selectedCall.history.length - 1
+                                ? selectedCall.status
                                 : "N/A"}
                             </span>
                           </div>
@@ -365,7 +358,7 @@ const EmailManagement = () => {
                 </div>
               ) : (
                 <p className="text-center text-gray-600">
-                  No history available for this email.
+                  No history available for this call.
                 </p>
               )}
             </div>
@@ -376,4 +369,4 @@ const EmailManagement = () => {
   );
 };
 
-export default EmailManagement;
+export default CallManagement;

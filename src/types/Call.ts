@@ -1,4 +1,4 @@
-export interface History {
+export interface Call {
   id: number;
   date: string;
   total_time: string;
@@ -10,8 +10,8 @@ export interface History {
   assigned_by: string;
 }
 
-export interface Email {
-  email: string;
+export interface Call {
+  phone_number: string;
   query: string;
   status: string;
   agent: string;

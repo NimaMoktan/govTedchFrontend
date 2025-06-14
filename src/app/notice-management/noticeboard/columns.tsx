@@ -18,9 +18,38 @@ export const columns = (
       return <p>{row.index + 1}</p>;
     },
   },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="transition-all duration-200 hover:bg-gray-100 hover:text-blue-600"
+        >
+          Date
+          <ArrowUpDown className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const dateValue = row.getValue("created_at");
+      return dateValue ? (
+        <span>
+          {new Date(dateValue).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </span>
+      ) : (
+        <span>-</span>
+      );
+    },
+  },
 
   {
-    header: "topic",
+    header: "Topic",
     cell: ({ row }) => (
       <div className="group">
         <p className="text-base font-medium transition-all duration-200 group-hover:text-blue-600">
@@ -40,7 +69,7 @@ export const columns = (
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="transition-all duration-200 hover:bg-gray-100 hover:text-blue-600"
         >
-          Category & Sub-Categories
+          Category
           <ArrowUpDown className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
         </Button>
       );

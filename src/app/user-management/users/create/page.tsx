@@ -79,7 +79,7 @@ const UsersCreate = () => {
                 first_name: "",
                 last_name: "",
                 email: "",
-                mobile_no: "",
+                mobile_number: "",
                 role: "",
                 is_active: true,
               }}
@@ -98,7 +98,9 @@ const UsersCreate = () => {
                   .required("Email address is required")
                   .email("Invalid email address"),
                 role: Yup.string().required("Select Role"),
-                mobile_no: Yup.string().min(8, "Enter at least 8 characters"),
+                mobile_number: Yup.string()
+                  .required("Mobile number is required")
+                  .min(8, "Enter at least 8 characters"),
               })}
               onSubmit={(values, { resetForm }) => {
                 handleSubmit(values, resetForm);
@@ -161,29 +163,20 @@ const UsersCreate = () => {
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
                           <Input
-                            label="Phone Number"
-                            type="text"
-                            placeholder="Enter phone number"
-                            name="mobile_no"
-                          />
-                        </div>
-
-                        <div className="w-full xl:w-1/2">
-                          <Input
                             label="CID Number"
                             type="text"
                             placeholder="Enter CID number"
                             name="cid"
                           />
                         </div>
-
-                        {/* <div className="w-full xl:w-1/2">
-                        <MultiSelect
-                          label="Role"
-                          name="userRoles"
-                          options={roleDropdown}
-                        />
-                      </div> */}
+                        <div className="w-full xl:w-1/2">
+                          <Input
+                            label="Phone Number"
+                            type="text"
+                            placeholder="Enter phone number"
+                            name="mobile_number"
+                          />
+                        </div>
                       </div>
                       <Button
                         type="submit"

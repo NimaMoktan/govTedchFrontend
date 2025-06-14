@@ -73,6 +73,7 @@ export const columns = (
       return <span>{agent || "Unassigned"}</span>;
     },
   },
+
   {
     id: "actions",
     header: "Action",
@@ -86,11 +87,8 @@ export const columns = (
             variant="outline"
             size="sm"
             onClick={() => {
-              const startTime = new Date().toISOString();
-              handleEdit({ ...email, start_time: startTime });
-              router.push(
-                `/task-management/emails/${email.id}?start_time=${startTime}`,
-              );
+              handleEdit(email);
+              router.push(`/task-management/emails/${email.id}`);
             }}
             className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-500"
           >

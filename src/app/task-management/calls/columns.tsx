@@ -3,138 +3,120 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { BsTrash, BsPencil } from "react-icons/bs";
 import { ArrowUpDown } from "lucide-react";
+import { Call } from "@/types/Call";
+import { Badge } from "@/components/ui/badge";
 import { IoMdEye } from "react-icons/io";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export type callGroup = {
-  id: number;
-  phone_no: number;
-  time_stamp: number;
-  query: string;
-  category: string;
-  subcategory: string;
-  status: string;
-  agent: string;
-  remarks: string;
-  active: string;
-};
-export interface CallHistory {
-  id: number;
-  call_id: number;
-  changed_at: number;
-  changed_by: string;
-  query: string;
-  remarks: string;
-  category: string;
-  subcategory: string;
-}
 export const columns = (
-  handleEdit: (callGroup: callGroup) => void,
-  handleDelete: (id: callGroup) => void,
-  handleView: (callGroup: callGroup) => void,
-): ColumnDef<callGroup>[] => [
+  handleEdit: (call: Call) => void,
+  handleDelete: (call: Call) => void,
+  handleView: (call: Call) => void,
+): ColumnDef<Call>[] => [
   {
     accessorKey: "id",
-    header: "Sl No",
-    cell: ({ row }) => {
-      return <span className="font-medium">{row.index + 1}</span>;
-    },
+    header: "ID",
+    cell: ({ row }) => <span className="font-mono">{row.getValue("id")}</span>,
   },
   {
-    accessorKey: "phone_no",
+    accessorKey: "phone_number",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-0 hover:bg-transparent"
+          className="px-0"
         >
-          Phone Number
+          Phone_Number
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      const phoneNo = row.getValue("phone_no") as number;
-      return <span className="font-medium">{phoneNo}</span>;
-    },
-  },
-  {
-    accessorKey: "time_stamp",
-    header: "Timestamp",
-    cell: ({ row }) => {
-      const timestamp = row.getValue("time_stamp") as number;
-      return <span>{new Date(timestamp).toLocaleString()}</span>;
+      const call: string = row.getValue("phone_number");
+      return <span className="font-medium">{call}</span>;
     },
   },
   {
     accessorKey: "query",
     header: "Query",
     cell: ({ row }) => {
-      const query = row.getValue("query") as string;
-      return <span className="line-clamp-1">{query}</span>;
+      const query: string = row.getValue("query");
+      return <div className="max-w-[200px] truncate">{query}</div>;
     },
   },
-
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      let statusClass = "";
-      switch (status) {
-        case "Pending":
-          statusClass = "bg-yellow-100 text-yellow-800";
-          break;
-        case "Assigned":
-          statusClass = "bg-blue-100 text-blue-800";
-          break;
-        case "In Progress":
-          statusClass = "bg-purple-100 text-purple-800";
-          break;
-        case "Completed":
-          statusClass = "bg-green-100 text-green-800";
-          break;
-        default:
-          statusClass = "bg-gray-100 text-gray-800";
-      }
+      const status: string = row.getValue("status");
       return (
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass}`}
+        <Badge
+          variant={
+            status === "Completed"
+              ? "default"
+              : status === "In-Progress"
+                ? "secondary"
+                : "outline"
+          }
         >
-          {status}
-        </span>
+          {status.replace("_", " ")}
+        </Badge>
       );
     },
   },
   {
     accessorKey: "agent",
     header: "Agent",
+    cell: ({ row }) => {
+      const agent: string = row.getValue("agent");
+      return <span>{agent || "Unassigned"}</span>;
+    },
+  },
+  {
+    accessorKey: "assigned_by",
+    header: "Assigned By",
+    cell: ({ row }) => {
+      const assignedBy: string = row.getValue("assigned_by");
+      return <span>{assignedBy || "System"}</span>;
+    },
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "Action",
     cell: ({ row }) => {
+      const call = row.original;
+      const router = useRouter();
+
       return (
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleEdit(row.original)}
-            className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              handleEdit(call);
+              router.push(`/task-management/calls/${call.id}`);
+            }}
+            className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-500"
           >
-            <BsPencil size={16} />
-          </button>
-          <button
-            onClick={() => handleDelete(row.original)}
-            className="flex items-center gap-1 rounded border border-red-300 px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-50"
+            <BsPencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDelete(call)}
+            className="flex items-center gap-1 rounded border border-red-300 bg-white px-3 py-1 text-sm text-red-600 transition-colors hover:bg-red-500"
           >
-            <BsTrash size={16} />
-          </button>
-          <button
-            onClick={() => handleView(row.original)}
-            className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50"
+            <BsTrash className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleView(call)}
+            className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-500"
           >
-            <IoMdEye size={16} />
-          </button>
+            <IoMdEye className="h-4 w-4" />
+          </Button>
         </div>
       );
     },

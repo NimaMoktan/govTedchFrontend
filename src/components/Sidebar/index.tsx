@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
@@ -16,15 +15,9 @@ import { IoIosInformationCircle } from "react-icons/io";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { RiShapeFill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
-
-import {
-  BiSolidBox,
-  BiSolidBadgeCheck,
-  BiUserPlus,
-  BiLogoCreativeCommons,
-  BiSolidGasPump,
-} from "react-icons/bi";
-import { CiCalculator1, CiChat2 } from "react-icons/ci";
+import { TbReportAnalytics } from "react-icons/tb";
+import { FaUserCheck } from "react-icons/fa";
+import { LuPhoneCall } from "react-icons/lu";
 
 type UserDetails = {
   fullName: string;
@@ -42,12 +35,14 @@ const menuGroups = [
   {
     menuItems: [
       {
-        icon: <GrDashboard className="fill-current" size={22} />,
+        icon: (
+          <GrDashboard className="fill-current" size={22} color="#F3F4F6" />
+        ),
         label: "Dashboard",
         route: "/dashboard",
       },
       {
-        icon: <FaDatabase className="fill-current" size={22} color="#ffd166" />,
+        icon: <FaDatabase className="fill-current" size={22} color="#22D3EE" />,
         label: "Data Management",
         route: "#",
         role: ["ADM"],
@@ -83,7 +78,7 @@ const menuGroups = [
         ],
       },
       {
-        icon: <FaUser className="fill-current" size={22} color="#ec782b" />,
+        icon: <FaUser className="fill-current" size={22} color="#A3E635" />,
         label: "User Management",
         route: "#",
         role: ["ADM"],
@@ -112,7 +107,7 @@ const menuGroups = [
         ],
       },
       {
-        icon: <FaTasks className="fill-current" size={22} color="#55cd00" />,
+        icon: <FaTasks className="fill-current" size={22} color="#F87171" />,
         label: "Task Management",
         route: "#",
         role: ["ADM"],
@@ -138,7 +133,7 @@ const menuGroups = [
           <IoIosInformationCircle
             className="fill-current"
             size={22}
-            color="#46cfef"
+            color="#FACC15"
           />
         ),
         label: "Notice Management",
@@ -173,11 +168,41 @@ const menuGroups = [
           <LuMessagesSquare
             className="fill-current"
             size={22}
-            color="#e96976"
+            color="#C4B5FD"
           />
         ),
         label: "FAQ",
         route: "/faq-management",
+        role: ["ADM"],
+      },
+
+      {
+        icon: (
+          <TbReportAnalytics
+            className="fill-current"
+            size={22}
+            color="#FDBA74"
+          />
+        ),
+        label: "Report",
+        route: "/report",
+        role: ["ADM"],
+      },
+      {
+        icon: (
+          <FaUserCheck className="fill-current" size={22} color="#CDDC39  " />
+        ),
+        label: "User Attendance",
+        route: "/user-attendance",
+        role: ["ADM"],
+      },
+
+      {
+        icon: (
+          <LuPhoneCall className="fill-current" size={22} color="#4CAF50 " />
+        ),
+        label: "Contact Numbers",
+        route: "/contact-numbers",
         role: ["ADM"],
       },
     ],

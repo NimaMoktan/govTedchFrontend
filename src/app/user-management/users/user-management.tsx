@@ -54,12 +54,7 @@ const UserManagement = () => {
       setIsLoading(true);
       await deleteUser(user.id); // Make sure this function returns a promise
       toast.success("User deleted successfully");
-
-      // Option 1: Fetch fresh data
       await fetchUsers();
-
-      // OR Option 2: Optimistically update local state if you're maintaining users state
-      // setUsers(prevUsers => prevUsers.filter(u => u.id !== user.id));
     } catch (error) {
       console.error("Delete error:", error); // Log the error for debugging
       toast.error(
@@ -72,7 +67,6 @@ const UserManagement = () => {
     }
   };
 
-  // Make sure fetchUsers is properly defined and stable
   const fetchUsers = useCallback(async () => {
     try {
       const response = await getUsers(); // Your API call

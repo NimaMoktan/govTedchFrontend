@@ -101,18 +101,16 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center py-4">
-        {searchColumnExists && (
-          <Input
-            placeholder={`Search by ${searchColumn}`}
-            value={
-              (table.getColumn(searchColumn)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(searchColumn)?.setFilterValue(event.target.value)
-            }
-            className="max-w-[250px] transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-          />
-        )}
+        <Input
+          placeholder="Search by topic..."
+          value={
+            (table.getColumn("question")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("question")?.setFilterValue(event.target.value)
+          }
+          className="max-w-[250px]"
+        />
 
         <Link href="/notice-management/noticeboard/create">
           <Button className="btn-sm right-10 ml-10 transform gap-2 rounded-full bg-red-700 px-4 py-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-800 hover:shadow-lg">
