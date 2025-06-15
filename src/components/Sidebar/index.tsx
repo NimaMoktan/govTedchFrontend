@@ -17,7 +17,7 @@ import { RiShapeFill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
 import { TbReportAnalytics } from "react-icons/tb";
 import { FaUserCheck } from "react-icons/fa";
-import { LuPhoneCall } from "react-icons/lu";
+import { RiContactsBook3Fill } from "react-icons/ri";
 
 type UserDetails = {
   fullName: string;
@@ -106,9 +106,10 @@ const menuGroups = [
           },
         ],
       },
+
       {
         icon: <FaTasks className="fill-current" size={22} color="#F87171" />,
-        label: "Task Management",
+        label: "Query Management",
         route: "#",
         role: ["ADM"],
         children: [
@@ -117,14 +118,14 @@ const menuGroups = [
             label: "Calls",
             role: ["ADM"],
             privilege: "can view users",
-            route: "/task-management/calls",
+            route: "/query-management/call",
           },
           {
             icon: <RiShapeFill size={16} className="mr-2" />,
             label: "Emails",
             role: ["ADM"],
             privilege: "can view roles",
-            route: "/task-management/emails",
+            route: "/query-management/email",
           },
         ],
       },
@@ -199,10 +200,14 @@ const menuGroups = [
 
       {
         icon: (
-          <LuPhoneCall className="fill-current" size={22} color="#4CAF50 " />
+          <RiContactsBook3Fill
+            className="fill-current"
+            size={22}
+            color="#4CAF50 "
+          />
         ),
-        label: "Contact Numbers",
-        route: "/contact-numbers",
+        label: "Phone Book",
+        route: "/contact-management",
         role: ["ADM"],
       },
     ],
@@ -281,7 +286,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
       <ClickOutside onClick={() => setSidebarOpen(false)}>
         <aside
-          className={`fixed left-0 top-0 z-40 flex h-screen flex-col overflow-y-hidden bg-gray-700 duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
+          className={`fixed left-0 top-0 z-40 flex h-screen flex-col overflow-y-hidden bg-gray-700 duration-300 ease-linear dark:bg-boxdark lg:translate-x-0  ${
             collapsed ? "w-20" : "w-72"
           } ${
             mobileMenuOpen
@@ -338,7 +343,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </button>
           </div>
 
-          <div className="no-scrollbar flex flex-1 flex-col overflow-y-auto duration-300 ease-linear">
+          <div className="no-scrollbar flex flex-1 flex-col overflow-y-auto duration-300 ease-linear  ">
             <nav className="mt-1 px-2 py-1 lg:mt-0 lg:px-1">
               {menuGroups.map((group, groupIndex) => (
                 <div key={groupIndex}>

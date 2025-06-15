@@ -34,7 +34,10 @@ export const columns = (
     },
     cell: ({ row }) => {
       const dateValue = row.getValue("created_at");
-      return dateValue ? (
+      return (typeof dateValue === "string" ||
+        typeof dateValue === "number" ||
+        dateValue instanceof Date) &&
+        dateValue ? (
         <span>
           {new Date(dateValue).toLocaleDateString("en-GB", {
             day: "2-digit",

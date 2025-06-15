@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+// Import the FAQ type/interface instead of the default export
 import { FAQ } from "./page";
 
 export const columns: ColumnDef<FAQ>[] = [

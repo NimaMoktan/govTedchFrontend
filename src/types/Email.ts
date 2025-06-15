@@ -1,29 +1,16 @@
-export interface History {
-  id: number;
-  date: string;
-  total_time: string;
-  category: string;
-  sub_category: string;
-  query: string;
-  remarks: string;
-  agent: string;
-  assigned_by: string;
-}
-
 export interface Email {
   email: string;
   query: string;
-  status: string;
+  status_id: number;
   agent: string;
-  category_id: number;
-  sub_categories: number[];
-  gender: string;
-  dzongkhag: string;
-  start_time: string;
-  end_time: string;
+  category_id?: number;
+  sub_category: number[];
+  start_date: string;
+  end_date: string;
   remarks: string;
   is_active: boolean;
-  created_at: string;
-  history: History[];
+  date: string;
+  type: string;
   assigned_by: string;
+  assigned_to: string;
 }

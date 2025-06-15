@@ -2,22 +2,22 @@ import React from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import UserAttendance from "./attendance-management";
+import ContactManagement from "./contact";
 
 export const metadata: Metadata = {
-  title: "Attendance | UserAttendance",
-  description: "User Attendance management in the system",
+  title: "Phone Number | Contact Management",
+  description: "Contact management in the system",
 };
 
-const AttendancePage: React.FC = () => {
+const RolePage: React.FC = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb parentPage="User " pageName="Attendance" />
+      <Breadcrumb parentPage="Contact Management" pageName="Phone Book" />
       <div className="flex flex-col gap-2">
-        <UserAttendance />
+        <ContactManagement />
       </div>
     </DefaultLayout>
   );
 };
 
-export default AttendancePage;
+export default RolePage;

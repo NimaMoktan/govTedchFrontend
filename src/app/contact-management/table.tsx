@@ -21,19 +21,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BiUserPlus } from "react-icons/bi";
 import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  handleAdd: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  handleAdd,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -55,30 +52,31 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const totalPages =
+    table?.getCoreRowModel()?.rows?.length &&
+    table.getState()?.pagination?.pageSize
+      ? Math.ceil(
+          table?.getCoreRowModel().rows.length /
+            table.getState().pagination.pageSize,
+        )
+      : 0; // Default to 0 if data or pagination is not ready
+
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search by Phone Number..."
-          value={
-            (table.getColumn("phone_number")?.getFilterValue() as string) ?? ""
-          }
+          placeholder="Search by name"
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("phone_number")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="ml-0 max-w-[250px]"
         />
-        <Link href="/task-management/calls/create">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAdd}
-            className="ml-4 flex items-center gap-1"
-          >
-            <BiUserPlus className="h-4 w-4" />
-            Add Call
-          </Button>
-        </Link>
+        <div className="mb-0 ml-4 flex max-w-full items-center justify-between">
+          <Link href="/contact-management/create" className="flex items-center">
+            <Button className="rounded-full bg-red-700">Add Contacts</Button>
+          </Link>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -106,7 +104,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100"
+                  className="transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100 hover:shadow-sm"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -130,24 +128,27 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        <div className="mr-5 flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <span>
+            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
