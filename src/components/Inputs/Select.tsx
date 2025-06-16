@@ -24,8 +24,9 @@ interface SelectDropDownProps {
   name: string;
   id?: string;
   onValueChange?: (value: string) => void;
-  searchable?: boolean; // New prop to toggle search
+  searchable?: boolean;
   searchPlaceholder?: string;
+  selectedValue?: string;
 }
 
 const SelectDropDown: React.FC<SelectDropDownProps> = ({
@@ -34,19 +35,24 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
   onValueChange,
   name,
   id,
-  searchable = false, // Default to false
+  searchable = false,
   searchPlaceholder = "Search...",
+  selectedValue,
 }) => {
   const [field, meta, helpers] = useField(name);
   const { validateField } = useFormikContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
 
+  // Determine the actual value to use
+  const value = selectedValue !== undefined ? selectedValue : field.value;
+  const safeValue = value && typeof value === "string" ? value : "";
+
   // Filter options based on search term
   const filteredOptions = useMemo(() => {
     if (!searchTerm || !searchable) return options;
-    return options.filter(option =>
-      option.text.toLowerCase().includes(searchTerm.toLowerCase())
+    return options.filter((option) =>
+      option.text.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [options, searchTerm, searchable]);
 
@@ -55,13 +61,11 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
     debounce((fieldName: string) => {
       validateField(fieldName);
     }, 100),
-    [validateField]
+    [validateField],
   );
 
-  const safeValue = field.value && typeof field.value === 'string' ? field.value : '';
-
   return (
-    <div className="grid w-full items-center gap-1.5 mb-4">
+    <div className="mb-4 grid w-full items-center gap-1.5">
       <Label htmlFor={id || name} className="text-sm font-medium">
         {label}
       </Label>
@@ -77,14 +81,13 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
       >
         <SelectTrigger
           id={id || name}
-          className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
+          className={`w-full ${meta.touched && meta.error ? "border-red-500" : ""}`}
         >
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent className={inputFocused ? "pointer-events-none" : ""}>
-          {/* Search Input - Conditionally rendered */}
           {searchable && (
-            <div className="p-2 sticky top-0 bg-background z-10">
+            <div className="sticky top-0 z-10 bg-background p-2">
               <Input
                 placeholder={searchPlaceholder}
                 value={searchTerm}
@@ -105,7 +108,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
                 </SelectItem>
               ))
             ) : (
-              <div className="px-2 py-1.5 text-sm text-muted-foreground text-center">
+              <div className="px-2 py-1.5 text-center text-sm text-muted-foreground">
                 No options found
               </div>
             )}
@@ -113,7 +116,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
         </SelectContent>
       </Select>
       {meta.touched && meta.error ? (
-        <span className="text-red-500 text-xs ml-3">{meta.error}</span>
+        <span className="ml-3 text-xs text-red-500">{meta.error}</span>
       ) : null}
     </div>
   );

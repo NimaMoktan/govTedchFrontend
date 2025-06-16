@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation"; // Changed from 'next/router'
+import { useRouter } from "next/navigation";
 import {
   deleteNoticeboard,
   getNoticeboards,
@@ -15,7 +15,6 @@ import { Noticeboard } from "@/types/Noticeboard";
 
 const NoticeboardManagement = () => {
   const [noticeboardList, setNoticeboardList] = useState<Noticeboard[]>([]);
-
   const router = useRouter();
   const { isLoading, setIsLoading } = useLoading();
 
@@ -45,14 +44,7 @@ const NoticeboardManagement = () => {
     try {
       setIsLoading(true);
       await deleteNoticeboard(noticeboard.id);
-      // Option 1: If you're using local state for noticeboards
       setNoticeboardList((prev) => prev.filter((n) => n.id !== noticeboard.id));
-
-      // Option 2: If you need to refetch data
-      // await fetchNoticeboards(); // Assuming you have a fetch function
-
-      // Option 3: If using a state management library
-      // dispatch(deleteNoticeboardAction(noticeboard.id));
     } catch (error) {
       Swal.fire("Error", "Failed to delete noticeboard", "error");
     } finally {
@@ -68,7 +60,6 @@ const NoticeboardManagement = () => {
           setIsLoading(false),
         );
         setNoticeboardList(response.data.results);
-        console.log(response);
       } catch (error) {
         console.error("Error fetching Notice:", error);
         Swal.fire(
@@ -83,7 +74,7 @@ const NoticeboardManagement = () => {
   }, []);
 
   return (
-    <Card className="w-full">
+    <Card className="w-full transition-all duration-300 hover:shadow-lg">
       <CardContent className="max-w-full overflow-x-auto">
         <DataTable
           columns={columns(handleEditNoticeboard, handleDelete)}
@@ -96,6 +87,3 @@ const NoticeboardManagement = () => {
 };
 
 export default NoticeboardManagement;
-function users(type: any) {
-  throw new Error("Function not implemented.");
-}

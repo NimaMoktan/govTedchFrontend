@@ -29,7 +29,10 @@ const NoticeboardsCreate = () => {
   const handleSubmit = async (values: Noticeboard) => {
     setIsLoading(true);
     try {
-      await createNoticeboard({ ...values, category_id: Number(values.category_id) })
+      await createNoticeboard({
+        ...values,
+        category_id: Number(values.category_id),
+      })
         .then((response) => {
           toast.success(response.data.message, {
             duration: 1500,
@@ -48,20 +51,15 @@ const NoticeboardsCreate = () => {
     }
   };
 
-  const priorityStyles = {
-    LOW: { color: "green" },
-    MEDIUM: { color: "goldenrod" },
-    HIGH: { color: "red" },
-  };
   const loadSubCategory = (main_category_id: number) => {
     const sub_list = originalCategory.filter(
-      (list) => list.parent !== null && list.parent.id === main_category_id
+      (list) => list.parent !== null && list.parent.id === main_category_id,
     );
     setSubCategory(
       sub_list.map((param: { id: number; name: string }) => ({
         value: param.id,
         text: param.name,
-      }))
+      })),
     );
   };
 
@@ -75,7 +73,7 @@ const NoticeboardsCreate = () => {
           (param: { id: string; name: string }) => ({
             value: param.id,
             text: param.name,
-          })
+          }),
         );
         setCategory(paramOptions);
       });
@@ -86,7 +84,7 @@ const NoticeboardsCreate = () => {
   return (
     <DefaultLayout>
       <Breadcrumb parentPage="Notice Management" pageName="Create Notice" />
-      <Card className="min-h-screen w-full">
+      <Card className="min-h-screen w-full transition-all duration-300 hover:shadow-lg">
         <CardContent className="min-h-screen max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2">
             <Formik
@@ -108,8 +106,8 @@ const NoticeboardsCreate = () => {
                 category_id: Yup.string().required("Select Category"),
                 priority: Yup.string().required("Select Priority"),
               })}
-              validateOnChange={true} // Enable validation on change
-              validateOnBlur={true} // Optional: Enable validation on blur as well
+              validateOnChange={true}
+              validateOnBlur={true}
               onSubmit={(values) => handleSubmit(values)}
             >
               {({ errors, setFieldValue, setFieldTouched, validateForm }) => {
@@ -135,7 +133,7 @@ const NoticeboardsCreate = () => {
                       <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                         <div className="w-full xl:w-1/2">
                           <Select
-                          searchable={true}
+                            searchable={true}
                             label="Category"
                             name="category_id"
                             options={category}
@@ -150,9 +148,6 @@ const NoticeboardsCreate = () => {
                               label="Sub Category"
                               name="sub_categories"
                               options={subCategory}
-                              
-
-                              // onValueChange={(value: string) => {}}
                             />
                           </div>
                         )}
@@ -173,7 +168,7 @@ const NoticeboardsCreate = () => {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="mx-2 rounded-full"
+                        className="hover:bg-primary-700 mx-2 transform rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                       >
                         {isLoading ? "Submitting..." : "Submit"}
                       </Button>
@@ -181,7 +176,7 @@ const NoticeboardsCreate = () => {
                         <Button
                           type="reset"
                           variant={`destructive`}
-                          className="mx-2 rounded-full"
+                          className="mx-2 transform rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg"
                         >
                           Back
                         </Button>

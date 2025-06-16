@@ -32,7 +32,7 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
     first_name: "",
     last_name: "",
     email: "",
-    mobile_no: "",
+    mobile_number: "",
     role_ids: [],
     is_active: true,
   });
@@ -47,12 +47,22 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
   ) => {
     setIsLoading(true);
     try {
-      // Add validation to ensure id exists before making the request
       if (!values.id) {
         throw new Error("User ID is required for update");
       }
 
-      const response = await updateUser(values.id, values);
+      const userToUpdate: User = {
+        id: values.id ?? 0,
+        username: values.username ?? "",
+        cid: values.cid ?? "",
+        first_name: values.first_name ?? "",
+        last_name: values.last_name ?? "",
+        email: values.email ?? "",
+        mobile_number: values.mobile_number ?? "",
+        role_ids: [values.role],
+        is_active: values.is_active ?? true,
+      };
+      const response = await updateUser(userToUpdate.id, userToUpdate);
 
       toast.success(response.data.message ?? "User updated successfully", {
         duration: 1500,
@@ -108,7 +118,8 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
             first_name: userData.first_name ?? "",
             last_name: userData.last_name ?? "",
             email: userData.email ?? "",
-            mobile_no: userData.mobileNumber ?? "",
+            mobile_number: userData.mobile_number ?? "",
+            role: userData.roles[0]?.id.toString() ?? "",
             role_ids:
               userData.userRole?.map((role: any) => role.roles.id.toString()) ??
               [],
@@ -129,12 +140,10 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       getRoleDropdowns().then((response) => {
-        console.log(response.data);
         const optionList = response.data.map((role: any) => ({
           value: String(role.id),
           text: role.name,
         }));
-        console.log(optionList);
         setRoleList(optionList);
       });
     };
@@ -166,23 +175,16 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
                 email: Yup.string()
                   .required("Email is required")
                   .email("Invalid email format"),
-                mobile_no: Yup.string()
+                mobile_number: Yup.string()
                   .required("Mobile number is required")
                   .min(8, "Enter at least 8 digits"),
-                role_ids: Yup.array().min(1, "At least one role is required"),
+                role: Yup.string().required("At least one role is required"),
               })}
               onSubmit={handleSubmit}
             >
               <Form>
                 <div className="-mt-2 space-y-4 p-4 md:p-5">
                   <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    {/* <div className="w-full xl:w-1/2">
-                      <MultiSelect
-                        label="Role"
-                        name="role_ids"
-                        options={roleDropdown}
-                      />
-                    </div> */}
                     <div className="w-full xl:w-1/2">
                       <SelectDropDown
                         label="Select Role"
@@ -221,6 +223,18 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
                         type="text"
                       />
                     </div>
+
+                    <div className="w-full xl:w-1/2">
+                      <Input
+                        label="Email"
+                        name="email"
+                        placeholder="Enter email address"
+                        type="email"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
                       <Input
                         label="CID"
@@ -230,21 +244,10 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
                         type="text"
                       />
                     </div>
-                  </div>
-
-                  <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                    <div className="w-full xl:w-1/2">
-                      <Input
-                        label="Email"
-                        name="email"
-                        placeholder="Enter email address"
-                        type="email"
-                      />
-                    </div>
                     <div className="w-full xl:w-1/2">
                       <Input
                         label="Phone Number"
-                        name="mobile_no"
+                        name="mobile_number"
                         placeholder="Enter phone number"
                         type="text"
                       />

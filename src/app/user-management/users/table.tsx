@@ -85,14 +85,16 @@ export function DataTable<TData, TValue>({
           }
           className="ml-6 max-w-[250px]"
         />
-        {/* <Input
+        <Input
           placeholder="Search by Mobile Number"
-          value={(table.getColumn("mobile")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("mobile_number")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("mobile")?.setFilterValue(event.target.value)
+            table.getColumn("mobile_number")?.setFilterValue(event.target.value)
           }
           className="ml-6 max-w-[250px]"
-        /> */}
+        />
         <Link href="/user-management/users/create">
           <Button className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
             <BiUserPlus size={20} />
@@ -126,6 +128,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="transition-transform duration-200 hover:scale-[1.02] hover:bg-gray-100"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

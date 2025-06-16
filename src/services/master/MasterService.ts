@@ -1,5 +1,6 @@
 import { Master } from "@/types/master/master";
 import api from "@/lib/axios";
+import axios from "axios";
 
 interface ApiResponse<T> {
   data: T;
@@ -21,7 +22,7 @@ export const getMastersByType = async (
   page: number = 1,
   pageSize: number = 10,
   search: string = "",
-  ordering: string = ""
+  ordering: string = "",
 ): Promise<ApiResponse<Results>> => {
   const queryParams = new URLSearchParams({
     type,
@@ -31,7 +32,9 @@ export const getMastersByType = async (
     ...(ordering && { ordering }),
   });
 
-  const response = await api.get(`master-management/?${queryParams.toString()}`);
+  const response = await api.get(
+    `master-management/?${queryParams.toString()}`,
+  );
   return response.data;
 };
 

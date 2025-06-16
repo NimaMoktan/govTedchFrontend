@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -34,15 +33,19 @@ const NoticeboardEditPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const noticeRes = await getNoticeboard(id as string);
+        if (id === undefined) {
+          toast.error("Invalid noticeboard ID.");
+          return;
+        }
+        const noticeRes = await getNoticeboard(Number(id));
         const noticeData = noticeRes.data.data;
         setInitialValues({
           ...noticeData,
-          category_id: noticeData.category?.id || "",
+          category_id: String(noticeData.category?.id) || "",
           sub_categories:
             noticeData.sub_categories?.map((sc: any) => sc.id) || [],
         });
-
+        console.log(noticeData.category?.id, "valueers here");
         const categoryRes = await getParentMastersByType("category");
         const catData = categoryRes.data;
         setOriginalCategory(catData);
@@ -74,10 +77,10 @@ const NoticeboardEditPage = () => {
       const payload = {
         ...values,
         category_id: Number(values.category_id),
-        sub_categories: values.sub_categories, // already an array of IDs
+        sub_categories: values.sub_categories,
       };
 
-      await updateNoticeboard(id as string, payload);
+      await updateNoticeboard(Number(id), payload);
       toast.success("Noticeboard updated successfully");
       router.push("/notice-management/noticeboard");
     } catch (error) {
@@ -104,7 +107,7 @@ const NoticeboardEditPage = () => {
   return (
     <DefaultLayout>
       <Breadcrumb parentPage="Notice Management" pageName="Edit Notice" />
-      <Card className="min-h-screen w-full">
+      <Card className="min-h-screen w-full transition-all duration-300 hover:shadow-lg">
         <CardContent className="min-h-screen max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2">
             <Formik
@@ -177,7 +180,7 @@ const NoticeboardEditPage = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="mx-2 rounded-full"
+                      className="hover:bg-primary-700 mx-2 transform rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                     >
                       {isLoading ? "Saving..." : "Update"}
                     </Button>
@@ -185,7 +188,7 @@ const NoticeboardEditPage = () => {
                       <Button
                         type="button"
                         variant="destructive"
-                        className="mx-2 rounded-full"
+                        className="mx-2 transform rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg"
                       >
                         Cancel
                       </Button>

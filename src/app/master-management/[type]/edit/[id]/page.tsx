@@ -141,8 +141,6 @@ const MasterUpdatePage = ({
                         <SelectDropDown
                           label="Select Status"
                           name="is_active"
-                          value={isActive}
-                          onChange={(value) => setIsActive(value)}
                           options={[
                             { value: true, text: "Active" },
                             { value: false, text: "Inactive" },

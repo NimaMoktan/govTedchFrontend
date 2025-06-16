@@ -1,24 +1,16 @@
-export interface EmailHistory {
-  id: string;
-  email_id: string;
-  changed_at: string;
-  changed_by: string;
-  changes: {
-    [key: string]: {
-      old: string;
-      new: string;
-    };
-  };
-}
-
 export interface Email {
-  id: string;
   email: string;
   query: string;
-  status: string;
+  status_id: number;
   agent: string;
-  category?: string;
-  remarks?: string;
-  created_at: string;
-  updated_at: string;
+  category_id?: number;
+  sub_category: number[];
+  start_date: string;
+  end_date: string;
+  remarks: string;
+  is_active: boolean;
+  date: string;
+  type: string;
+  assigned_by: string;
+  assigned_to: string;
 }

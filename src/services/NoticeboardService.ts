@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { FAQ } from "@/types/FAQ";
 import { Noticeboard } from "@/types/Noticeboard";
 
 interface ApiResponse<T> {
@@ -27,10 +28,11 @@ export const getNoticeboard = async (id: number) =>
   api.get(`/notice-management/${id}/`);
 
 export const updateNoticeboard = async (id: number, data: Noticeboard) => {
-  const modifiedPayload = {
-    ...data,
-  };
-  return api.post(`/notice-management/${id}/`, modifiedPayload);
+  return api.put(`/notice-management/${id}/`, data);
 };
+
+// export const updateNoticeboard = async (id: number, data: Noticeboard) =>
+//   api.put(`/notice-management/${id}/`, data);
+
 export const deleteNoticeboard = async (id: number) =>
   api.delete(`notice-management/${id}/`);

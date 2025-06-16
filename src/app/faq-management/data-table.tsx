@@ -30,6 +30,41 @@ interface DataTableProps<TData, TValue> {
   handleAdd: () => void;
 }
 
+// Component to handle text truncation and read more functionality
+const TruncatedText = ({
+  text,
+  maxWords = 10,
+  isRowExpanded = false,
+}: {
+  text: string;
+  maxWords?: number;
+  isRowExpanded?: boolean;
+}) => {
+  const [isButtonExpanded, setIsButtonExpanded] = React.useState(false);
+  const words = text.split(" ");
+  const shouldTruncate = words.length > maxWords;
+  const truncatedText = shouldTruncate
+    ? words.slice(0, maxWords).join(" ") + "..."
+    : text;
+
+  // Display full text if either the row is expanded or the button is clicked
+  const isExpanded = isRowExpanded || isButtonExpanded;
+
+  return (
+    <div>
+      {isExpanded ? text : truncatedText}
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsButtonExpanded(!isButtonExpanded)}
+          className="ml-1 text-blue-500 hover:underline"
+        >
+          {isButtonExpanded ? "Read less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+};
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -39,10 +74,39 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
+  const [expandedRows, setExpandedRows] = React.useState<{
+    [key: string]: boolean;
+  }>({});
+
+  // Modify columns to use TruncatedText for text content
+  const modifiedColumns = React.useMemo(() => {
+    return columns.map((column) => {
+      const columnId = (column as { id?: string }).id;
+      if (columnId === "answer" || columnId === "question") {
+        return {
+          ...column,
+          cell: ({
+            row,
+          }: {
+            row: import("@tanstack/react-table").Row<TData>;
+          }) => {
+            const value = row.getValue(columnId as string);
+            return (
+              <TruncatedText
+                text={String(value)}
+                isRowExpanded={expandedRows[row.id] || false}
+              />
+            );
+          },
+        };
+      }
+      return column;
+    });
+  }, [columns, expandedRows]);
 
   const table = useReactTable({
     data,
-    columns,
+    columns: modifiedColumns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -63,6 +127,14 @@ export function DataTable<TData, TValue>({
             table.getState().pagination.pageSize,
         )
       : 0;
+
+  // Toggle expansion state for a row
+  const toggleRowExpansion = (rowId: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [rowId]: !prev[rowId],
+    }));
+  };
 
   return (
     <div>
@@ -111,6 +183,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer transition-all duration-100 hover:scale-[1.01] hover:bg-gray-100 hover:shadow-md"
+                  onClick={() => toggleRowExpansion(row.id)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
