@@ -170,7 +170,6 @@ const EditAttendance = ({ params }: { params: Promise<{ id: string }> }) => {
                               setFieldValue("roles", selected.data.roles);
                             }
                           }}
-                          selected={values.user}
                         />
                         {errors.user && touched.user && (
                           <p className="text-sm text-red-500">{errors.user}</p>
@@ -224,7 +223,6 @@ const EditAttendance = ({ params }: { params: Promise<{ id: string }> }) => {
                           name="start_date"
                           mode="range"
                           dateFormat="d F Y"
-                          selected={values.start_date}
                         />
                         {errors.start_date && touched.start_date && (
                           <p className="text-sm text-red-500">

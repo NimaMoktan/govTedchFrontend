@@ -17,7 +17,7 @@ import { getParentMastersByType } from "@/services/master/MasterService";
 import { toast } from "sonner";
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
-import { FAQ } from "@/types/FAQ";
+import { FAQ } from "@/types/faq";
 import Input from "@/components/Inputs/Input";
 
 const FAQEditPage = () => {

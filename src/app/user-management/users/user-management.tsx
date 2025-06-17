@@ -70,7 +70,7 @@ const UserManagement = () => {
   const fetchUsers = useCallback(async () => {
     try {
       const response = await getUsers(); // Your API call
-      setUsersList(response.data.results);
+      setUsersList(response.data.results.flat());
     } catch (error) {
       toast.error("Failed to fetch users");
     }

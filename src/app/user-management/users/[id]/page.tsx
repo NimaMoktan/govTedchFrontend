@@ -16,13 +16,14 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
 import SelectDropDown from "@/components/Inputs/Select";
+import { useParams } from 'next/navigation';
 
 interface RoleDropdown {
   value: string;
   text: string;
 }
 
-const UsersEdit = ({ params }: { params: { id: string } }) => {
+const UsersEdit = () => {
   const { setIsLoading, isLoading } = useLoading();
   const [roleDropdown, setRoleDropdown] = useState<RoleDropdown[]>([]);
   const [initialValues, setInitialValues] = useState<User>({
@@ -38,6 +39,7 @@ const UsersEdit = ({ params }: { params: { id: string } }) => {
   });
   const [roleList, setRoleList] = useState<RoleDropdown[]>([]);
   const router = useRouter();
+  const params = useParams()
 
   const handleSubmit = async (
     values: Partial<User>,

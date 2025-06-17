@@ -53,7 +53,7 @@ const G2cPage = () => {
         // Map the data to options
         const agencyOptions = data.map((item) => ({
           value: item.name,
-          label: item.name,
+          text: item.name,
         }));
 
         setNameList(agencyOptions);
@@ -123,7 +123,7 @@ const G2cPage = () => {
                   </option>
                   {nameList.map((item) => (
                     <option key={item.value} value={item.value}>
-                      {item.label}
+                      {item.text}
                     </option>
                   ))}
                 </select>

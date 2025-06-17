@@ -1,24 +1,7 @@
 import { useState, useEffect } from "react";
-import { Bar, Doughnut } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
+
 import { Bell, Phone, Users, Activity, Menu, X } from "lucide-react";
 
-ChartJS.register(
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-);
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -105,14 +88,14 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-lg bg-white p-6 shadow">
               <h3 className="mb-4 text-lg font-semibold">Call Volume</h3>
-              <Bar data={callVolumeData} options={{ responsive: true }} />
+              {/* <Bar data={callVolumeData} options={{ responsive: true }} /> */}
             </div>
             <div className="rounded-lg bg-white p-6 shadow">
               <h3 className="mb-4 text-lg font-semibold">Agent Performance</h3>
-              <Doughnut
+              {/* <Doughnut
                 data={agentPerformanceData}
                 options={{ responsive: true }}
-              />
+              /> */}
             </div>
             <div className="col-span-1 rounded-lg bg-white p-6 shadow lg:col-span-2">
               <h3 className="mb-4 text-lg font-semibold">Call Queue</h3>

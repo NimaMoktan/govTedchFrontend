@@ -5,7 +5,7 @@ import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 import ExpandCell from "@/components/common/ExpandCell";
-import { FAQ } from "@/types/FAQ";
+import { FAQ } from "@/types/faq";
 
 export const columns = (
   handleEdit: (faq: FAQ) => void,

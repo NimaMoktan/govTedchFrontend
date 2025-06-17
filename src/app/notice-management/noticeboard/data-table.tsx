@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
         return {
           ...col,
           cell: ({ row }) => (
-            <DescriptionCell value={row.original["description"] as string} />
+            <DescriptionCell value={(row.original as Record<string, any>)["description"] as string} />
           ),
         };
       }

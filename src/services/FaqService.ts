@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { FAQ } from "@/types/FAQ";
+import { FAQ } from "@/types/faq";
 
 interface ApiResponse<T> {
   data: results;

@@ -95,6 +95,7 @@ export function DataTable<TData, TValue>({
           mainCategories.map((cat: any) => ({
             value: String(cat.id),
             text: cat.name,
+            data: cat,
           })),
         );
       } catch (error) {
@@ -176,14 +177,11 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-[250px]"
         />
-        <div className="w-[200px]">
+        {/* <div className="w-[200px]">
           <Select
-            searchable={true}
-            placeholder="Filter by Category"
+          label=""
+          name=""
             options={[{ value: "all", text: "All Categories" }, ...categories]}
-            value={
-              (table.getColumn("category")?.getFilterValue() as string) ?? "all"
-            }
             onValueChange={(value: string) => {
               table
                 .getColumn("category")
@@ -196,23 +194,17 @@ export function DataTable<TData, TValue>({
               }
             }}
           />
-        </div>
-        {subCategories.length > 0 && (
+        </div> */}
+        {/* {subCategories.length > 0 && (
           <div className="w-[200px]">
             <Select
+            label=""
+            name=""
               searchable={true}
-              placeholder="Filter by Sub-Category"
               options={[
                 { value: "all", text: "All Sub-Categories" },
                 ...subCategories,
               ]}
-              value={
-                (
-                  table
-                    .getColumn("sub_categories")
-                    ?.getFilterValue() as number[]
-                )?.[0]?.toString() ?? "all"
-              }
               onValueChange={(value: string) => {
                 table
                   .getColumn("sub_categories")
@@ -220,7 +212,7 @@ export function DataTable<TData, TValue>({
               }}
             />
           </div>
-        )}
+        )} */}
         <Link href="/faq-management/create">
           <Button className="btn-sm ml-auto gap-2 rounded-full bg-red-700 px-4 py-2">
             <BiUserPlus size={20} />
