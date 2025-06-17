@@ -1,11 +1,12 @@
 "use client";
 import * as React from "react";
+import { Select } from "@/components/ui/select";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
+  getPaginationRowModel,
   SortingState,
   getSortedRowModel,
   ColumnFiltersState,
@@ -21,30 +22,81 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BiUserPlus } from "react-icons/bi";
 import Link from "next/link";
-import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onDataUpdate?: () => void;
+  handleAdd: () => void;
 }
+
+const TruncatedText = ({
+  text,
+  maxWords = 10,
+  isRowExpanded = false,
+}: {
+  text: string;
+  maxWords?: number;
+  isRowExpanded?: boolean;
+}) => {
+  const [isButtonExpanded, setIsButtonExpanded] = React.useState(false);
+  const words = text.split(" ");
+  const shouldTruncate = words.length > maxWords;
+  const truncatedText = shouldTruncate
+    ? words.slice(0, maxWords).join(" ") + "..."
+    : text;
+
+  const isExpanded = isRowExpanded || isButtonExpanded;
+
+  return (
+    <div>
+      {isExpanded ? text : truncatedText}
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsButtonExpanded(!isButtonExpanded)}
+          className="ml-1 text-blue-500 hover:underline"
+        >
+          {isButtonExpanded ? "Read less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+};
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onDataUpdate,
+  handleAdd,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
 
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const modifiedColumns = React.useMemo(() => {
+    return columns.map((column) => {
+      const columnId = (column as { id?: string }).id;
+      if (columnId === "answer" || columnId === "question") {
+        return {
+          ...column,
+          cell: ({
+            row,
+          }: {
+            row: import("@tanstack/react-table").Row<TData>;
+          }) => {
+            const value = row.getValue(columnId as string);
+            return <TruncatedText text={String(value)} />;
+          },
+        };
+      }
+      return column;
+    });
+  }, []);
 
   const table = useReactTable({
     data,
-    columns,
+    columns: modifiedColumns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -57,65 +109,23 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const totalPages = table.getPageCount();
+  const totalPages =
+    table.getCoreRowModel()?.rows?.length &&
+    table.getState()?.pagination?.pageSize
+      ? Math.ceil(
+          table.getCoreRowModel().rows.length /
+            table.getState().pagination.pageSize,
+        )
+      : 0;
+
+  // State to track expanded rows
+  const [expandedRows, setExpandedRows] = React.useState<{
+    [key: string]: boolean;
+  }>({});
 
   return (
-    <div className="min-h-screen border-t-2 p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="mb-6 text-3xl font-bold text-gray-800">Leave Record</h1>
-        <Link href="/user-attendance/create" className="flex items-center">
-          <Button className="rounded bg-red-700">Add Leave</Button>
-        </Link>
-      </div>
-
-      <div className="mb-5 w-full rounded border p-6 shadow-md">
-        <div className="flex flex-col gap-4">
-          {/* Main Filters Row */}
-          <div className="flex flex-row items-center gap-6">
-            <Input
-              placeholder="Filter by username..."
-              value={
-                (table.getColumn("username")?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn("username")?.setFilterValue(event.target.value)
-              }
-              className="max-w-xs"
-            />
-            <Input
-              placeholder="Filter by email..."
-              value={
-                (table.getColumn("email")?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn("email")?.setFilterValue(event.target.value)
-              }
-              className="max-w-xs"
-            />
-
-            <Button
-              variant="outline"
-              onClick={() => setShowMoreFilters((prev) => !prev)}
-              className="ml-auto flex items-center gap-1 bg-red-600 text-white"
-            >
-              {showMoreFilters ? (
-                <>
-                  <span className="text-lg">−</span> Hide Filters
-                </>
-              ) : (
-                <>
-                  <span className="text-lg">+</span> More Filters
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Additional Filters */}
-          {showMoreFilters && <div className=""></div>}
-        </div>
-      </div>
-
-      <div className="rounded-md border pt-5">
+    <>
+      <div className="rounded-md border shadow-lg">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -139,19 +149,16 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="transition-colors duration-150 hover:bg-gray-100"
-                  style={{
-                    overflow: "hidden",
-                  }}
+                  className="cursor-pointer transition-all duration-100 hover:scale-[1.01] hover:bg-gray-100 hover:shadow-md"
+                  onClick={() =>
+                    setExpandedRows((prev) => ({
+                      ...prev,
+                      [row.id]: !prev[row.id],
+                    }))
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -173,27 +180,29 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination controls centered */}
-      <div className="flex items-center justify-center gap-6 py-4">
+      <div className="mr-5 flex items-center justify-end space-x-2 py-4">
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           Previous
         </Button>
-
-        <span className="font-medium">
+        <span>
           Page {table.getState().pagination.pageIndex + 1} of {totalPages}
         </span>
-
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           Next
         </Button>
       </div>
-    </div>
+    </>
   );
 }
+
+export default DataTable;

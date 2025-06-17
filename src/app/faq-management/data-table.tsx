@@ -21,8 +21,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Select from "@/components/Inputs/Select";
 import { BiUserPlus } from "react-icons/bi";
 import Link from "next/link";
+import { getParentMastersByType } from "@/services/master/MasterService";
+import { Options } from "@/interface/Options";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,7 +33,6 @@ interface DataTableProps<TData, TValue> {
   handleAdd: () => void;
 }
 
-// Component to handle text truncation and read more functionality
 const TruncatedText = ({
   text,
   maxWords = 10,
@@ -47,7 +49,6 @@ const TruncatedText = ({
     ? words.slice(0, maxWords).join(" ") + "..."
     : text;
 
-  // Display full text if either the row is expanded or the button is clicked
   const isExpanded = isRowExpanded || isButtonExpanded;
 
   return (
@@ -77,8 +78,42 @@ export function DataTable<TData, TValue>({
   const [expandedRows, setExpandedRows] = React.useState<{
     [key: string]: boolean;
   }>({});
+  const [categories, setCategories] = React.useState<Options[]>([]);
+  const [subCategories, setSubCategories] = React.useState<Options[]>([]);
+  const [originalCategories, setOriginalCategories] = React.useState<any[]>([]);
 
-  // Modify columns to use TruncatedText for text content
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getParentMastersByType("category");
+        const catData = response.data;
+        setOriginalCategories(catData);
+        const mainCategories = catData.filter(
+          (item: any) => item.parent == null,
+        );
+        setCategories(
+          mainCategories.map((cat: any) => ({
+            value: String(cat.id),
+            text: cat.name,
+          })),
+        );
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const loadSubCategories = (categoryId: string) => {
+    const subList = originalCategories.filter(
+      (item) => item.parent !== null && item.parent.id === Number(categoryId),
+    );
+    setSubCategories(
+      subList.map((sub: any) => ({ value: String(sub.id), text: sub.name })),
+    );
+    table.getColumn("sub_categories")?.setFilterValue([]);
+  };
+
   const modifiedColumns = React.useMemo(() => {
     return columns.map((column) => {
       const columnId = (column as { id?: string }).id;
@@ -128,17 +163,9 @@ export function DataTable<TData, TValue>({
         )
       : 0;
 
-  // Toggle expansion state for a row
-  const toggleRowExpansion = (rowId: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [rowId]: !prev[rowId],
-    }));
-  };
-
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="flex items-center gap-4 py-4">
         <Input
           placeholder="Search by question"
           value={
@@ -149,9 +176,53 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-[250px]"
         />
-
+        <div className="w-[200px]">
+          <Select
+            searchable={true}
+            placeholder="Filter by Category"
+            options={[{ value: "all", text: "All Categories" }, ...categories]}
+            value={
+              (table.getColumn("category")?.getFilterValue() as string) ?? "all"
+            }
+            onValueChange={(value: string) => {
+              table
+                .getColumn("category")
+                ?.setFilterValue(value === "all" ? undefined : value);
+              if (value !== "all") {
+                loadSubCategories(value);
+              } else {
+                setSubCategories([]);
+                table.getColumn("sub_categories")?.setFilterValue([]);
+              }
+            }}
+          />
+        </div>
+        {subCategories.length > 0 && (
+          <div className="w-[200px]">
+            <Select
+              searchable={true}
+              placeholder="Filter by Sub-Category"
+              options={[
+                { value: "all", text: "All Sub-Categories" },
+                ...subCategories,
+              ]}
+              value={
+                (
+                  table
+                    .getColumn("sub_categories")
+                    ?.getFilterValue() as number[]
+                )?.[0]?.toString() ?? "all"
+              }
+              onValueChange={(value: string) => {
+                table
+                  .getColumn("sub_categories")
+                  ?.setFilterValue(value === "all" ? [] : [Number(value)]);
+              }}
+            />
+          </div>
+        )}
         <Link href="/faq-management/create">
-          <Button className="btn-sm right-10 ml-10 gap-2 rounded-full bg-red-700 px-4 py-2">
+          <Button className="btn-sm ml-auto gap-2 rounded-full bg-red-700 px-4 py-2">
             <BiUserPlus size={20} />
             Add New
           </Button>
@@ -162,18 +233,16 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -184,7 +253,12 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="cursor-pointer transition-all duration-100 hover:scale-[1.01] hover:bg-gray-100 hover:shadow-md"
-                  onClick={() => toggleRowExpansion(row.id)}
+                  onClick={() =>
+                    setExpandedRows((prev) => ({
+                      ...prev,
+                      [row.id]: !prev[row.id],
+                    }))
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -208,28 +282,30 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        <div className="mr-5 flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+      </div>
+      <div className="mr-5 flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <span>
+          Page {table.getState().pagination.pageIndex + 1} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
 }
+
+export default DataTable;

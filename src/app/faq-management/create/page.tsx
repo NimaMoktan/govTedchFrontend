@@ -17,7 +17,7 @@ import { getParentMastersByType } from "@/services/master/MasterService";
 import Select from "@/components/Inputs/Select";
 import MultiSelect from "@/components/Inputs/MultiSelect";
 import Input from "@/components/Inputs/Input";
-import { createFaq } from "@/services/FAQService";
+import { createFaq } from "@/services/FaqService";
 import { FAQ } from "@/types/FAQ";
 
 const FaqCreate = () => {
@@ -44,7 +44,7 @@ const FaqCreate = () => {
           }, 2000);
         })
         .catch((e) => {
-          toast.error("Error while creating Notice.");
+          toast.error("Error while creating FAQ.");
         })
         .finally(() => setIsLoading(false));
     } catch (error) {
@@ -65,6 +65,7 @@ const FaqCreate = () => {
       sub_list.map((param: { id: number; name: string }) => ({
         value: param.id,
         text: param.name,
+        data: param,
       })),
     );
   };
@@ -79,6 +80,7 @@ const FaqCreate = () => {
           (param: { id: string; name: string }) => ({
             value: param.id,
             text: param.name,
+            data: param,
           }),
         );
         setCategory(paramOptions);

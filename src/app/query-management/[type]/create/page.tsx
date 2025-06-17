@@ -47,7 +47,6 @@ const QueryCreatePage = ({ params }: { params: Promise<{ type: string }> }) => {
             getUsers(),
           ]);
 
-        console.log("Category Response:", categoryRes.data);
         setOriginalCategory(categoryRes.data);
         const categories = categoryRes.data.filter(
           (item: any) => item.parent == null,
@@ -59,7 +58,6 @@ const QueryCreatePage = ({ params }: { params: Promise<{ type: string }> }) => {
           })),
         );
 
-        console.log("Status Response:", statusRes.data);
         setOriginalStatus(statusRes.data);
         const statuses = statusRes.data.filter(
           (item: any) => item.parent == null,
@@ -71,7 +69,6 @@ const QueryCreatePage = ({ params }: { params: Promise<{ type: string }> }) => {
           })),
         );
 
-        console.log("Gender Response:", genderRes.data);
         setGender(
           genderRes.data.map((param: { id: string; name: string }) => ({
             value: param.id,
@@ -79,7 +76,6 @@ const QueryCreatePage = ({ params }: { params: Promise<{ type: string }> }) => {
           })),
         );
 
-        console.log("Dzongkhag Response:", dzongkhagRes.data);
         setDzongkhag(
           dzongkhagRes.data.map((param: { id: string; name: string }) => ({
             value: param.id,
