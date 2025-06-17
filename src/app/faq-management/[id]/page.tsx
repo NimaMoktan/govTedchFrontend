@@ -48,14 +48,22 @@ const FAQEditPage = () => {
           (item: any) => item.parent == null,
         );
         setCategory(
-          mainCategories.map((cat: any) => ({ value: cat.id, text: cat.name })),
+          mainCategories.map((cat: any) => ({
+            value: cat.id,
+            text: cat.name,
+            data: cat,
+          })),
         );
 
         const subCategories = catData.filter(
           (item: any) => item.parent && item.parent.id === faqData.category?.id,
         );
         setSubCategory(
-          subCategories.map((sub: any) => ({ value: sub.id, text: sub.name })),
+          subCategories.map((sub: any) => ({
+            value: sub.id,
+            text: sub.name,
+            data: sub,
+          })),
         );
       } catch (error) {
         toast.error("Error loading FAQ data.");
@@ -90,6 +98,7 @@ const FAQEditPage = () => {
       sub_list.map((param: { id: number; name: string }) => ({
         value: param.id,
         text: param.name,
+        data: param,
       })),
     );
   };

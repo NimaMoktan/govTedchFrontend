@@ -178,7 +178,7 @@ const QueryUpdatePage = ({
           <div className="flex flex-col gap-2">
             <Formik
               initialValues={{
-                type: param.type,
+                type: param.type.toUpperCase,
                 email: editQuery?.email || "",
                 phone_number: editQuery?.phone_number || "",
                 date: editQuery?.date || "",
