@@ -1,5 +1,3 @@
-"use client";
-import { useEffect } from "react";
 import React from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";

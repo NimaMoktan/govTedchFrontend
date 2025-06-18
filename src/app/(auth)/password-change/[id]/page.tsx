@@ -9,11 +9,13 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import logo from "/public/images/logo/logo.png";
+import { useParams } from 'next/navigation';
 
-const PasswordChange = ({ params }: { params: { id: string } }) => {
+export default function PasswordChange( ) {
     const router = useRouter()
+    const params = useParams()
     const [userId, setUserId] = useState<number | undefined>()
-    const { id } = params;
+    
 
     const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -85,7 +87,7 @@ const PasswordChange = ({ params }: { params: { id: string } }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    text: decodeUrlParam(id),
+                    text: decodeUrlParam(String(params.id ?? "")),
                     password: 'Qni7p7"y4|?w',
                     action: 'decrypt'
                 })
@@ -96,7 +98,7 @@ const PasswordChange = ({ params }: { params: { id: string } }) => {
         };
 
         decryptId();
-    }, [id]);
+    }, [params.id]);
 
     return (
         <div className="flex items-center justify-center min-h-screen">
@@ -226,5 +228,3 @@ const PasswordChange = ({ params }: { params: { id: string } }) => {
         </div>
     );
 };
-
-export default PasswordChange;

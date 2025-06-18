@@ -2,7 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 // Import the FAQ type/interface instead of the default export
-import { FAQ } from "./page";
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  subCategory: string;
+}
 
 export const columns: ColumnDef<FAQ>[] = [
   {

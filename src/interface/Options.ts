@@ -1,5 +1,5 @@
 export interface Options {
-  data: any;
+  data?: any;
   value: any;
   text: string;
 }

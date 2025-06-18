@@ -113,7 +113,7 @@ export function DataTable<TData, TValue>({
             </tr>
           </thead>
           <tbody>
-            {permissions.map((permission) => (
+            {[].map((permission: any) => (
               <tr key={permission.id} className="hover:bg-gray-50">
                 <td className="border-b px-4 py-2 text-center">
                   {permission.id}
@@ -123,9 +123,7 @@ export function DataTable<TData, TValue>({
                   <input
                     type="checkbox"
                     checked={permission.admin}
-                    onChange={() =>
-                      handleCheckboxChange(permission.id, "admin")
-                    }
+                    
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </td>
@@ -133,9 +131,7 @@ export function DataTable<TData, TValue>({
                   <input
                     type="checkbox"
                     checked={permission.supervisor}
-                    onChange={() =>
-                      handleCheckboxChange(permission.id, "supervisor")
-                    }
+                   
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </td>
@@ -143,9 +139,7 @@ export function DataTable<TData, TValue>({
                   <input
                     type="checkbox"
                     checked={permission.agent}
-                    onChange={() =>
-                      handleCheckboxChange(permission.id, "agent")
-                    }
+                    
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </td>
@@ -153,9 +147,7 @@ export function DataTable<TData, TValue>({
                   <input
                     type="checkbox"
                     checked={permission.customer}
-                    onChange={() =>
-                      handleCheckboxChange(permission.id, "customer")
-                    }
+                   
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </td>

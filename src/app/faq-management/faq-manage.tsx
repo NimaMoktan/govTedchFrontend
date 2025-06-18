@@ -12,7 +12,7 @@ import {
 import { useLoading } from "@/context/LoadingContext";
 import { Options } from "@/interface/Options";
 import { Noticeboard } from "@/types/Noticeboard";
-import { FAQ } from "@/types/FAQ";
+import { FAQ } from "@/types/faq";
 import { getFaqs, deleteFaq } from "@/services/FaqService";
 
 const FaqManagement = () => {

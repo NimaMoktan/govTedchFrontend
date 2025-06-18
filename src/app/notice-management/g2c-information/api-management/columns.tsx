@@ -5,7 +5,6 @@ import { BsTrash, BsPencil, BsArrowRepeat } from "react-icons/bs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 import ExpandCell from "@/components/common/ExpandCell";
-import { FAQ } from "@/types/FAQ";
 import { G2C } from "@/types/g2c";
 
 export const columns = (

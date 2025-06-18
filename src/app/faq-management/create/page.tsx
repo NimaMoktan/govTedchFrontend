@@ -18,7 +18,7 @@ import Select from "@/components/Inputs/Select";
 import MultiSelect from "@/components/Inputs/MultiSelect";
 import Input from "@/components/Inputs/Input";
 import { createFaq } from "@/services/FaqService";
-import { FAQ } from "@/types/FAQ";
+import { FAQ } from "@/types/faq";
 
 const FaqCreate = () => {
   const [category, setCategory] = useState<Options[]>([]);

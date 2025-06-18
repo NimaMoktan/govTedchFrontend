@@ -1,4 +1,4 @@
-import { FAQ } from "./FAQ";
+import { FAQ } from "./faq";
 
 export type FaqItem = {
   active: number | null;

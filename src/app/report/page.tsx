@@ -2,7 +2,7 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useState, useEffect } from "react";
-import { utils, writeFile } from "xlsx";
+// import { utils, writeFile } from "xlsx";
 import {
   Select,
   SelectContent,
@@ -125,12 +125,12 @@ export default function Reports() {
   }, [filters]);
 
   // Export to Excel
-  const exportToExcel = () => {
-    const worksheet = utils.json_to_sheet(filteredData);
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Report");
-    writeFile(workbook, "Overview_Statistics_Report.xlsx");
-  };
+  // const exportToExcel = () => {
+  //   const worksheet = utils.json_to_sheet(filteredData);
+  //   const workbook = utils.book_new();
+  //   utils.book_append_sheet(workbook, worksheet, "Report");
+  //   writeFile(workbook, "Overview_Statistics_Report.xlsx");
+  // };
 
   return (
     <DefaultLayout>
@@ -316,7 +316,7 @@ export default function Reports() {
                   {filteredData.length === 1 ? "record" : "records"})
                 </h2>
                 <button
-                  onClick={exportToExcel}
+                  // onClick={exportToExcel}
                   className="inline-flex items-center rounded-md border border-transparent bg-red-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   Export to Excel

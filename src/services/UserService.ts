@@ -2,13 +2,13 @@ import api from "@/lib/axios";
 
 // Enhanced User type with roles information
 export interface User {
-  id: number;
+  id?: number;
   username: string;
   email: string;
   first_name: string;
   last_name: string;
   is_active: boolean;
-  roles: Role[]; // Explicitly include roles
+  roles?: Role[]; // Explicitly include roles
   [key: string]: any; // Allow for additional properties
 }
 

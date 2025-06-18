@@ -30,7 +30,8 @@ const UsersCreate = () => {
   ) => {
     setIsLoading(true);
     try {
-      await createUser({ ...values, role_ids: [values.role] })
+      const { roles, ...userPayload } = values;
+      await createUser({ ...userPayload, role_ids: [values.role] })
         .then((response) => {
           toast.success(response.data.message, {
             duration: 1500,

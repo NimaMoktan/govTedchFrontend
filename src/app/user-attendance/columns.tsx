@@ -26,7 +26,7 @@ export const columns = (
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <p className="text-left">{row.original.username}</p>,
+    cell: ({ row }) => <p className="text-left">{row.original.user?.username}</p>,
   },
   {
     accessorKey: "email",
