@@ -124,7 +124,7 @@ const NoticeboardsCreate = () => {
                         </div>
                         <div className="w-full xl:w-1/2">
                           <InputTextArea
-                            label="Description/Body"
+                            label="Description"
                             placeholder="Enter your answer"
                             name="description"
                           />

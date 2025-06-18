@@ -137,7 +137,7 @@ const NoticeboardEditPage = () => {
                       <div className="w-full xl:w-1/2">
                         <InputTextArea
                           name="description"
-                          label="Description/Body"
+                          label="Description"
                           placeholder="Enter your answer"
                         />
                       </div>

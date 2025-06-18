@@ -93,14 +93,14 @@ export const columns = (
     header: () => <>Action</>,
     cell: ({ row }) => (
       <div className="flex justify-end gap-2 p-2">
-        <button
+        {/* <button
           onClick={() => handleView(row.original)}
           className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50"
           aria-label="View"
         >
           <BsEye size={16} />
           View
-        </button>
+        </button> */}
         <button
           onClick={() => handleEdit(row.original)}
           className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
