@@ -103,26 +103,19 @@ const QueryPage = ({ params }: { params: Promise<{ type: string }> }) => {
         parentPage="Query Management"
       />
       <div className="flex flex-col gap-2">
-        <Card className="w-full">
-          <CardContent className="max-w-full overflow-x-auto">
-            <DataTable
-              columns={columns(
-                handleEdit,
-                handleDelete,
-                handleView,
-                param.type,
-              )}
-              catType={param.type}
-              data={queryList}
-              totalCount={totalCount}
-              page={page}
-              pageSize={pageSize}
-              setPage={setPage}
-              setSearch={setSearch}
-              setOrdering={setOrdering}
-            />
-          </CardContent>
-        </Card>
+        <CardContent className="max-w-full overflow-x-auto">
+          <DataTable
+            columns={columns(handleEdit, handleDelete, handleView, param.type)}
+            catType={param.type}
+            data={queryList}
+            totalCount={totalCount}
+            page={page}
+            pageSize={pageSize}
+            setPage={setPage}
+            setSearch={setSearch}
+            setOrdering={setOrdering}
+          />
+        </CardContent>
       </div>
     </DefaultLayout>
   );

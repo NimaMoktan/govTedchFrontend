@@ -29,30 +29,42 @@ export const columns = (
         </Button>
       ),
     },
-    {
-      accessorKey: "email",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
-    {
-      accessorKey: "phone_number",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Phone Number
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-    },
+    ...(type === "email" || type === "category"
+      ? [
+          {
+            accessorKey: "email",
+            header: ({ column }) => (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
+              >
+                Email
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            ),
+          },
+        ]
+      : []),
+    ...(type === "phone_number" || type === "call" || type === "category"
+      ? [
+          {
+            accessorKey: "phone_number",
+            header: ({ column }) => (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
+              >
+                Phone Number
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            ),
+          },
+        ]
+      : []),
     {
       accessorKey: "query",
       header: ({ column }) => (
@@ -93,21 +105,12 @@ export const columns = (
     header: () => <>Action</>,
     cell: ({ row }) => (
       <div className="flex justify-end gap-2 p-2">
-        {/* <button
-          onClick={() => handleView(row.original)}
-          className="flex items-center gap-1 rounded border border-green-300 px-3 py-1 text-sm text-green-600 transition-colors hover:bg-green-50"
-          aria-label="View"
-        >
-          <BsEye size={16} />
-          View
-        </button> */}
         <button
           onClick={() => handleEdit(row.original)}
           className="flex items-center gap-1 rounded border border-blue-300 px-3 py-1 text-sm text-blue-600 transition-colors hover:bg-blue-50"
           aria-label="Edit"
         >
           <BsPencil size={16} />
-          Edit
         </button>
         <button
           onClick={() => handleDelete(row.original)}
@@ -115,7 +118,6 @@ export const columns = (
           aria-label="Delete"
         >
           <BsTrash size={16} />
-          Delete
         </button>
       </div>
     ),
